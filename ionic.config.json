@@ -1,0 +1,7 @@
+{
+  "name": "StarRouting",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
