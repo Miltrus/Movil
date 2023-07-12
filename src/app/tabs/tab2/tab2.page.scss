@@ -1,0 +1,11 @@
+.scanner-area {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 40vh;
+    border: 2px solid #000;
+    border-radius: 10px;
+    z-index: 999;
+}

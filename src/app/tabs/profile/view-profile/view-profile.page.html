@@ -1,0 +1,44 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="getUserData($event.target)">
+    <ion-refresher-content refreshingSpinner="lines">
+    </ion-refresher-content>
+  </ion-refresher>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>{{userData?.nombreUsuario}} {{userData?.apellidoUsuario}}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-item>
+          <ion-label>Tipo documento:</ion-label>
+          <ion-note slot="end"> {{ getTipoDocumento(userData?.idTipoDocumento) }}</ion-note>
+        </ion-item>
+        <ion-item>
+          <ion-label>Documento:</ion-label>
+          <ion-note slot="end">{{userData?.documentoUsuario}}</ion-note>
+        </ion-item>
+        <ion-item>
+          <ion-label>Email:</ion-label>
+          <ion-note slot="end">{{userData?.correoUsuario}}</ion-note>
+        </ion-item>
+        <ion-item>
+          <ion-label>Teléfono:</ion-label>
+          <ion-note slot="end">{{userData?.telefonoUsuario}}</ion-note>
+        </ion-item>
+        <br>
+        <ion-button mat-raised-button color="primary" (click)="openEditProfile()">Editar</ion-button>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+  <br>
+  <ion-button expand="block" color="danger" (click)="logout()">
+    <ion-icon slot="start" name="log-out"></ion-icon>
+    Cerrar sesion
+  </ion-button>
+</ion-content>

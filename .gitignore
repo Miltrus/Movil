@@ -23,6 +23,8 @@ log.txt
 /platforms
 /plugins
 
+.eslintrc.json
+
 # Compiled output
 /dist
 /tmp

@@ -1,0 +1,24 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Mondason
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-button expand="full" (click)="scanQR()" *ngIf="content_visibility">
+    Escanear codigo QR
+  </ion-button>
+
+  <ion-card *ngIf="scannedResult">
+    <ion-card-header>Viva el vicio</ion-card-header>
+    <ion-card-content>Contenido escaneado: {{ scannedResult }}</ion-card-content>
+  </ion-card>
+
+  <div class="scanner-area" *ngIf="!content_visibility"></div>
+
+</ion-content>
+<ion-button color="danger" expand="full" (click)="stopScan()" *ngIf="!content_visibility">
+  Cancelar
+</ion-button>

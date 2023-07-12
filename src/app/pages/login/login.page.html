@@ -1,0 +1,30 @@
+<ion-content>
+  <div class="tittle">
+    <h4>Iniciar sesión</h4>
+    <p>Empieza una nueva ruta hoy</p>
+  </div>
+
+  <form [formGroup]="loginForm" (ngSubmit)="login(loginForm.value)">
+    <ion-item>
+      <ion-label position="stacked">Correo electrónico</ion-label>
+      <ion-input formControlName="correoUsuario" placeholder="Correo"
+        [class.is-invalid]="loginForm.get('correoUsuario')?.invalid && (loginForm.get('correoUsuario')?.touched || loginForm.get('correoUsuario')?.dirty)"
+        [class.is-valid]="loginForm.get('correoUsuario')?.valid && (loginForm.get('correoUsuario')?.touched || loginForm.get('correoUsuario')?.dirty)"></ion-input>
+      <ion-icon name="person" slot="end" color="primary"></ion-icon>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Contraseña</ion-label>
+      <ion-input formControlName="contrasenaUsuario" placeholder="Contraseña"
+        [class.is-invalid]="loginForm.get('contrasenaUsuario')?.invalid && (loginForm.get('contrasenaUsuario')?.touched || loginForm.get('contrasenaUsuario')?.dirty)"
+        [class.is-valid]="loginForm.get('contrasenaUsuario')?.valid && (loginForm.get('contrasenaUsuario')?.touched || loginForm.get('contrasenaUsuario')?.dirty)"
+        [type]="showPassword ? 'text' : 'password'"></ion-input>
+      <ion-icon name="{{ showPassword ? 'eye-off' : 'eye' }}" slot="end" [color]="showPassword ? 'warn' : 'primary'"
+        (click)="togglePasswordVisibility()"></ion-icon>
+    </ion-item>
+    <ion-button expand="full" type="submit" color="primary">Iniciar sesión</ion-button>
+    <div class="back-button">
+      <ion-button expand="block" [routerLink]="['']" class="red-button">Volver
+        atrás</ion-button>
+    </div>
+  </form>
+</ion-content>

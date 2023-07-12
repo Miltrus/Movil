@@ -1,0 +1,150 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Actualizar perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="ngOnInit($event.target)">
+    <ion-refresher-content refreshingSpinner="lines">
+    </ion-refresher-content>
+  </ion-refresher>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Actualizacion de datos</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <form [formGroup]="editForm">
+        <ion-col>
+          <ion-item>
+            <ion-label>Tipo de documento <b style="color: red;">*</b></ion-label>
+            <ion-select formControlName="idTipoDocumento" placeholder="---SELECCIONE---"
+              [class.is-invalid]="editForm.get('idTipoDocumento')?.invalid && (editForm.get('idTipoDocumento')?.touched || editForm.get('idTipoDocumento')?.dirty)"
+              [class.is-valid]="editForm.get('idTipoDocumento')?.valid && (editForm.get('idTipoDocumento')?.touched || editForm.get('idTipoDocumento')?.dirty)">
+              <ion-select-option *ngFor="let tipoDocumento of tiposDocumento" [value]="tipoDocumento.idTipoDocumento">
+                {{ tipoDocumento.nombreTipo }}
+              </ion-select-option>
+            </ion-select>
+            <div *ngIf="editForm.get('idTipoDocumento')?.errors?.['required']" class="invalid-feedback">
+              Este campo es obligatorio.
+            </div>
+          </ion-item>
+        </ion-col>
+
+        <ion-col>
+          <ion-item>
+            <ion-label>Documento <b style="color: red;">*</b></ion-label>
+            <ion-input type="text" formControlName="documentoUsuario"
+              [class.is-invalid]="editForm.get('documentoUsuario')?.invalid && (editForm.get('documentoUsuario')?.touched || editForm.get('documentoUsuario')?.dirty)"
+              [class.is-valid]="editForm.get('documentoUsuario')?.valid && (editForm.get('documentoUsuario')?.touched || editForm.get('documentoUsuario')?.dirty)">
+            </ion-input>
+            <div *ngIf="editForm.get('documentoUsuario')?.errors?.['pattern']" class="invalid-feedback">
+              Documento inválido, mínimo 7 y máximo 10 dígitos numéricos.
+            </div>
+            <div *ngIf="editForm.get('documentoUsuario')?.errors?.['required']" class="invalid-feedback">
+              Este campo es obligatorio.
+            </div>
+          </ion-item>
+        </ion-col>
+
+        <ion-col>
+          <ion-item>
+            <ion-label>Nombre <b style="color: red;">*</b></ion-label>
+            <ion-input type="text" formControlName="nombreUsuario"
+              [class.is-invalid]="editForm.get('nombreUsuario')?.invalid && (editForm.get('nombreUsuario')?.touched || editForm.get('nombreUsuario')?.dirty)"
+              [class.is-valid]="editForm.get('nombreUsuario')?.valid && (editForm.get('nombreUsuario')?.touched || editForm.get('nombreUsuario')?.dirty)">
+            </ion-input>
+            <div *ngIf="editForm.get('nombreUsuario')?.errors?.['required']" class="invalid-feedback">
+              Este campo es obligatorio.
+            </div>
+          </ion-item>
+        </ion-col>
+
+        <ion-col>
+          <ion-item>
+            <ion-label>Apellido <b style="color: red;">*</b></ion-label>
+            <ion-input type="text" formControlName="apellidoUsuario"
+              [class.is-invalid]="editForm.get('apellidoUsuario')?.invalid && (editForm.get('apellidoUsuario')?.touched || editForm.get('apellidoUsuario')?.dirty)"
+              [class.is-valid]="editForm.get('apellidoUsuario')?.valid && (editForm.get('apellidoUsuario')?.touched || editForm.get('apellidoUsuario')?.dirty)">
+            </ion-input>
+            <div *ngIf="editForm.get('apellidoUsuario')?.errors?.['required']" class="invalid-feedback">
+              Este campo es obligatorio.
+            </div>
+          </ion-item>
+        </ion-col>
+
+        <ion-col>
+          <ion-item>
+            <ion-label>Telefono <b style="color: red;">*</b></ion-label>
+            <ion-input type="text" formControlName="telefonoUsuario"
+              [class.is-invalid]="editForm.get('telefonoUsuario')?.invalid && (editForm.get('telefonoUsuario')?.touched || editForm.get('telefonoUsuario')?.dirty)"
+              [class.is-valid]="editForm.get('telefonoUsuario')?.valid && (editForm.get('telefonoUsuario')?.touched || editForm.get('telefonoUsuario')?.dirty)">
+            </ion-input>
+            <div *ngIf="editForm.get('telefonoUsuario')?.errors?.['required']" class="invalid-feedback">
+              Este campo es obligatorio.
+            </div>
+            <div *ngIf="editForm.get('telefonoUsuario')?.errors?.['pattern']" class="invalid-feedback">
+              Teléfono inválido, debe contener 10 dígitos numéricos.
+            </div>
+          </ion-item>
+        </ion-col>
+
+        <ion-col>
+          <ion-item>
+            <ion-label>Correo <b style="color: red;">*</b></ion-label>
+            <ion-input type="text" formControlName="correoUsuario"
+              [class.is-invalid]="editForm.get('correoUsuario')?.invalid && (editForm.get('correoUsuario')?.touched || editForm.get('correoUsuario')?.dirty)"
+              [class.is-valid]="editForm.get('correoUsuario')?.valid && (editForm.get('correoUsuario')?.touched || editForm.get('correoUsuario')?.dirty)">
+            </ion-input>
+            <div *ngIf="editForm.get('correoUsuario')?.errors?.['required']" class="invalid-feedback">
+              Este campo es obligatorio.
+            </div>
+            <div *ngIf="editForm.get('correoUsuario')?.errors?.['pattern']" class="invalid-feedback">
+              Correo inválido.
+            </div>
+          </ion-item>
+        </ion-col>
+        <ion-col>
+          <ion-button type="button" color="warn" (click)="togglePasswordChange()">
+            {{ showPasswordChange ? 'Cancelar cambio de contraseña' : 'Cambiar contraseña' }}
+          </ion-button>
+        </ion-col>
+
+        <form [formGroup]="pwdForm">
+          <ion-row *ngIf="showPasswordChange">
+            <ion-col>
+              <ion-item>
+                <ion-label>Nueva contraseña <b style="color: red;">*</b></ion-label>
+                <ion-input type="{{ showPassword ? 'text' : 'password' }}" formControlName="contrasenaUsuario"
+                  [class.is-invalid]="pwdForm.get('contrasenaUsuario')?.invalid && (pwdForm.get('contrasenaUsuario')?.touched || pwdForm.get('contrasenaUsuario')?.dirty)"
+                  [class.is-valid]="pwdForm.get('contrasenaUsuario')?.valid && (pwdForm.get('contrasenaUsuario')?.touched || pwdForm.get('contrasenaUsuario')?.dirty)">
+                </ion-input>
+                <div *ngIf="pwdForm.get('contrasenaUsuario')?.errors?.['pattern']" class="invalid-feedback">
+                  La contraseña debe contener mínimo: 8 caracteres, una minúscula, una mayúscula, 3 números y 1 caracter
+                  especial.
+                </div>
+                <div *ngIf="pwdForm.get('contrasenaUsuario')?.errors?.['required']" class="invalid-feedback">
+                  Este campo es obligatorio.
+                </div>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+        </form>
+
+        <ion-row>
+          <ion-col>
+            <ion-button type="submit" color="primary" (click)="saveChanges()"
+              [disabled]="editForm.invalid || (showPasswordChange && pwdForm.get('contrasenaUsuario')?.invalid)">
+              Guardar cambios
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
