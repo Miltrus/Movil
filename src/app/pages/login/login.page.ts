@@ -37,8 +37,6 @@ export class LoginPage implements OnInit {
     });
     await loading.present();
 
-    this.nav.navigateForward('StarRouting/tabs/tab1');
-
     this.api.onLogin(form).subscribe(
       async (data) => {
         if (data.status == 'ok') {
