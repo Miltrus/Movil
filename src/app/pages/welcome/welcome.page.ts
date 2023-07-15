@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ModalController, NavController } from '@ionic/angular';
+import { NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-welcome',
@@ -10,7 +10,6 @@ export class WelcomePage implements OnInit {
 
 
   constructor(
-    public modalCtrl: ModalController,
     private nav: NavController,
   ) { }
 
@@ -18,7 +17,7 @@ export class WelcomePage implements OnInit {
   }
 
   login() {
-    this.nav.navigateForward('StarRouting/login');
+    this.nav.navigateForward('Star_Routing/login');
   }
 
 }

@@ -44,12 +44,12 @@ export class LoginPage implements OnInit {
           this.userData = data.user; // Almacenar los datos del usuario
           await loading.dismiss();
 
-          this.nav.navigateForward('StarRouting/tabs/tab1');
+          this.nav.navigateForward('Star_Routing/tabs/tab1');
 
           setTimeout(async () => {
             const successAlert = await this.alert.create({
               header: 'Inicio de sesión exitoso',
-              message: 'Bienvenido ' + this.userData!.nombreUsuario,
+              message: 'Bienvenido ' + this.userData!.nombreUsuario + '!',
               buttons: ['Aceptar'],
             });
             await successAlert.present();

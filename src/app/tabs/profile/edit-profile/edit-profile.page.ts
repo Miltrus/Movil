@@ -138,7 +138,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
                 const data = await this.api.putUsuario(updatedData).toPromise();
                 this.savedChanges = true;
                 if (data?.status == 'ok') {
-                  this.nav.navigateRoot('StarRouting/tabs/profile', { queryParams: { userData: JSON.stringify(updatedData) } });
+                  this.nav.navigateRoot('Star_Routing/tabs/profile', { queryParams: { userData: JSON.stringify(updatedData) } });
                   const successAlert = await this.alert.create({
                     header: 'Actualización exitosa',
                     message: 'Los cambios se han guardado correctamente.',
@@ -173,7 +173,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
 
   async goBack() {
     if (!this.hasUnsavedChanges()) {
-      this.nav.navigateBack('StarRouting/tabs/profile');
+      this.nav.navigateBack('Star_Routing/tabs/profile');
     } else {
       this.showUnsavedChangesAlert();
     }
@@ -192,7 +192,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
           text: 'Aceptar',
           handler: async () => {
             await confirmAlert.dismiss();
-            this.nav.navigateBack('StarRouting/tabs/profile');
+            this.nav.navigateBack('Star_Routing/tabs/profile');
           }
         }
       ]

@@ -5,11 +5,11 @@ import { isLoggedInGuard } from './auth/guards/is-logged-in.guard';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'StarRouting/welcome',
+    redirectTo: 'Star_Routing/welcome',
     pathMatch: 'full'
   },
   {
-    path: 'StarRouting',
+    path: 'Star_Routing',
     children: [
       {
         path: '',
@@ -26,6 +26,7 @@ const routes: Routes = [
       },
       {
         path: 'tabs',
+        canMatch: [isLoggedInGuard],
         loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
       }
     ]

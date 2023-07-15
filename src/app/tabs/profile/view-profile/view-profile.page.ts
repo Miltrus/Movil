@@ -69,7 +69,6 @@ export class ViewProfilePage implements OnInit {
         }
       },
       async (error) => {
-        console.error("HOLAA", error);
         loading.dismiss();
         const alert = await this.alert.create({
           header: 'Error',
@@ -91,7 +90,7 @@ export class ViewProfilePage implements OnInit {
   }
 
   openEditProfile(): void {
-    this.nav.navigateForward('StarRouting/tabs/profile/edit-profile', { state: { userData: this.userData } });
+    this.nav.navigateForward('Star_Routing/tabs/profile/edit-profile', { state: { userData: this.userData } });
   }
 
   async logout() {
@@ -112,7 +111,7 @@ export class ViewProfilePage implements OnInit {
             });
             await loading.present();
 
-            this.nav.navigateRoot('StarRouting/welcome');
+            this.nav.navigateRoot('Star_Routing/welcome');
             localStorage.removeItem('token');
             loading.dismiss();
           }
