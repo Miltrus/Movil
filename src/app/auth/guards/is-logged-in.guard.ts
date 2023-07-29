@@ -16,20 +16,9 @@ export const isLoggedInGuard: CanMatchFn = (route, state) => {
     return tokenService.verifyToken(token).pipe(
       map(response => {
         if (response.status === 'ok') {
-          const tokenDate = JSON.parse(atob(token!.split('.')[1]));
-          const expirationDate = new Date(tokenDate.exp * 1000);
-
-          if (expirationDate < new Date()) {
-            localStorage.removeItem('token');
-            nav.navigateRoot('Star_Routing/login');
-            showAlert(alertController, 'Por favor inicie sesión nuevamente.', 'Su sesión ha expirado');
-            return false;
-          }
-
           return true;
-
         } else {
-          nav.navigateRoot('Star_Routing/login');
+          nav.navigateRoot('login');
           localStorage.removeItem('token');
           showAlert(alertController, response.msj, 'Su sesión ha expirado');
           return false;
@@ -40,7 +29,7 @@ export const isLoggedInGuard: CanMatchFn = (route, state) => {
       })
     );
   } else {
-    nav.navigateRoot('Star_Routing/login');
+    nav.navigateRoot('login');
     showAlert(alertController, 'Por favor inicie sesión nuevamente.', 'Su sesión ha expirado');
     return of(false); // Retorna un Observable<boolean> usando el operador of
   }

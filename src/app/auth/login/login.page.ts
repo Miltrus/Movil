@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import { LoginInterface } from 'src/app/models/login.interface';
@@ -11,10 +11,10 @@ import { LoginService } from 'src/app/services/api/login.service';
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
 })
-export class LoginPage implements OnInit {
+export class LoginPage {
 
   loginForm = new FormGroup({
-    correoUsuario: new FormControl('', [Validators.required, Validators.pattern('^[\\w.%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$')]),
+    correoUsuario: new FormControl('', Validators.required),
     contrasenaUsuario: new FormControl('', Validators.required)
   })
 
@@ -28,9 +28,6 @@ export class LoginPage implements OnInit {
   userData: UsuarioInterface | null = null;
   showPassword: boolean = false;
 
-  ngOnInit() {
-  }
-
   async login(form: LoginInterface) {
     const loading = await this.loading.create({
       message: 'Iniciando sesión...',
@@ -41,10 +38,10 @@ export class LoginPage implements OnInit {
       async (data) => {
         if (data.status == 'ok') {
           localStorage.setItem('token', data.token);
-          this.userData = data.user; // Almacenar los datos del usuario
+          this.userData = data.user;
           await loading.dismiss();
 
-          this.nav.navigateForward('Star_Routing/tabs/tab1');
+          this.nav.navigateForward('/tabs/profile');
 
           setTimeout(async () => {
             const successAlert = await this.alert.create({
@@ -66,7 +63,6 @@ export class LoginPage implements OnInit {
       },
       async (error) => {
         await loading.dismiss();
-        console.error(error);
         const alert = await this.alert.create({
           header: 'Error',
           message: 'Ha ocurrido un error al iniciar sesión. Por favor, inténtalo de nuevo más tarde.',
@@ -76,7 +72,6 @@ export class LoginPage implements OnInit {
       }
     );
   }
-
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;

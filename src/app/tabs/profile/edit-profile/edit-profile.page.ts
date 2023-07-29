@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
 import { TipoDocumentoInterface } from 'src/app/models/tipo-documento.interface';
@@ -14,11 +14,6 @@ import { HasUnsavedChanges } from 'src/app/auth/guards/unsaved-changes.guard';
 })
 export class EditProfilePage implements OnInit, HasUnsavedChanges {
 
-  @HostListener('window:beforeunload', ['$event'])
-  onBeforeUnload(e: BeforeUnloadEvent) {
-    return this.hasUnsavedChanges() === false;
-  }
-
   editForm: FormGroup;
   pwdForm: FormGroup;
   dataUsuario: UsuarioInterface[] = [];
@@ -26,7 +21,6 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
   showPasswordChange: boolean = false;
   showPassword: boolean = false;
   refresher: IonRefresher | null = null;
-  savedChanges: boolean = false;
 
   constructor(
     private api: UsuarioService,
@@ -53,7 +47,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
 
 
   hasUnsavedChanges(): boolean {
-    return (this.editForm.dirty || this.pwdForm.dirty) && !this.savedChanges;
+    return this.editForm.dirty || this.pwdForm.dirty;
   }
 
   async ngOnInit(refresher?: any): Promise<void> {
@@ -116,73 +110,9 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
       delete updatedData.contrasenaUsuario;
     }
 
-    try {
-      const confirmAlert = await this.alert.create({
-        header: 'Confirmar actualización',
-        message: '¿Estás seguro de que deseas guardar los cambios?',
-        buttons: [
-          {
-            text: 'Cancelar',
-            role: 'cancel'
-          },
-          {
-            text: 'Aceptar',
-            handler: async () => {
-              await confirmAlert.dismiss();
-              const loading = await this.loading.create({
-                message: 'Guardando cambios...',
-              });
-              await loading.present();
-
-              try {
-                const data = await this.api.putUsuario(updatedData).toPromise();
-                this.savedChanges = true;
-                if (data?.status == 'ok') {
-                  this.nav.navigateRoot('Star_Routing/tabs/profile', { queryParams: { userData: JSON.stringify(updatedData) } });
-                  const successAlert = await this.alert.create({
-                    header: 'Actualización exitosa',
-                    message: 'Los cambios se han guardado correctamente.',
-                    buttons: ['Aceptar']
-                  });
-
-                  await successAlert.present();
-
-                } else {
-                  const errorAlert = await this.alert.create({
-                    header: 'Error',
-                    message: 'No se han podido guardar los cambios. Por favor, inténtalo de nuevo más tarde.',
-                    buttons: ['Aceptar']
-                  });
-
-                  await errorAlert.present();
-                }
-              } catch (error) {
-                console.error(error);
-              } finally {
-                await loading.dismiss();
-              }
-            }
-          }
-        ]
-      });
-      await confirmAlert.present();
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async goBack() {
-    if (!this.hasUnsavedChanges()) {
-      this.nav.navigateBack('Star_Routing/tabs/profile');
-    } else {
-      this.showUnsavedChangesAlert();
-    }
-  }
-
-  async showUnsavedChangesAlert(): Promise<void> {
     const confirmAlert = await this.alert.create({
-      header: 'Cambios sin guardar',
-      message: '¿Estás seguro que deseas salir?',
+      header: 'Confirmar actualización',
+      message: '¿Estás seguro de que deseas guardar los cambios?',
       buttons: [
         {
           text: 'Cancelar',
@@ -192,7 +122,70 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
           text: 'Aceptar',
           handler: async () => {
             await confirmAlert.dismiss();
-            this.nav.navigateBack('Star_Routing/tabs/profile');
+            const loading = await this.loading.create({
+              message: 'Guardando cambios...',
+            });
+            await loading.present();
+
+            try {
+              const data = await this.api.putUsuario(updatedData).toPromise();
+              if (data?.status === 'ok') {
+                this.nav.navigateRoot('/tabs/profile', { queryParams: { userData: JSON.stringify(updatedData) } });
+                const successAlert = await this.alert.create({
+                  header: 'Actualización exitosa',
+                  message: 'Los cambios se han guardado correctamente.',
+                  buttons: ['Aceptar']
+                });
+                await successAlert.present();
+              } else {
+                const errorAlert = await this.alert.create({
+                  header: 'Error',
+                  message: data?.msj,
+                  buttons: ['Aceptar']
+                });
+                await errorAlert.present();
+              }
+            } catch (error) {
+              console.error('Error:', error);
+              const errorAlert = await this.alert.create({
+                header: 'Error',
+                message: 'Ha ocurrido un error al guardar los cambios.',
+                buttons: ['Aceptar']
+              });
+              await errorAlert.present();
+            } finally {
+              await loading.dismiss();
+            }
+          }
+        }
+      ]
+    });
+    await confirmAlert.present();
+  }
+
+
+  async goBack() {
+    if (!this.hasUnsavedChanges()) {
+      this.nav.navigateBack('/tabs/profile');
+    } else {
+      this.showUnsavedChangesAlert();
+    }
+  }
+
+  async showUnsavedChangesAlert(): Promise<void> {
+    const confirmAlert = await this.alert.create({
+      header: 'Cambios sin guardar',
+      message: '¿Estás seguro de que deseas salir?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Aceptar',
+          handler: async () => {
+            await confirmAlert.dismiss();
+            this.nav.navigateBack('/tabs/profile');
           }
         }
       ]

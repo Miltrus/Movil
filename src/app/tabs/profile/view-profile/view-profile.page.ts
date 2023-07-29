@@ -45,6 +45,7 @@ export class ViewProfilePage implements OnInit {
     const loading = await this.loading.create({
       message: 'Cargando...',
     });
+
     await loading.present();
 
     const token = localStorage.getItem('token');
@@ -55,21 +56,21 @@ export class ViewProfilePage implements OnInit {
       this.userService.getOneUsuario(uid),
       this.userService.getTipoDocumento(),
     ]).subscribe(
-      ([usuarioData, tipoDocumentoData]) => {
-        this.userData = usuarioData;
-        this.tiposDocumento = tipoDocumentoData;
+      async (data) => {
+        await loading.dismiss();
+        this.userData = data[0];
+        this.tiposDocumento = data[1];
 
         this.tiposDocumento.forEach((tipoDocumento) => {
           this.tipoDocumentoMap[tipoDocumento.idTipoDocumento!] = tipoDocumento.nombreTipo!;
         });
-        loading.dismiss();
 
         if (refresher) {
           refresher.complete(); // Finaliza el "refresh" una vez se han actualizado los datos
         }
       },
       async (error) => {
-        loading.dismiss();
+        await loading.dismiss();
         const alert = await this.alert.create({
           header: 'Error',
           message: 'Ha ocurrido un error al cargar los datos del usuario. Por favor, inténtalo de nuevo más tarde.',
@@ -90,7 +91,7 @@ export class ViewProfilePage implements OnInit {
   }
 
   openEditProfile(): void {
-    this.nav.navigateForward('Star_Routing/tabs/profile/edit-profile', { state: { userData: this.userData } });
+    this.nav.navigateForward('/tabs/profile/edit-profile', { state: { userData: this.userData } });
   }
 
   async logout() {
@@ -111,16 +112,13 @@ export class ViewProfilePage implements OnInit {
             });
             await loading.present();
 
-            this.nav.navigateRoot('Star_Routing/welcome');
+            this.nav.navigateRoot('/login');
             localStorage.removeItem('token');
             loading.dismiss();
           }
         }
       ]
     });
-
     await logOutAlert.present();
   }
-
-
 }

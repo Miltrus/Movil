@@ -1,0 +1,33 @@
+<ion-content [fullscreen]="true">
+
+  <!-- Login Page -->
+  <div class="container">
+    <!-- <img class="logo" src="../../../assets/icon/Logo.png" alt="Logo de la empresa"> -->
+    <h1 class="heading">Bienvenido 👋<br><br></h1>
+    <p class="sub-heading">Empieza una nueva ruta</p>
+    <form [formGroup]="loginForm">
+      <ion-item lines="none" class="ion-item">
+        <fieldset class="input-item">
+          <legend>Correo</legend>
+          <ion-input formControlName="correoUsuario" type="email" placeholder="Ingresa tu email"></ion-input>
+        </fieldset>
+      </ion-item>
+      <ion-item lines="none" class="ion-item">
+        <fieldset class="input-item">
+          <legend>Contraseña</legend>
+          <ion-input formControlName="contrasenaUsuario" type="{{ showPassword ? 'text' : 'password' }}"
+            placeholder="Ingresa tu contraseña"></ion-input>
+          <ion-icon name="{{ showPassword ? 'eye-outline' : 'eye-off-outline' }}"
+            color="{{ showPassword ? 'primary' : ''}}" slot="end" (click)="togglePasswordVisibility()"></ion-icon>
+        </fieldset>
+      </ion-item>
+      <ion-button class="login-button" (click)="login(loginForm.value)" expand="block"
+        [disabled]="loginForm.invalid">Ingresar</ion-button>
+    </form>
+  </div>
+</ion-content>
+<ion-footer color="white">
+  <ion-toolbar>
+    <p class="copyright">Copyright © -&nbsp;<a>Star ☆ Routing</a></p>
+  </ion-toolbar>
+</ion-footer>
