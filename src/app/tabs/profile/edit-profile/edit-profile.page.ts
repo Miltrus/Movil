@@ -197,7 +197,8 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
     this.showPassword = !this.showPassword;
   }
 
-  togglePasswordChange(): void {
+  togglePasswordChange(event: Event): void {
+    event.preventDefault();
     this.showPasswordChange = !this.showPasswordChange;
   }
 }
