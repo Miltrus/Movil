@@ -36,6 +36,27 @@
     margin-top: 35px;
 }
 
+.forget-text {
+    a {
+        text-decoration: none;
+        color: black;
+    }
+
+    text-align: end;
+    margin-bottom: -10px;
+    padding-right: 20px;
+}
+
+.signup-text {
+    a {
+        text-decoration: none;
+        color: var(--ion-color-primary);
+    }
+
+    padding-right: 20px;
+    text-align: end;
+}
+
 .login-button {
     padding-left: 20px;
     padding-right: 20px;

@@ -1,20 +1,15 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
 
 import { EntregaPageRoutingModule } from './entrega-routing.module';
 
 import { EntregaPage } from './entrega.page';
+import { SharedModule } from 'src/app/shared/shared.module';
 
 @NgModule({
   imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
+    SharedModule,
     EntregaPageRoutingModule
   ],
   declarations: [EntregaPage]
 })
-export class EntregaPageModule {}
+export class EntregaPageModule { }

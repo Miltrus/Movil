@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
-import { RolInterface } from 'src/app/models/rol.interface';
 import { TipoDocumentoInterface } from 'src/app/models/tipo-documento.interface';
 import { UsuarioInterface } from 'src/app/models/usuario.interface';
 import { UsuarioService } from 'src/app/services/api/usuario.service';
@@ -17,8 +16,8 @@ export class ViewProfilePage implements OnInit {
   userData: UsuarioInterface | null = null;
   refresher: IonRefresher | null = null;
   tiposDocumento: TipoDocumentoInterface[] = [];
-  rolData: RolInterface[] = [];
   tipoDocumentoMap: { [key: string]: string } = {};
+  /* selectedImg: any; */
 
   constructor(
     private userService: UsuarioService,
@@ -29,6 +28,10 @@ export class ViewProfilePage implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    /* const storedImg = localStorage.getItem('selectedImg');
+    if (storedImg) {
+      this.selectedImg = storedImg;
+    } */
     this.getUserData();
     this.route.queryParams.subscribe(params => {
       const userData = JSON.parse(params['userData']);
@@ -122,3 +125,19 @@ export class ViewProfilePage implements OnInit {
     await logOutAlert.present();
   }
 }
+
+/* onFileSelected(event: any) {
+  const file: File = event.target.files[0];
+  if (file) {
+    this.readFile(file);
+  }
+}
+
+private readFile(file: File) {
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onloadend = () => {
+    this.selectedImg = reader.result as string;
+    localStorage.setItem('selectedImg', this.selectedImg);
+  };
+} */

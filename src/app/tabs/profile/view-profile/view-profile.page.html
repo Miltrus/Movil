@@ -8,9 +8,12 @@
 
 <ion-content class="ion-padding">
   <div class="profile-info">
-    <ion-avatar>
-      <img src="assets/icon/avatar.png">
+    <ion-avatar> <!-- (click)="fileInput.click()" -->
+      <img src="assets/icon/avatar.png"> <!-- *ngIf="!selectedImg" -->
+      <!-- <img [src]="selectedImg" *ngIf="selectedImg"> -->
     </ion-avatar>
+    <!-- <input type="file" (change)="onFileSelected($event)" #fileInput style="display: none;"> -->
+
 
     <div class="name-container">
       {{ userData?.nombreUsuario }} {{ userData?.apellidoUsuario }}

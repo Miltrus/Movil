@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { TabsPage } from './tabs.page';
+import { isLoggedInGuard } from '../auth/guards/is-logged-in.guard';
 
 const routes: Routes = [
   {
@@ -17,11 +18,12 @@ const routes: Routes = [
       },
       {
         path: 'profile',
+        canMatch: [isLoggedInGuard],
         loadChildren: () => import('./profile/view-profile/view-profile.module').then(m => m.ViewProfilePageModule)
       },
       {
         path: 'entrega',
-        loadChildren: () => import('./entrega/entrega.module').then( m => m.EntregaPageModule)
+        loadChildren: () => import('./entrega/entrega.module').then(m => m.EntregaPageModule)
       },
     ]
   },

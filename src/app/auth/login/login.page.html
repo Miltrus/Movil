@@ -1,7 +1,6 @@
 <ion-content [fullscreen]="true">
 
-  <!-- Login Page -->
-  <div class="container">
+  <div class="container" *ngIf="screen === 'login'">
     <!-- <img class="logo" src="../../../assets/icon/Logo.png" alt="Logo de la empresa"> -->
     <h1 class="heading">Bienvenido 👋<br><br></h1>
     <p class="sub-heading">Empieza una nueva ruta</p>
@@ -21,12 +20,38 @@
             color="{{ showPassword ? 'primary' : ''}}" slot="end" (click)="togglePasswordVisibility()"></ion-icon>
         </fieldset>
       </ion-item>
+      <p class="forget-text"><a (click)="change('forgot-pwd')">¿Olvidaste la contraseña?</a></p>
       <ion-button class="login-button" (click)="login(loginForm.value)" expand="block"
         [disabled]="loginForm.invalid">Ingresar</ion-button>
     </form>
   </div>
+
+  <div class="container" *ngIf="screen === 'forgot-pwd'">
+    <h1 class="heading">¿Olvidaste la contraseña?<br><br></h1>
+    <p class="sub-heading">¡Recuperala!</p>
+    <form [formGroup]="forgotPwdForm">
+      <ion-item lines="none" class="ion-item">
+        <fieldset class="input-item">
+          <legend>Documento</legend>
+          <ion-input formControlName="documentoUsuario" type="text" placeholder="Ingresa tu documento"></ion-input>
+        </fieldset>
+      </ion-item>
+      <ion-item lines="none" class="ion-item">
+        <fieldset class="input-item">
+          <legend>Correo</legend>
+          <ion-input formControlName="correoUsuario" type="email" placeholder="Ingresa tu email"></ion-input>
+        </fieldset>
+      </ion-item>
+    </form>
+    <p class="signup-text">¿Ya la recordaste?&nbsp;<a (click)="change('login')">Ingresa</a></p>
+    <ion-button [disabled]="forgotPwdForm.invalid" class="login-button" (click)="forgotPwd(forgotPwdForm.value)"
+      expand="block">Recuperar
+      contraseña</ion-button>
+  </div>
+
 </ion-content>
-<ion-footer color="white">
+
+<ion-footer>
   <ion-toolbar>
     <p class="copyright">Copyright © -&nbsp;<a>Star ☆ Routing</a></p>
   </ion-toolbar>

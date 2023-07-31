@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import { LoginInterface } from 'src/app/models/login.interface';
 import { UsuarioInterface } from 'src/app/models/usuario.interface';
-import { LoginService } from 'src/app/services/api/login.service';
+import { AuthService } from 'src/app/services/api/auth.service';
 
 
 @Component({
@@ -18,12 +18,23 @@ export class LoginPage {
     contrasenaUsuario: new FormControl('', Validators.required)
   })
 
+  forgotPwdForm = new FormGroup({
+    documentoUsuario: new FormControl('', Validators.required),
+    correoUsuario: new FormControl('', Validators.required)
+  })
+
   constructor(
     private nav: NavController,
     private alert: AlertController,
     private loading: LoadingController,
-    private api: LoginService,
+    private auth: AuthService,
   ) { }
+
+  screen: any = 'login';
+
+  change(event: any) {
+    this.screen = event;
+  }
 
   userData: UsuarioInterface | null = null;
   showPassword: boolean = false;
@@ -34,7 +45,7 @@ export class LoginPage {
     });
     await loading.present();
 
-    this.api.onLogin(form).subscribe(
+    this.auth.onLogin(form).subscribe(
       async (data) => {
         if (data.status == 'ok') {
           localStorage.setItem('token', data.token);
@@ -66,6 +77,44 @@ export class LoginPage {
         const alert = await this.alert.create({
           header: 'Error',
           message: 'Ha ocurrido un error al iniciar sesión. Por favor, inténtalo de nuevo más tarde.',
+          buttons: ['Aceptar'],
+        });
+        await alert.present();
+      }
+    );
+  }
+
+  async forgotPwd(form: any) {
+    const loading = await this.loading.create({
+      message: 'Validando...',
+    });
+    await loading.present();
+
+    this.auth.onForgotPassword(form).subscribe(
+      async (data) => {
+        if (data.status == 'ok') {
+          await loading.dismiss();
+          const successAlert = await this.alert.create({
+            header: 'Correo enviado',
+            message: 'Se ha enviado un correo con un enlace para restablecer tu contraseña.',
+            buttons: ['Aceptar'],
+          });
+          await successAlert.present();
+        } else {
+          await loading.dismiss();
+          const alert = await this.alert.create({
+            header: 'Error',
+            message: data.msj,
+            buttons: ['Aceptar'],
+          });
+          await alert.present();
+        }
+      },
+      async (error) => {
+        await loading.dismiss();
+        const alert = await this.alert.create({
+          header: 'Error',
+          message: 'Ha ocurrido un error al enviar el correo. Por favor, inténtalo de nuevo más tarde.',
           buttons: ['Aceptar'],
         });
         await alert.present();
