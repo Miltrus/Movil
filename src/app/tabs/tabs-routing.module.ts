@@ -19,8 +19,13 @@ const routes: Routes = [
         path: 'profile',
         loadChildren: () => import('./profile/view-profile/view-profile.module').then(m => m.ViewProfilePageModule)
       },
+      {
+        path: 'entrega',
+        loadChildren: () => import('./entrega/entrega.module').then( m => m.EntregaPageModule)
+      },
     ]
   },
+
 ];
 
 @NgModule({

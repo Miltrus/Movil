@@ -83,6 +83,7 @@ export class Tab2Page implements OnDestroy {
     this.stopScan();
   }
 
+  //HAY QUE HACER QUE EL SISTEMA PIDA PERMISO PARA ACCEDER A LA CAMARA
   /* public async openCam() {
     const capturedPhoto: Photo = await Camera.getPhoto({
       resultType: CameraResultType.Uri,
