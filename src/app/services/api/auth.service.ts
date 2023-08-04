@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 })
 export class AuthService {
 
-  url: string = 'http://10.170.80.168:3030/auth/';
+  url: string = 'http://127.0.0.1:3030/auth/';
 
   constructor(private http: HttpClient) { }
 

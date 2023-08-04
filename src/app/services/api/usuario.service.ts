@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 })
 export class UsuarioService {
 
-  url: string = 'http://10.170.80.168:3030/';
+  url: string = 'http://127.0.0.1:3030/';
 
   constructor(private http: HttpClient) { }
 
