@@ -49,14 +49,14 @@ export class EntregaPage implements OnInit {
   convertBase64toBlob(dataURL: any): Blob {
     const base64Prefix = 'data:image/png;base64,';
     const base64Data = dataURL.substring(base64Prefix.length);
-  
+
     const byteCharacters = atob(base64Data);
     const byteArrays = new Uint8Array(byteCharacters.length);
-  
+
     for (let i = 0; i < byteCharacters.length; i++) {
       byteArrays[i] = byteCharacters.charCodeAt(i);
     }
-  
+
     const blob = new Blob([byteArrays], { type: 'image/png' });
     return blob;
   }
@@ -73,8 +73,7 @@ export class EntregaPage implements OnInit {
     this.signaturePad.clear();
   }
 
-  async goBack() {
-    this.nav.navigateBack('/tabs/tabs2');
+  goBack() {
+    this.nav.navigateBack('tabs/tab1');
   }
-
 }

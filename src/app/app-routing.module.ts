@@ -17,12 +17,6 @@ const routes: Routes = [
     canActivate: [isLoggedInGuard],
     loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
   },
-  {
-    path: 'map',
-    loadChildren: () => import('./pages/map/map.module').then( m => m.MapPageModule)
-  }
-
-
 ];
 
 @NgModule({

@@ -25,6 +25,11 @@ const routes: Routes = [
         path: 'entrega',
         loadChildren: () => import('./entrega/entrega.module').then(m => m.EntregaPageModule)
       },
+
+      {
+        path: 'mapa',
+        loadChildren: () => import('../pages/map/map.module').then(m => m.MapPageModule)
+      }
     ]
   },
 
