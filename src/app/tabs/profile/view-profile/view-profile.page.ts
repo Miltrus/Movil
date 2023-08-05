@@ -17,7 +17,15 @@ export class ViewProfilePage implements OnInit {
   refresher: IonRefresher | null = null;
   tiposDocumento: TipoDocumentoInterface[] = [];
   tipoDocumentoMap: { [key: string]: string } = {};
-  /* selectedImg: any; */
+  defaultAvatars = [
+    { name: 'Por defecto', url: 'assets/icon/avatar0.png' },
+    { name: 'Avatar 1', url: 'assets/icon/avatar1.png' },
+    { name: 'Avatar 2', url: 'assets/icon/avatar2.jpg' },
+    { name: 'Avatar 3', url: 'assets/icon/avatar3.png' },
+    { name: 'Avatar 4', url: 'assets/icon/avatar4.png' },
+  ];
+
+  selectedAvatar: any;
 
   constructor(
     private userService: UsuarioService,
@@ -28,10 +36,6 @@ export class ViewProfilePage implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    /* const storedImg = localStorage.getItem('selectedImg');
-    if (storedImg) {
-      this.selectedImg = storedImg;
-    } */
     this.getUserData();
     this.route.queryParams.subscribe(params => {
       const userData = JSON.parse(params['userData']);
@@ -62,6 +66,10 @@ export class ViewProfilePage implements OnInit {
       async (data) => {
         await loading.dismiss();
         this.userData = data[0];
+
+        // Cargar el avatar seleccionado desde localStorage para el usuario actual
+        const selectedAvatarUrl = localStorage.getItem(`selectedAvatar_${this.userData?.idUsuario}`);
+        this.selectedAvatar = this.defaultAvatars.find(avatar => avatar.url === selectedAvatarUrl) || this.defaultAvatars[0];
         this.tiposDocumento = data[1];
 
         this.tiposDocumento.forEach((tipoDocumento) => {
@@ -88,10 +96,39 @@ export class ViewProfilePage implements OnInit {
     );
   }
 
-
   getTipoDocumento(idTipoDocumento: any): string {
     return this.tipoDocumentoMap[idTipoDocumento] || '';
   }
+
+  async changeAvatar() {
+    const alert = await this.alert.create({
+      header: 'Seleccionar Avatar',
+      inputs: this.defaultAvatars.map((avatar, index) => ({
+        type: 'radio',
+        label: avatar.name,
+        value: avatar,
+        checked: avatar.url === (localStorage.getItem(`selectedAvatar_${this.userData?.idUsuario}`) || this.defaultAvatars[0].url),
+      })),
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Aceptar',
+          handler: (selected) => {
+            if (selected) {
+              this.selectedAvatar = selected;
+              localStorage.setItem(`selectedAvatar_${this.userData?.idUsuario}`, selected.url); // Guardar la selección del usuario en localStorage con clave única
+            }
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
 
   openEditProfile(): void {
     this.nav.navigateForward('/tabs/profile/edit-profile', { state: { userData: this.userData } });
@@ -125,19 +162,3 @@ export class ViewProfilePage implements OnInit {
     await logOutAlert.present();
   }
 }
-
-/* onFileSelected(event: any) {
-  const file: File = event.target.files[0];
-  if (file) {
-    this.readFile(file);
-  }
-}
-
-private readFile(file: File) {
-  const reader = new FileReader();
-  reader.readAsDataURL(file);
-  reader.onloadend = () => {
-    this.selectedImg = reader.result as string;
-    localStorage.setItem('selectedImg', this.selectedImg);
-  };
-} */

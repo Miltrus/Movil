@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { LoadingController, NavController } from '@ionic/angular';
-import { MarkerInterface } from 'src/app/models/marker.interface';
 import { WayPointInterface } from 'src/app/models/waypoint.interface';
 
 declare var google: any;
@@ -10,23 +9,26 @@ declare var google: any;
   templateUrl: './map.page.html',
   styleUrls: ['./map.page.scss'],
 })
-export class MapPage implements OnInit {
+export class MapPage {
 
   map = null;
   mapEle: any;
   indicators: any;
-  directionsService = new google.maps.DirectionsService();  // Para calcular la ruta
-  directionsDisplay = new google.maps.DirectionsRenderer(); // Para mostrar la ruta
-  marker: google.maps.Marker | null = null; // Para el marcador de la ubicación actual
+  directionsService = new google.maps.DirectionsService();  // para calcular la ruta
+  directionsDisplay = new google.maps.DirectionsRenderer(); // para mostrar la ruta
+  marker: google.maps.Marker | null = null; // para el marcador de la ubicación actual
+  locationWatchId: number | null = null; // para almacenar el id de la suscripción de watchPosition
+  currentWaypointIndex: number = 0;
+  shouldCalculateRoute: boolean = true;
 
-  origin: { lat: number, lng: number } = { lat: 0, lng: 0 }; // Propiedad para almacenar la ubicación actual
-  destination = { lat: 6.2975878, lng: -75.5586858 };
+  origin: { lat: number, lng: number } = { lat: 0, lng: 0 };
+  destination = { lat: 6.26732, lng: -75.59406 };
 
   waypoints: WayPointInterface[] = [
-    { location: { lat: 6.16330, lng: -75.63106 }, stopover: true },
-    { location: { lat: 6.20860, lng: -75.56431 }, stopover: true },
-    { location: { lat: 6.29774, lng: -75.55036 }, stopover: true },
-    { location: { lat: 6.33401, lng: -75.55695 }, stopover: true },
+    { location: { lat: 6.29747, lng: -75.55033 }, stopover: true },
+    { location: { lat: 6.28923, lng: -75.54613 }, stopover: true },
+    { location: { lat: 6.14983, lng: -75.60969 }, stopover: true },
+    { location: { lat: 6.10601, lng: -75.63808 }, stopover: true },
   ];
 
   constructor(
@@ -34,8 +36,18 @@ export class MapPage implements OnInit {
     private nav: NavController,
   ) { }
 
-  ngOnInit() {
+  ionViewDidEnter() {
+    // limpiamo el marcador de la ubicación actual cuando se entra nuevamente a la página
+    this.clearCurrentLocationMarker();
     this.loadMap();
+  }
+
+  ionViewWillLeave() {
+    // cancelar la suscripción de watchPosition al salir de la página
+    if (this.locationWatchId !== null) {
+      navigator.geolocation.clearWatch(this.locationWatchId);
+    }
+    this.shouldCalculateRoute = false;
   }
 
   async loadMap() {
@@ -52,42 +64,42 @@ export class MapPage implements OnInit {
 
     google.maps.event.addListenerOnce(this.map, 'idle', async () => {
       this.mapEle.classList.add('show-map');
-      await this.getCurrentLocation(); // Llamamos a getCurrentLocation() solo al cargar el mapa
-      this.calculateRoute(); // Llamamos a calculateRoute() solo al cargar el mapa
+      await this.getCurrentLocation();
+      this.calculateRoute();
     });
   }
 
   async getCurrentLocation() {
     if (navigator.geolocation) {
       const geolocationOptions = {
-        enableHighAccuracy: true, // Habilitar la máxima precisión posible
-        timeout: 10000, // Tiempo máximo para esperar la respuesta
-        maximumAge: 0 // No usar la caché de la ubicación anterior
+        enableHighAccuracy: true, // máxima precisión posible
+        timeout: 10000, // time maximo para esperar la respuesta
+        maximumAge: 0 // no usar la caché de la ubicación anterior
       };
 
       let attempts = 0;
       const maxAttempts = 10;
 
-      // Función recursiva para intentar obtener la ubicación
+      // funcion recursiva para intentar obtener la ubicacion
       const tryGetLocation = () => {
-        navigator.geolocation.watchPosition(
+        this.locationWatchId = navigator.geolocation.watchPosition(
           (position) => {
             const currentLatLng = {
               lat: position.coords.latitude,
               lng: position.coords.longitude,
             };
+
             this.origin = currentLatLng;
             this.updateMarkerPosition(currentLatLng);
 
-            // Agregamos el mensaje de consola para verificar la actualización de la ubicación
-            console.log("Nueva ubicación:", currentLatLng);
+            console.log("nueva ubicación:", currentLatLng);
           },
           (error) => {
-            console.error('Error al obtener la ubicación actual:', error);
+            console.warn('error al obtener la ubicación actual:', error);
             if (attempts < maxAttempts) {
               attempts++;
-              console.log(`Intento ${attempts} de ${maxAttempts}`);
-              // Intentamos obtener la ubicación nuevamente después de 1 segundo (1000 ms)
+              console.log(`intento ${attempts} de ${maxAttempts}`);
+              // intentamo obtener la ubicacion nuevamente despues de 1 segundo
               setTimeout(() => {
                 tryGetLocation();
               }, 1000);
@@ -95,17 +107,18 @@ export class MapPage implements OnInit {
               alert('No se pudo obtener la ubicación actual después de varios intentos.');
             }
           },
-          geolocationOptions // Pasamos las opciones para la geolocalización
+          geolocationOptions // pasamos las opciones para la geolocalizacion
         );
       };
 
-      // Iniciamos la función recursiva para obtener la ubicación
+      // llamamos la función recursiva para obtener la ubicación
       tryGetLocation();
     } else {
       console.error('El navegador no admite la geolocalización.');
       alert('El navegador no admite la geolocalización.');
     }
   }
+
 
 
   async calculateRoute() {
@@ -117,8 +130,9 @@ export class MapPage implements OnInit {
     let attempts = 0;
     const maxAttempts = 10;
 
-    // Función recursiva para intentar calcular la ruta
+    // funcion recursiva para intentar calcular la ruta
     const tryCalculateRoute = () => {
+
       this.directionsService.route({
         origin: this.origin,
         destination: this.destination,
@@ -126,15 +140,43 @@ export class MapPage implements OnInit {
         optimizeWaypoints: true,
         travelMode: google.maps.TravelMode.DRIVING
       }, (response: any, status: any) => {
+
         if (status === google.maps.DirectionsStatus.OK) {
           this.directionsDisplay.setDirections(response);
-          loading.dismiss();
+
+          // verificar si se ha llegado a un waypoint
+          const route = response.routes[0];
+          const legs = route.legs;
+          const currentLeg = legs[this.currentWaypointIndex];
+          const waypointLatLng = this.waypoints[this.currentWaypointIndex].location;
+
+          if (this.shouldCalculateRoute) {
+            if (this.isCloseToWaypoint(this.origin, waypointLatLng)) {
+              console.log(`Llegaste al waypoint ${this.currentWaypointIndex + 1}`, currentLeg);
+              this.currentWaypointIndex++;
+
+              if (this.currentWaypointIndex < this.waypoints.length) {
+                // si hay mas waypoints, intentamos calcular la ruta nuevamente
+                tryCalculateRoute();
+              } else {
+                console.log('Has llegado a tu destino.');
+              }
+              loading.dismiss();
+            } else {
+              console.log('Aún no has llegado al waypoint actual.', currentLeg);
+              loading.dismiss();
+              setTimeout(() => {
+                tryCalculateRoute();
+              }, 5000);
+            }
+            loading.dismiss();
+          }
         } else {
           console.warn('No se pudo calcular la ruta:', status);
+
           if (attempts < maxAttempts) {
             attempts++;
             console.log(`Intento ${attempts} de ${maxAttempts}`);
-            // intentamos calcular la ruta nuevamente después de 1 segundo
             setTimeout(() => {
               tryCalculateRoute();
             }, 1000);
@@ -145,11 +187,24 @@ export class MapPage implements OnInit {
         }
       });
     };
-
-    tryCalculateRoute(); // Iniciamos la función recursiva para calcular la ruta
+    tryCalculateRoute(); // llamamos la función recursiva para calcular la ruta
   }
 
-  // Función para actualizar la posición del marcador
+  isCloseToWaypoint(currentLatLng: { lat: number, lng: number }, waypointLatLng: { lat: number, lng: number }): boolean {
+    const proximidad = 50; // umbral de proximidad en metros
+
+    // calculamos la distancia entre la ubicación actual y el waypoint
+    const distance = google.maps.geometry.spherical.computeDistanceBetween(
+      new google.maps.LatLng(currentLatLng.lat, currentLatLng.lng),
+      new google.maps.LatLng(waypointLatLng.lat, waypointLatLng.lng)
+    );
+
+    // verificamos si la distancia es menor que el umbral de proximidad
+    return distance < proximidad;
+  }
+
+
+  // para actualizar la posición del marcador
   updateMarkerPosition(position: { lat: number, lng: number }) {
     if (this.marker) {
       this.marker.setPosition(position);
@@ -162,7 +217,18 @@ export class MapPage implements OnInit {
     }
   }
 
+  // para limpiar el marcador de la ubicación actual
+  clearCurrentLocationMarker() {
+    if (this.marker) {
+      this.marker.setMap(null);
+      this.marker = null;
+    }
+  }
+
+
   goBack() {
+    // limpiar el marcador de la ubicación actual cuando se navega hacia atrás
+    this.clearCurrentLocationMarker();
     this.nav.navigateBack('tabs/tab1');
   }
 

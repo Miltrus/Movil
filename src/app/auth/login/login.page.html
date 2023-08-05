@@ -27,7 +27,7 @@
   </div>
 
   <div class="container" *ngIf="screen === 'forgot-pwd'">
-    <h1 class="heading">¿Olvidaste la contraseña?<br><br></h1>
+    <h1 class="heading">¿La olvidaste?<br><br></h1>
     <p class="sub-heading">¡Recuperala!</p>
     <form [formGroup]="forgotPwdForm">
       <ion-item lines="none" class="ion-item">
@@ -43,7 +43,7 @@
         </fieldset>
       </ion-item>
     </form>
-    <p class="signup-text">¿Ya la recordaste?&nbsp;<a (click)="change('login')">Ingresa</a></p>
+    <p class="forget-text">¿Ya la recordaste?&nbsp;<a (click)="change('login')">Ingresa</a></p>
     <ion-button [disabled]="forgotPwdForm.invalid" class="login-button" (click)="forgotPwd(forgotPwdForm.value)"
       expand="block">Recuperar
       contraseña</ion-button>
