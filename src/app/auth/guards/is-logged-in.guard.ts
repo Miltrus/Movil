@@ -4,7 +4,7 @@ import { catchError, map, of } from 'rxjs';
 import { AlertController, NavController } from '@ionic/angular';
 import { TokenService } from 'src/app/auth/token/token.service';
 
-export const isLoggedInGuard: CanMatchFn = (route, state) => {
+export const isLoggedInGuard: CanMatchFn = () => {
 
   const tokenService = inject(TokenService);
   const alertController = inject(AlertController);
@@ -20,11 +20,14 @@ export const isLoggedInGuard: CanMatchFn = (route, state) => {
         } else {
           nav.navigateRoot('login');
           localStorage.removeItem('token');
-          showAlert(alertController, response.msj, 'Su sesión ha expirado');
+          showAlert(alertController, 'Por favor inicie sesión nuevamente.', 'Su sesión ha expirado');
           return false;
         }
       }),
       catchError(error => {
+        nav.navigateRoot('login');
+        localStorage.removeItem('token');
+        showAlert(alertController, 'Por favor inicie sesión nuevamente.', 'Ha ocurrido un error');
         return of(false);
       })
     );

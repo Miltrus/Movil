@@ -37,7 +37,7 @@ export class MapPage {
   ) { }
 
   ionViewDidEnter() {
-    // limpiamo el marcador de la ubicación actual cuando se entra nuevamente a la página
+    this.shouldCalculateRoute = true;
     this.clearCurrentLocationMarker();
     this.loadMap();
   }
@@ -167,7 +167,7 @@ export class MapPage {
               loading.dismiss();
               setTimeout(() => {
                 tryCalculateRoute();
-              }, 5000);
+              }, 50000000);
             }
             loading.dismiss();
           }
@@ -231,12 +231,4 @@ export class MapPage {
     this.clearCurrentLocationMarker();
     this.nav.navigateBack('tabs/tab1');
   }
-
-  /* addMarker(marker: MarkerInterface) {
-    return new google.maps.Marker({
-      position: { lat: 6.25184, lng: -75.56359 },
-      map: this.map,
-      title: marker.title
-    });
-  } */
 }

@@ -130,6 +130,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
             try {
               const data = await this.api.putUsuario(updatedData).toPromise();
               if (data?.status === 'ok') {
+                await loading.dismiss();
                 this.nav.navigateRoot('/tabs/profile', { queryParams: { userData: JSON.stringify(updatedData) } });
                 const successAlert = await this.alert.create({
                   header: 'Actualización exitosa',
@@ -138,6 +139,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
                 });
                 await successAlert.present();
               } else {
+                await loading.dismiss();
                 const errorAlert = await this.alert.create({
                   header: 'Error',
                   message: data?.msj,

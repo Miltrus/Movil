@@ -50,18 +50,16 @@ export class LoginPage {
         if (data.status == 'ok') {
           localStorage.setItem('token', data.token);
           this.userData = data.user;
+
+          await this.nav.navigateForward('/tabs/profile');
+
           await loading.dismiss();
-
-          this.nav.navigateForward('/tabs/profile');
-
-          setTimeout(async () => {
-            const successAlert = await this.alert.create({
-              header: 'Inicio de sesión exitoso',
-              message: 'Bienvenido ' + this.userData!.nombreUsuario + '!',
-              buttons: ['Aceptar'],
-            });
-            await successAlert.present();
-          }, 400);
+          const successAlert = await this.alert.create({
+            header: 'Inicio de sesión exitoso',
+            message: 'Bienvenido ' + this.userData!.nombreUsuario + '!',
+            buttons: ['Aceptar'],
+          });
+          await successAlert.present();
         } else {
           await loading.dismiss();
           const alert = await this.alert.create({
