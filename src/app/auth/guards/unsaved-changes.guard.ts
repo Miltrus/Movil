@@ -13,7 +13,7 @@ export const unsavedChangesGuard: CanDeactivateFn<HasUnsavedChanges> = (componen
   if (component.hasUnsavedChanges()) {
     alert.create({
       header: 'Cambios sin guardar',
-      message: '¿Estás seguro que deseas salir?',
+      message: '¿Estás seguro de que deseas salir?',
       buttons: [
         {
           text: 'Cancelar',

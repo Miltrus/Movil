@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { AlertController, LoadingController, NavController } from '@ionic/angular';
+import { AlertController, LoadingController, NavController, ToastController } from '@ionic/angular';
 import { LoginInterface } from 'src/app/models/login.interface';
 import { UsuarioInterface } from 'src/app/models/usuario.interface';
 import { AuthService } from 'src/app/services/api/auth.service';
@@ -28,6 +28,7 @@ export class LoginPage {
     private alert: AlertController,
     private loading: LoadingController,
     private auth: AuthService,
+    private toast: ToastController
   ) { }
 
   screen: any = 'login';
@@ -54,12 +55,12 @@ export class LoginPage {
           await this.nav.navigateForward('/tabs/profile');
 
           await loading.dismiss();
-          const successAlert = await this.alert.create({
-            header: 'Inicio de sesión exitoso',
-            message: 'Bienvenido ' + this.userData!.nombreUsuario + '!',
-            buttons: ['Aceptar'],
+          const toast = await this.toast.create({
+            message: '¡Bienvenido ' + this.userData!.nombreUsuario + '!',
+            duration: 3000,
+            position: 'bottom',
           });
-          await successAlert.present();
+          toast.present();
         } else {
           await loading.dismiss();
           const alert = await this.alert.create({

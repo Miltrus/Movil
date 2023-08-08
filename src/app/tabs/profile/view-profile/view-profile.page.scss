@@ -11,6 +11,17 @@ ion-avatar {
     }
 }
 
+ion-label {
+    font-weight: bold;
+}
+
+ion-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 50%;
+}
+
 .profile-info {
     display: flex;
     align-items: center;
