@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { NavController } from '@ionic/angular';
 import SignaturePad from 'signature_pad';
 
@@ -7,7 +7,7 @@ import SignaturePad from 'signature_pad';
   templateUrl: './entrega.page.html',
   styleUrls: ['./entrega.page.scss'],
 })
-export class EntregaPage implements OnInit {
+export class EntregaPage {
 
   @ViewChild('canvas', { static: true }) signaturePadElement?: ElementRef;
   signaturePad: any;
@@ -16,9 +16,6 @@ export class EntregaPage implements OnInit {
     private elementRef: ElementRef,
     private nav: NavController,
   ) { }
-
-  ngOnInit() {
-  }
 
   init() {
     const canvas: any = this.elementRef.nativeElement.querySelector('canvas');
