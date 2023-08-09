@@ -54,6 +54,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
   async ngOnInit(refresher?: any): Promise<void> {
     const loading = await this.loading.create({
       message: 'Cargando...',
+      spinner: 'lines',
     });
 
     loading.present();
@@ -125,6 +126,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
             await confirmAlert.dismiss();
             const loading = await this.loading.create({
               message: 'Guardando cambios...',
+              spinner: 'lines',
             });
             await loading.present();
 
@@ -136,6 +138,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
                   message: 'Los cambios se han guardado correctamente.',
                   duration: 3000,
                   position: 'bottom',
+                  icon: 'checkmark-done-outline'
                 });
                 loading.dismiss();
                 toast.present();

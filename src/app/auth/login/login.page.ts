@@ -43,6 +43,7 @@ export class LoginPage {
   async login(form: LoginInterface) {
     const loading = await this.loading.create({
       message: 'Iniciando sesión...',
+      spinner: 'lines',
     });
     await loading.present();
 
@@ -86,6 +87,7 @@ export class LoginPage {
   async forgotPwd(form: any) {
     const loading = await this.loading.create({
       message: 'Validando...',
+      spinner: 'lines',
     });
     await loading.present();
 

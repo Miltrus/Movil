@@ -1,13 +1,10 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import SignaturePad from 'signature_pad';
 import { EntregaInterface } from 'src/app/models/entrega.interface';
 import { ListaPaquetesInterface } from 'src/app/models/lista-paquetes.interface';
 import { EntregaService } from 'src/app/services/api/entrega.service';
-
-/* import { format } from 'date-fns';
-import { utcToZonedTime } from 'date-fns-tz'; */
 
 @Component({
   selector: 'app-entrega',
@@ -38,13 +35,13 @@ export class EntregaPage {
     });
   }
 
-  async ngOnInit(): Promise<void> {
+  /* async ngOnInit(): Promise<void> {
     const loading = await this.loading.create({
       message: 'Cargando...',
     });
 
-    /* await loading.present(); */
-  }
+    await loading.present();
+  }*/
 
   async save(): Promise<void> {
     this.saveSignature();
@@ -61,7 +58,7 @@ export class EntregaPage {
           handler: async () => {
             this.dateAndTime();
             const entregaData: EntregaInterface = this.newForm.value;
-            console.log("POST: ",entregaData);
+            console.log("POST: ", entregaData);
             await confirmAlert.dismiss();
             const loading = await this.loading.create({
               message: 'Guardando...',
@@ -128,21 +125,16 @@ export class EntregaPage {
 
   dateAndTime() {
     const fechaActual = new Date();
-    this.newForm.patchValue({
-      fechaEntrega: fechaActual.toISOString(),
-    });
-    console.log(this.newForm.value);
-  }
+    const formattedFechaEntrega = `${fechaActual.getFullYear()}-${(fechaActual.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${fechaActual.getDate().toString().padStart(2, '0')} ${fechaActual.getHours().toString().padStart(2, '0')}:${fechaActual.getMinutes().toString().padStart(2, '0')}:${fechaActual.getSeconds().toString().padStart(2, '0')}`;
 
-  /* dateAndTimeColombia() {
-    const fechaActual = new Date();
-    const zonaHorariaColombia = 'America/Bogota';
-    const fechaEntrega = utcToZonedTime(fechaActual, zonaHorariaColombia);
     this.newForm.patchValue({
-      fechaEntrega: format(fechaEntrega, "yyyy-MM-dd'T'HH:mm:ssxxx"),
+      fechaEntrega: formattedFechaEntrega,
     });
-    console.log(this.newForm.value);
-  } */
+
+    console.log("VIDA HP", this.newForm.value.fechaEntrega);
+  }
 
   saveSignature() {
     const dataURL = this.signaturePad.toDataURL('image/png');

@@ -55,6 +55,7 @@ export class ViewProfilePage implements OnInit {
   async getUserData(refresher?: any) {
     const loading = await this.loading.create({
       message: 'Cargando...',
+      spinner: 'lines',
     });
 
     await loading.present();
@@ -154,6 +155,7 @@ export class ViewProfilePage implements OnInit {
             await logOutAlert.dismiss();
             const loading = await this.loading.create({
               message: 'Cerrando sesión...',
+              spinner: 'lines',
             });
             await loading.present();
 
