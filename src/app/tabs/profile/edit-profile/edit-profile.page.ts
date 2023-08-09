@@ -4,7 +4,7 @@ import { finalize, forkJoin } from 'rxjs';
 import { TipoDocumentoInterface } from 'src/app/models/tipo-documento.interface';
 import { UsuarioInterface } from 'src/app/models/usuario.interface';
 import { UsuarioService } from 'src/app/services/api/usuario.service';
-import { AlertController, IonRefresher, LoadingController, NavController } from '@ionic/angular';
+import { AlertController, IonRefresher, LoadingController, NavController, ToastController } from '@ionic/angular';
 import { HasUnsavedChanges } from 'src/app/auth/guards/unsaved-changes.guard';
 
 @Component({
@@ -28,6 +28,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
     private loading: LoadingController,
     private formBuilder: FormBuilder,
     private nav: NavController,
+    private toast: ToastController
   ) {
     this.editForm = this.formBuilder.group({
       idUsuario: [''],
@@ -55,7 +56,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
       message: 'Cargando...',
     });
 
-    await loading.present();
+    loading.present();
 
     const token = localStorage.getItem('token');
     const decodedToken = JSON.parse(atob(token!.split('.')[1]));
@@ -129,15 +130,15 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
 
             try {
               const data = await this.api.putUsuario(updatedData).toPromise();
-              if (data?.status === 'ok') {
-                await loading.dismiss();
+              if (data?.status == 'ok') {
                 this.nav.navigateRoot('/tabs/profile', { queryParams: { userData: JSON.stringify(updatedData) } });
-                const successAlert = await this.alert.create({
-                  header: 'Actualización exitosa',
+                const toast = await this.toast.create({
                   message: 'Los cambios se han guardado correctamente.',
-                  buttons: ['Aceptar']
+                  duration: 3000,
+                  position: 'bottom',
                 });
-                await successAlert.present();
+                loading.dismiss();
+                toast.present();
               } else {
                 await loading.dismiss();
                 const errorAlert = await this.alert.create({
@@ -148,7 +149,6 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
                 await errorAlert.present();
               }
             } catch (error) {
-              console.error('Error:', error);
               const errorAlert = await this.alert.create({
                 header: 'Error',
                 message: 'Ha ocurrido un error al guardar los cambios.',

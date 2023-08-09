@@ -3,8 +3,28 @@
     <ion-title>
       Perfil
     </ion-title>
+    <ion-buttons slot="end">
+      <ion-button id="click-trigger">
+        <ion-icon name="ellipsis-vertical"></ion-icon>
+      </ion-button>
+      <ion-popover trigger="click-trigger" triggerAction="click" dismissOnSelect="true">
+        <ng-template>
+          <ion-content class="ion-padding">
+            <ion-item (click)="openEditProfile()">
+              <ion-icon slot="start" name="create-outline"></ion-icon>
+              <p>Editar perfil</p>
+            </ion-item>
+            <ion-item (click)="logout()">
+              <ion-icon slot="start" name="log-out-outline"></ion-icon>
+              <p>Cerrar sesión</p>
+            </ion-item>
+          </ion-content>
+        </ng-template>
+      </ion-popover>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
+
 
 <ion-content class="ion-padding">
 
@@ -40,7 +60,5 @@
     <ion-label>Telefono</ion-label>
     <ion-text>{{ userData?.telefonoUsuario }}</ion-text>
   </ion-item>
-  <br>
-  <ion-button color="primary" (click)="openEditProfile()">Editar Perfil</ion-button><br><br>
-  <ion-button expand="block" color="danger" (click)="logout()">Cerrar sesión</ion-button>
+
 </ion-content>

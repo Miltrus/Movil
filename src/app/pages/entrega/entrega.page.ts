@@ -14,7 +14,7 @@ import { utcToZonedTime } from 'date-fns-tz'; */
   templateUrl: './entrega.page.html',
   styleUrls: ['./entrega.page.scss'],
 })
-export class EntregaPage implements OnInit {
+export class EntregaPage {
 
   @ViewChild('canvas', { static: true }) signaturePadElement?: ElementRef;
   signaturePad: any;

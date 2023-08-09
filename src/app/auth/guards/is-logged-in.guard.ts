@@ -44,6 +44,5 @@ async function showAlert(alertController: AlertController, message: string, head
     message: message,
     buttons: ['Aceptar']
   });
-
   await alert.present();
 }

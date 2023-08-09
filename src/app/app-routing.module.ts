@@ -14,7 +14,7 @@ const routes: Routes = [
   },
   {
     path: 'tabs',
-    canActivate: [isLoggedInGuard],
+    canMatch: [isLoggedInGuard],
     loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
   },
 ];
