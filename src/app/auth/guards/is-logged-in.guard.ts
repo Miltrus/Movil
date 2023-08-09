@@ -15,7 +15,7 @@ export const isLoggedInGuard: CanMatchFn = () => {
   if (token) {
     return tokenService.verifyToken(token).pipe(
       map(response => {
-        if (response.status === 'ok') {
+        if (response.status == 'ok') {
           return true;
         } else {
           nav.navigateRoot('login');

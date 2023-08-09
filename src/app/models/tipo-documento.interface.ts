@@ -1,4 +1,4 @@
 export interface TipoDocumentoInterface {
-    idTipoDocumento?: string | null | undefined;
-    nombreTipo?: string | null | undefined;
+    idTipoDocumento?: any | null | undefined;
+    nombreTipo?: any | null | undefined;
 }

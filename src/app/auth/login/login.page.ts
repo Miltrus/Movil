@@ -57,7 +57,7 @@ export class LoginPage {
 
           await loading.dismiss();
           const toast = await this.toast.create({
-            message: '¡Bienvenido ' + this.userData!.nombreUsuario + '!',
+            message: 'Bienvenido, ' + this.userData!.nombreUsuario,
             duration: 2500,
             position: 'bottom',
             icon: 'checkmark-circle-outline',
