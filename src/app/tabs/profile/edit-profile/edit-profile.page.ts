@@ -136,9 +136,9 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
                 this.nav.navigateRoot('/tabs/profile', { queryParams: { userData: JSON.stringify(updatedData) } });
                 const toast = await this.toast.create({
                   message: 'Los cambios se han guardado correctamente.',
-                  duration: 3000,
+                  duration: 2500,
                   position: 'bottom',
-                  icon: 'checkmark-done-outline'
+                  icon: 'checkmark-outline'
                 });
                 loading.dismiss();
                 toast.present();

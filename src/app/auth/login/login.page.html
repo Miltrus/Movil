@@ -22,7 +22,7 @@
       </ion-item>
       <p class="forget-text"><a (click)="change('forgot-pwd')">¿Olvidaste la contraseña?</a></p>
       <ion-button class="login-button" (click)="login(loginForm.value)" expand="block"
-        [disabled]="loginForm.invalid">Ingresar</ion-button>
+        [disabled]="loginForm.invalid">Ingresar <ion-icon slot="end" name="log-in-outline"></ion-icon></ion-button>
     </form>
   </div>
 

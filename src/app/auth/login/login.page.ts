@@ -58,8 +58,9 @@ export class LoginPage {
           await loading.dismiss();
           const toast = await this.toast.create({
             message: '¡Bienvenido ' + this.userData!.nombreUsuario + '!',
-            duration: 3000,
+            duration: 2500,
             position: 'bottom',
+            icon: 'checkmark-circle-outline',
           });
           toast.present();
         } else {
@@ -96,8 +97,8 @@ export class LoginPage {
         if (data.status == 'ok') {
           await loading.dismiss();
           const successAlert = await this.alert.create({
-            header: 'Correo enviado',
-            message: 'Se ha enviado un correo con un enlace para restablecer tu contraseña.',
+            header: 'Revisa tu correo',
+            message: 'Hemos enviado un correo electrónico a tu cuenta con un enlace para restablecer tu contraseña.',
             buttons: ['Aceptar'],
           });
           await successAlert.present();
@@ -115,7 +116,7 @@ export class LoginPage {
         await loading.dismiss();
         const alert = await this.alert.create({
           header: 'Error',
-          message: 'Ha ocurrido un error al enviar el correo. Por favor, inténtalo de nuevo más tarde.',
+          message: 'Ha ocurrido un error al intentar recuperar tu contraseña. Por favor inténtalo de nuevo más tarde.',
           buttons: ['Aceptar'],
         });
         await alert.present();
