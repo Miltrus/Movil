@@ -1,8 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
-//import { BarcodeScanner } from '@awesome-cordova-plugins/barcode-scanner/ngx';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import { Camera, CameraResultType, Photo } from '@capacitor/camera';
 import { AlertController } from '@ionic/angular';
+import { PaqueteService } from 'src/app/services/api/paquete.service';
 
 @Component({
   selector: 'app-tab2',
@@ -11,10 +10,14 @@ import { AlertController } from '@ionic/angular';
 })
 export class Tab2Page implements OnDestroy {
 
-  scannedResult: any;
+  scannedResults: any = [];
+  codigoPaquetes: any = [];
   content_visibility = true;
 
-  constructor(private alert: AlertController) { }
+  constructor(
+    private alert: AlertController,
+    private api: PaqueteService
+  ) { }
 
   async checkPermission() {
     try {
@@ -57,15 +60,18 @@ export class Tab2Page implements OnDestroy {
       document.querySelector('body')!.classList.add('scanner-active');
       this.content_visibility = false;
       const result = await BarcodeScanner.startScan();
-      console.log(result);
       this.content_visibility = true;
       BarcodeScanner.showBackground();
       document.querySelector('body')!.classList.remove('scanner-active');
 
       if (result.hasContent) {
-        this.scannedResult = result.content;
-        console.log(this.scannedResult);
+        const qrData: any = JSON.parse(result.content); // Suponiendo que el contenido es un JSON válido
+        this.api.getOnePaquete(qrData[0].id).subscribe((data) => {
+          this.codigoPaquetes.push(data.codigoPaquete);
+        });
+        this.scannedResults.push(qrData);
       }
+
     } catch (error) {
       console.log(error);
       this.stopScan();
@@ -82,13 +88,5 @@ export class Tab2Page implements OnDestroy {
   ngOnDestroy() {
     this.stopScan();
   }
-
-  //HAY QUE HACER QUE EL SISTEMA PIDA PERMISO PARA ACCEDER A LA CAMARA
-  /* public async openCam() {
-    const capturedPhoto: Photo = await Camera.getPhoto({
-      resultType: CameraResultType.Uri,
-      quality: 100
-    });
-  } */
 
 }

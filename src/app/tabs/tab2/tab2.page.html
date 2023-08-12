@@ -8,17 +8,28 @@
 
 <ion-content [fullscreen]="true">
   <ion-button expand="full" (click)="scanQR()" *ngIf="content_visibility">
-    Escanear codigo QR
+    Escanear Paquete
   </ion-button>
 
-  <ion-card *ngIf="scannedResult">
-    <ion-card-header>Escaneado exitosamente</ion-card-header>
-    <ion-card-content>Contenido escaneado: {{ scannedResult }}</ion-card-content>
-  </ion-card>
+  <ion-list *ngIf="scannedResults && scannedResults.length > 0">
+    <ion-list-header>
+      Paquetes escaneados: {{ scannedResults.length }}
+    </ion-list-header>
+    <ion-item *ngFor="let code of codigoPaquetes; let i = index">
+      # {{ i + 1 }}: {{ code }}
+    </ion-item>
+    <ion-item>
+      <ion-button color="primary" (click)="scanQR()">
+        Escanear otro paquete
+      </ion-button>
+    </ion-item>
+  </ion-list>
 
   <div class="scanner-area" *ngIf="!content_visibility"></div>
 
 </ion-content>
+
+
 <ion-button color="danger" expand="full" (click)="stopScan()" *ngIf="!content_visibility">
   Cancelar
 </ion-button>
