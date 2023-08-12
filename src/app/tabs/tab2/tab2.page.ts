@@ -11,13 +11,13 @@ import { PaqueteService } from 'src/app/services/api/paquete.service';
 export class Tab2Page implements OnDestroy {
 
   scannedResults: any = [];
-  codigoPaquetes: any = [];
   content_visibility = true;
 
   constructor(
     private alert: AlertController,
     private api: PaqueteService
   ) { }
+
 
   async checkPermission() {
     try {
@@ -51,11 +51,11 @@ export class Tab2Page implements OnDestroy {
 
   async scanQR() {
     try {
-      // miramos si el permiso ha sido concedido
       const permission = await this.checkPermission();
       if (!permission) {
         return;
       }
+
       await BarcodeScanner.hideBackground();
       document.querySelector('body')!.classList.add('scanner-active');
       this.content_visibility = false;
@@ -65,17 +65,97 @@ export class Tab2Page implements OnDestroy {
       document.querySelector('body')!.classList.remove('scanner-active');
 
       if (result.hasContent) {
-        const qrData: any = JSON.parse(result.content); // Suponiendo que el contenido es un JSON válido
-        this.api.getOnePaquete(qrData[0].id).subscribe((data) => {
-          this.codigoPaquetes.push(data.codigoPaquete);
-        });
-        this.scannedResults.push(qrData);
-      }
+        try {
+          const qrDataArray: any[] = JSON.parse(result.content);
+          if (Array.isArray(qrDataArray) && qrDataArray.length > 0) {
+            const qrData = qrDataArray[0].cod;
 
+            const codExists = this.scannedResults.some((nestedArray: any) =>
+              nestedArray.some((item: any) => item.cod === qrData)
+            );
+
+            if (codExists) {
+              const alert = await this.alert.create({
+                header: 'Paquete duplicado',
+                message: 'Este paquete ya ha sido ingresado anteriormente.',
+                buttons: ['OK']
+              });
+              await alert.present();
+            } else {
+              this.scannedResults.push(qrDataArray);
+            }
+          }
+        } catch (error) {
+          const alert = await this.alert.create({
+            header: 'QR no válido',
+            message: 'El QR escaneado no es válido. Por favor, escanee un QR válido o introduzca el código manualmente.',
+            buttons: ['OK']
+          });
+          await alert.present();
+        }
+      }
     } catch (error) {
       console.log(error);
       this.stopScan();
     }
+  }
+
+  async enterCodeManually() {
+    const alert = await this.alert.create({
+      header: 'Introducir código manualmente',
+      inputs: [
+        {
+          name: 'manualCode',
+          type: 'text',
+          placeholder: 'Ingrese el código aquí'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Aceptar',
+          handler: (data) => {
+            if (data.manualCode) {
+              if (this.scannedResults.some((nestedArray: any) =>
+                nestedArray.some((item: any) => item.cod == data.manualCode)
+              )) {
+                this.alert.create({
+                  header: 'Paquete duplicado',
+                  message: 'Este paquete ya ha sido ingresado anteriormente.',
+                  buttons: ['OK']
+                }).then(alert => alert.present());
+              } else {
+                this.api.getPaqueteByCodigo(data.manualCode).subscribe((res: any) => {
+                  if (res.status == 'error') {
+                    this.alert.create({
+                      header: 'Error',
+                      message: 'El código ingresado no es válido. Por favor, ingrese un código válido.',
+                      buttons: ['OK']
+                    }).then(alert => alert.present());
+                  } else {
+                    const scannedPackage = {
+                      cod: res.codigoPaquete,
+                      lat: res.lat,
+                      lng: res.lng
+                    };
+                    this.scannedResults.push([scannedPackage]);
+                  }
+                });
+              }
+            }
+          }
+
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  removePaquete(index: number) {
+    this.scannedResults.splice(index, 1);
   }
 
   async stopScan() {

@@ -1,26 +1,44 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      Tab 2
+      Escaner
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-button expand="full" (click)="scanQR()" *ngIf="content_visibility">
-    Escanear Paquete
-  </ion-button>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="primary">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top">
+      <ion-fab-button (click)="scanQR()">
+        <ion-icon name="qr-code-outline"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button (click)="enterCodeManually()">
+        <ion-icon name="keypad-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab-list>
+  </ion-fab>
 
   <ion-list *ngIf="scannedResults && scannedResults.length > 0">
-    <ion-list-header>
-      Paquetes escaneados: {{ scannedResults.length }}
+    <ion-list-header mode="ios">
+      Paquetes agregados: {{ scannedResults.length }}
     </ion-list-header>
-    <ion-item *ngFor="let code of codigoPaquetes; let i = index">
-      # {{ i + 1 }}: {{ code }}
+
+    <ion-item *ngFor="let nestedArray of scannedResults; let i = index">
+      <ion-label color="primary">Paquete #{{ i + 1 }}:</ion-label>
+      <ion-text *ngFor="let code of nestedArray">
+        {{ code.cod }}
+      </ion-text>
+      <ion-button color="danger" fill="clear" size="small" (click)="removePaquete(i)">
+        <ion-icon name="trash-outline"></ion-icon>
+      </ion-button>
     </ion-item>
+
     <ion-item>
-      <ion-button color="primary" (click)="scanQR()">
-        Escanear otro paquete
+      <ion-button slot="end" color="success">
+        Iniciar ruta
       </ion-button>
     </ion-item>
   </ion-list>
@@ -28,7 +46,6 @@
   <div class="scanner-area" *ngIf="!content_visibility"></div>
 
 </ion-content>
-
 
 <ion-button color="danger" expand="full" (click)="stopScan()" *ngIf="!content_visibility">
   Cancelar
