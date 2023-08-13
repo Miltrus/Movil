@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import { AlertController } from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular';
 import { PaqueteService } from 'src/app/services/api/paquete.service';
 
 @Component({
@@ -15,16 +15,15 @@ export class Tab2Page implements OnDestroy {
 
   constructor(
     private alert: AlertController,
-    private api: PaqueteService
+    private api: PaqueteService,
+    private loading: LoadingController
   ) { }
 
 
   async checkPermission() {
     try {
-      // pedimos el permiso
       const status = await BarcodeScanner.checkPermission({ force: true });
       if (status.granted) {
-        // el permiso es concedido
         return true;
       } else if (status.denied) {
         const alert = await this.alert.create({
@@ -44,7 +43,6 @@ export class Tab2Page implements OnDestroy {
       }
       return false;
     } catch (err) {
-      console.log(err);
       return false;
     }
   }
@@ -70,7 +68,7 @@ export class Tab2Page implements OnDestroy {
           if (Array.isArray(qrDataArray) && qrDataArray.length > 0) {
             const qrData = qrDataArray[0].cod;
 
-            const codExists = this.scannedResults.some((nestedArray: any) =>
+            const codExists = this.scannedResults.find((nestedArray: any) =>
               nestedArray.some((item: any) => item.cod === qrData)
             );
 
@@ -87,15 +85,14 @@ export class Tab2Page implements OnDestroy {
           }
         } catch (error) {
           const alert = await this.alert.create({
-            header: 'QR no válido',
-            message: 'El QR escaneado no es válido. Por favor, escanee un QR válido o introduzca el código manualmente.',
+            header: 'QR inválido',
+            message: 'El QR escaneado es inválido. Por favor, escanee un QR válido o introduzca el código manualmente.',
             buttons: ['OK']
           });
           await alert.present();
         }
       }
     } catch (error) {
-      console.log(error);
       this.stopScan();
     }
   }
@@ -117,37 +114,55 @@ export class Tab2Page implements OnDestroy {
         },
         {
           text: 'Aceptar',
-          handler: (data) => {
+          handler: async (data) => {
             if (data.manualCode) {
-              if (this.scannedResults.some((nestedArray: any) =>
-                nestedArray.some((item: any) => item.cod == data.manualCode)
-              )) {
+              const loading = await this.loading.create({
+                message: 'Cargando...',
+                spinner: 'lines'
+              });
+              await loading.present();
+              if (this.scannedResults.find((nestedArray: any) =>
+                nestedArray.some((item: any) => item.cod === data.manualCode.toUpperCase()))) {
+                await loading.dismiss();
                 this.alert.create({
                   header: 'Paquete duplicado',
                   message: 'Este paquete ya ha sido ingresado anteriormente.',
                   buttons: ['OK']
                 }).then(alert => alert.present());
               } else {
-                this.api.getPaqueteByCodigo(data.manualCode).subscribe((res: any) => {
-                  if (res.status == 'error') {
-                    this.alert.create({
-                      header: 'Error',
-                      message: 'El código ingresado no es válido. Por favor, ingrese un código válido.',
+                this.api.getPaqueteByCodigo(data.manualCode).subscribe(
+                  async (res: any) => {
+                    await loading.dismiss();
+                    if (res.status == 'error') {
+                      const alert = await this.alert.create({
+                        header: 'Error',
+                        message: 'El código ingresado es inválido. Por favor, ingrese un código válido o escanee el QR.',
+                        buttons: ['OK']
+                      });
+                      await alert.present();
+                    } else {
+                      const scannedPackage = {
+                        cod: res.codigoPaquete,
+                        lat: res.lat,
+                        lng: res.lng
+                      };
+                      await this.scannedResults.push([scannedPackage]);
+                      loading.dismiss();
+                    }
+                  },
+                  async (error) => {
+                    await loading.dismiss();
+                    const alert = await this.alert.create({
+                      header: 'Error de comunicación',
+                      message: 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtelo nuevamente.',
                       buttons: ['OK']
-                    }).then(alert => alert.present());
-                  } else {
-                    const scannedPackage = {
-                      cod: res.codigoPaquete,
-                      lat: res.lat,
-                      lng: res.lng
-                    };
-                    this.scannedResults.push([scannedPackage]);
+                    });
+                    await alert.present();
                   }
-                });
+                );
               }
             }
           }
-
         }
       ]
     });
