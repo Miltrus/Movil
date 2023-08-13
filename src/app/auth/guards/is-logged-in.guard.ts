@@ -15,19 +15,18 @@ export const isLoggedInGuard: CanMatchFn = () => {
   if (token) {
     return tokenService.verifyToken(token).pipe(
       map(response => {
-        if (response.status == 'ok') {
-          return true;
-        } else {
+        if (response.status == 'error') {
           nav.navigateRoot('login');
           localStorage.removeItem('token');
+          localStorage.removeItem('uid');
           showAlert(alertController, 'Por favor inicie sesión nuevamente.', 'Su sesión ha expirado');
           return false;
+        } else {
+          return true;
         }
       }),
       catchError(error => {
-        nav.navigateRoot('login');
-        localStorage.removeItem('token');
-        showAlert(alertController, 'Por favor inicie sesión nuevamente.', 'Ha ocurrido un error');
+        showAlert(alertController, 'Ha ocurrido un error al comunicarse con el servidor, intente nuevamente.', 'Error en el servidor');
         return of(false);
       })
     );

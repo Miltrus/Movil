@@ -48,7 +48,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
 
 
   hasUnsavedChanges(): boolean {
-    return this.editForm.dirty || this.pwdForm.dirty;
+    return this.editForm.dirty || (this.showPasswordChange && this.pwdForm.dirty);
   }
 
   async ngOnInit(refresher?: any): Promise<void> {
@@ -59,12 +59,10 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
 
     loading.present();
 
-    const token = localStorage.getItem('token');
-    const decodedToken = JSON.parse(atob(token!.split('.')[1]));
-    const idUsuario = decodedToken.uid;
+    const uid = localStorage.getItem('uid');
 
     const tipoDocumento$ = this.api.getTipoDocumento();
-    const oneUsuario$ = this.api.getOneUsuario(idUsuario);
+    const oneUsuario$ = this.api.getOneUsuario(uid);
 
     forkJoin([tipoDocumento$, oneUsuario$])
       .pipe(
@@ -96,7 +94,12 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
           });
         },
         (error) => {
-          console.error('Error:', error);
+          const errorAlert = this.alert.create({
+            header: 'Error en el servidor',
+            message: 'Ha ocurrido un error al cargar los datos. Por favor, inténtalo nuevamente',
+            buttons: ['Aceptar']
+          });
+          errorAlert.then((alert) => alert.present());
         }
       );
   }
@@ -133,12 +136,16 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
             try {
               const data = await this.api.putUsuario(updatedData).toPromise();
               if (data?.status == 'ok') {
+                this.editForm.reset();
+                this.pwdForm.reset();
                 this.nav.navigateRoot('/tabs/profile', { queryParams: { userData: JSON.stringify(updatedData) } });
                 const toast = await this.toast.create({
+                  header: 'Cambios guardados',
                   message: 'Los cambios se han guardado correctamente.',
                   duration: 2500,
                   position: 'bottom',
-                  icon: 'checkmark-outline'
+                  icon: 'checkmark-outline',
+                  mode: 'md',
                 });
                 loading.dismiss();
                 toast.present();

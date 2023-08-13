@@ -138,7 +138,7 @@ export class Tab2Page implements OnDestroy {
           handler: async (data) => {
             if (data.manualCode) {
               const loading = await this.loading.create({
-                message: 'Cargando...',
+                message: 'Validando...',
                 spinner: 'lines'
               });
               await loading.present();
@@ -174,7 +174,7 @@ export class Tab2Page implements OnDestroy {
                   async (error) => {
                     await loading.dismiss();
                     const alert = await this.alert.create({
-                      header: 'Error de comunicación',
+                      header: 'Error en el servidor',
                       message: 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtelo nuevamente.',
                       buttons: ['OK']
                     });

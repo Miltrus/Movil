@@ -60,9 +60,7 @@ export class ViewProfilePage implements OnInit {
 
     await loading.present();
 
-    const token = localStorage.getItem('token');
-    const decodedToken = JSON.parse(atob(token!.split('.')[1]));
-    const uid = decodedToken.uid;
+    const uid = localStorage.getItem('uid');
 
     forkJoin([
       this.userService.getOneUsuario(uid),
@@ -161,6 +159,7 @@ export class ViewProfilePage implements OnInit {
 
             await this.nav.navigateRoot('/login');
             localStorage.removeItem('token');
+            localStorage.removeItem('uid');
             loading.dismiss();
           }
         }

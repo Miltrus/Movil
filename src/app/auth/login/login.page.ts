@@ -51,16 +51,20 @@ export class LoginPage {
       async (data) => {
         if (data.status == 'ok') {
           localStorage.setItem('token', data.token);
+          const decodedToken = JSON.parse(atob(data.token!.split('.')[1]));
+          localStorage.setItem('uid', decodedToken.uid);
           this.userData = data.user;
 
           await this.nav.navigateForward('/tabs/profile');
 
           await loading.dismiss();
           const toast = await this.toast.create({
+            header: 'Inicio de sesión exitoso',
             message: 'Bienvenido, ' + this.userData!.nombreUsuario,
             duration: 2500,
             position: 'bottom',
             icon: 'checkmark-circle-outline',
+            mode: 'md',
           });
           toast.present();
         } else {
@@ -76,7 +80,7 @@ export class LoginPage {
       async (error) => {
         await loading.dismiss();
         const alert = await this.alert.create({
-          header: 'Error',
+          header: 'Error en el servidor',
           message: 'Ha ocurrido un error al iniciar sesión. Por favor, inténtalo de nuevo más tarde.',
           buttons: ['Aceptar'],
         });
@@ -115,7 +119,7 @@ export class LoginPage {
       async (error) => {
         await loading.dismiss();
         const alert = await this.alert.create({
-          header: 'Error',
+          header: 'Error en el servidor',
           message: 'Ha ocurrido un error al intentar recuperar tu contraseña. Por favor inténtalo de nuevo más tarde.',
           buttons: ['Aceptar'],
         });

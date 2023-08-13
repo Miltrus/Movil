@@ -27,9 +27,6 @@ export class MapPage {
 
   waypoints: WayPointInterface[] = [
     { location: { lat: 6.29747, lng: -75.55033 }, stopover: true },
-    { location: { lat: 6.28923, lng: -75.54613 }, stopover: true },
-    { location: { lat: 6.14983, lng: -75.60969 }, stopover: true },
-    { location: { lat: 6.10601, lng: -75.63808 }, stopover: true },
   ];
 
   constructor(
@@ -146,7 +143,7 @@ export class MapPage {
 
       this.directionsService.route({
         origin: this.origin,
-        destination: this.waypoints[this.waypoints.length - 1].location,
+        destination: this.origin,
         waypoints: this.waypoints,
         optimizeWaypoints: true,
         travelMode: google.maps.TravelMode.DRIVING

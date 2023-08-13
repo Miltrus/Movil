@@ -30,10 +30,9 @@ export const unsavedChangesGuard: CanDeactivateFn<HasUnsavedChanges> = (componen
           },
         },
       ],
-    })
-      .then((alert) => {
-        alert.present();
-      });
+    }).then((alert) => {
+      alert.present();
+    });
   }
 
   return true;
