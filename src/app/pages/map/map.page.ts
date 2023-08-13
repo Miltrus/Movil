@@ -1,4 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { LoadingController, NavController } from '@ionic/angular';
 import { WayPointInterface } from 'src/app/models/waypoint.interface';
 
@@ -34,12 +35,22 @@ export class MapPage {
   constructor(
     private loading: LoadingController,
     private nav: NavController,
+    private route: ActivatedRoute
   ) { }
 
   ionViewDidEnter() {
     this.shouldCalculateRoute = true;
-    this.clearCurrentLocationMarker();
-    this.loadMap();
+    this.route.queryParams.subscribe(params => {
+      const scannedWaypoints = params['state'];
+      if (scannedWaypoints) {
+        console.log('nuevos waypoints:', scannedWaypoints);
+        this.waypoints = scannedWaypoints;
+        this.clearCurrentLocationMarker();
+        this.loadMap();
+      } else {
+        console.log('no hay nuevos waypoints');
+      }
+    });
   }
 
   ionViewWillLeave() {
@@ -135,7 +146,7 @@ export class MapPage {
 
       this.directionsService.route({
         origin: this.origin,
-        destination: this.destination,
+        destination: this.waypoints[this.waypoints.length - 1].location,
         waypoints: this.waypoints,
         optimizeWaypoints: true,
         travelMode: google.maps.TravelMode.DRIVING

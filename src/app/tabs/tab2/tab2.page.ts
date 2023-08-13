@@ -1,6 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController, NavController } from '@ionic/angular';
+import { WayPointInterface } from 'src/app/models/waypoint.interface';
 import { PaqueteService } from 'src/app/services/api/paquete.service';
 
 @Component({
@@ -16,8 +17,28 @@ export class Tab2Page implements OnDestroy {
   constructor(
     private alert: AlertController,
     private api: PaqueteService,
-    private loading: LoadingController
+    private loading: LoadingController,
+    private nav: NavController
   ) { }
+
+  generateWaypointsFromScannedResults(): WayPointInterface[] {
+    const waypoints: WayPointInterface[] = [];
+
+    for (const nestedArray of this.scannedResults) {
+      const latLng = { lat: nestedArray[0].lat, lng: nestedArray[0].lng };
+      waypoints.push({ location: latLng, stopover: true });
+    }
+
+    return waypoints;
+  }
+
+  async startRoute() {
+    if (this.scannedResults.length > 0) {
+      const waypoints = this.generateWaypointsFromScannedResults();
+
+      this.nav.navigateRoot('/tabs/mapa', { queryParams: { state: waypoints } });
+    }
+  }
 
 
   async checkPermission() {
