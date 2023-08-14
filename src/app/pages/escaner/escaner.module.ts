@@ -1,14 +1,14 @@
 import { NgModule } from '@angular/core';
-import { Tab2Page } from './tab2.page';
+import { EscanerPage } from './escaner.page';
 
-import { Tab2PageRoutingModule } from './tab2-routing.module';
+import { EscanerPageRoutingModule } from './escaner-routing.module';
 import { SharedModule } from 'src/app/shared/shared.module';
 
 @NgModule({
   imports: [
     SharedModule,
-    Tab2PageRoutingModule
+    EscanerPageRoutingModule
   ],
-  declarations: [Tab2Page]
+  declarations: [EscanerPage]
 })
 export class Tab2PageModule { }

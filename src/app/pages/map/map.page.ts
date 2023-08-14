@@ -86,7 +86,7 @@ export class MapPage {
       };
 
       let attempts = 0;
-      const maxAttempts = 10;
+      const maxAttempts = 15;
 
       // funcion recursiva para intentar obtener la ubicacion
       const tryGetLocation = () => {
@@ -131,7 +131,8 @@ export class MapPage {
 
   async calculateRoute() {
     const loading = await this.loading.create({
-      message: 'Calculando la ruta...'
+      message: 'Calculando la ruta...',
+      spinner: 'lines',
     });
     await loading.present();
 
@@ -187,7 +188,7 @@ export class MapPage {
             console.log(`Intento ${attempts} de ${maxAttempts}`);
             setTimeout(() => {
               tryCalculateRoute();
-            }, 1000);
+            }, 2000);
           } else {
             alert('No se pudo calcular la ruta después de varios intentos.');
             loading.dismiss();
@@ -237,6 +238,6 @@ export class MapPage {
   goBack() {
     // limpiar el marcador de la ubicación actual cuando se navega hacia atrás
     this.clearCurrentLocationMarker();
-    this.nav.navigateBack('tabs/tab1');
+    this.nav.navigateBack('tabs/escaner');
   }
 }

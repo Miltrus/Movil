@@ -143,7 +143,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
                   header: 'Cambios guardados',
                   message: 'Los cambios se han guardado correctamente.',
                   duration: 2500,
-                  position: 'bottom',
+                  position: 'top',
                   icon: 'checkmark-outline',
                   mode: 'md',
                 });

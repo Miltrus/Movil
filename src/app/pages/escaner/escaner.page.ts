@@ -6,10 +6,10 @@ import { PaqueteService } from 'src/app/services/api/paquete.service';
 
 @Component({
   selector: 'app-tab2',
-  templateUrl: 'tab2.page.html',
-  styleUrls: ['tab2.page.scss']
+  templateUrl: 'escaner.page.html',
+  styleUrls: ['escaner.page.scss']
 })
-export class Tab2Page implements OnDestroy {
+export class EscanerPage implements OnDestroy {
 
   scannedResults: any = [];
   content_visibility = true;
@@ -119,7 +119,7 @@ export class Tab2Page implements OnDestroy {
   }
 
   async enterCodeManually() {
-    const alert = await this.alert.create({
+    const alertInput = await this.alert.create({
       header: 'Introducir código manualmente',
       inputs: [
         {
@@ -183,6 +183,7 @@ export class Tab2Page implements OnDestroy {
                 );
               }
             } else {
+              await alertInput.dismiss();
               const alert = await this.alert.create({
                 header: 'Error',
                 message: 'No se ha ingresado ningún código. Por favor, ingrese un código válido o escanee el QR.',
@@ -194,7 +195,7 @@ export class Tab2Page implements OnDestroy {
         }
       ]
     });
-    await alert.present();
+    await alertInput.present();
   }
 
   removePaquete(index: number) {

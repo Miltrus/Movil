@@ -11,17 +11,17 @@ const routes: Routes = [
       {
         path: 'tab1',
         canMatch: [isLoggedInGuard],
-        loadChildren: () => import('./tab1/tab1.module').then(m => m.Tab1PageModule)
+        loadChildren: () => import('../pages/tab1/tab1.module').then(m => m.Tab1PageModule)
       },
       {
-        path: 'tab2',
+        path: 'escaner',
         canMatch: [isLoggedInGuard],
-        loadChildren: () => import('./tab2/tab2.module').then(m => m.Tab2PageModule)
+        loadChildren: () => import('../pages/escaner/escaner.module').then(m => m.Tab2PageModule)
       },
       {
         path: 'profile',
         canMatch: [isLoggedInGuard],
-        loadChildren: () => import('./profile/view-profile/view-profile.module').then(m => m.ViewProfilePageModule)
+        loadChildren: () => import('../pages/profile/view-profile/view-profile.module').then(m => m.ViewProfilePageModule)
       },
       {
         path: 'entrega',

@@ -62,7 +62,7 @@ export class LoginPage {
             header: 'Inicio de sesión exitoso',
             message: 'Bienvenido, ' + this.userData!.nombreUsuario,
             duration: 2500,
-            position: 'bottom',
+            position: 'top',
             icon: 'checkmark-circle-outline',
             mode: 'md',
           });
