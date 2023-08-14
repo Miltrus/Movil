@@ -182,6 +182,13 @@ export class Tab2Page implements OnDestroy {
                   }
                 );
               }
+            } else {
+              const alert = await this.alert.create({
+                header: 'Error',
+                message: 'No se ha ingresado ningún código. Por favor, ingrese un código válido o escanee el QR.',
+                buttons: ['OK']
+              });
+              await alert.present();
             }
           }
         }
