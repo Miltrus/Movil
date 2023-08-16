@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header *ngIf="content_visibility">
   <ion-toolbar>
     <ion-title>
       Escaner
@@ -7,7 +7,7 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab *ngIf="content_visibility" vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button color="primary">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
@@ -21,29 +21,38 @@
     </ion-fab-list>
   </ion-fab>
 
-  <ion-list *ngIf="scannedResults && scannedResults.length > 0">
+  <ion-list *ngIf="scannedResults && scannedResults.length > 0 && content_visibility">
     <ion-list-header mode="ios">
       Paquetes agregados: {{ scannedResults.length }}
     </ion-list-header>
 
-    <ion-item *ngFor="let nestedArray of scannedResults; let i = index">
-      <ion-label color="primary">Paquete #{{ i + 1 }}:</ion-label>
-      <ion-text *ngFor="let code of nestedArray">
-        {{ code.cod }}
-      </ion-text>
-      <ion-button color="danger" fill="clear" size="small" (click)="removePaquete(i)">
-        <ion-icon name="trash-outline"></ion-icon>
-      </ion-button>
-    </ion-item>
+    <div class="container" *ngIf="content_visibility">
+      <ion-item *ngFor="let nestedArray of scannedResults; let i = index">
+        <ion-label color="primary">Paquete #{{ i + 1 }}:</ion-label>
+        <ion-text *ngFor="let code of nestedArray">
+          {{ code.cod }}
+        </ion-text>
+        <ion-button color="danger" fill="clear" size="small" (click)="removePaquete(i)">
+          <ion-icon name="trash-outline"></ion-icon>
+        </ion-button>
+      </ion-item>
 
-    <ion-item>
-      <ion-button slot="end" color="success" (click)="startRoute()">
-        Iniciar ruta
-      </ion-button>
-    </ion-item>
+      <ion-item>
+        <ion-button slot="end" color="success" (click)="startRoute()">
+          Iniciar ruta
+        </ion-button>
+      </ion-item>
+    </div>
   </ion-list>
 
+
   <div class="scanner-area" *ngIf="!content_visibility"></div>
+
+  <ion-fab *ngIf="!content_visibility" vertical="bottom" horizontal="center" slot="fixed">
+    <ion-fab-button color="primary" (click)="toggleFlashlight()">
+      <ion-icon [name]="isFlashlightOn ? 'flash-off-outline' : 'flash-outline'"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 
 </ion-content>
 

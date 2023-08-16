@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
+import { BarcodeScanner, TorchStateResult } from '@capacitor-community/barcode-scanner';
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import { WayPointInterface } from 'src/app/models/waypoint.interface';
 import { PaqueteService } from 'src/app/services/api/paquete.service';
@@ -13,6 +13,7 @@ export class EscanerPage implements OnDestroy {
 
   scannedResults: any = [];
   content_visibility = true;
+  isFlashlightOn = false;
 
   constructor(
     private alert: AlertController,
@@ -69,6 +70,7 @@ export class EscanerPage implements OnDestroy {
   }
 
   async scanQR() {
+    this.isFlashlightOn = false
     try {
       const permission = await this.checkPermission();
       if (!permission) {
@@ -207,6 +209,19 @@ export class EscanerPage implements OnDestroy {
     BarcodeScanner.showBackground();
     await BarcodeScanner.stopScan();
     document.querySelector('body')!.classList.remove('scanner-active');
+  }
+
+  async toggleFlashlight() {
+    const torchState: TorchStateResult = await BarcodeScanner.getTorchState();
+
+    if (torchState.isEnabled) {
+      await BarcodeScanner.disableTorch();
+      this.isFlashlightOn = false;
+    } else {
+      await BarcodeScanner.enableTorch();
+      this.isFlashlightOn = true;
+    }
+
   }
 
   ngOnDestroy() {
