@@ -45,8 +45,19 @@
     </div>
   </ion-list>
 
-
-  <div class="scanner-area" *ngIf="!content_visibility"></div>
+  <div class="sample-background" *ngIf="!content_visibility"></div>
+  <div class="container-scan" *ngIf="!content_visibility">
+    <div class="barcode-scanner--area--container">
+      <div class="relative">
+        <p>Apunta tu cámara al código QR</p>
+      </div>
+      <div class="square surround-cover">
+        <div class="barcode-scanner--area--outer surround-cover">
+          <div class="barcode-scanner--area--inner"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <ion-fab *ngIf="!content_visibility" vertical="bottom" horizontal="center" slot="fixed">
     <ion-fab-button color="primary" (click)="toggleFlashlight()">
@@ -55,7 +66,6 @@
   </ion-fab>
 
 </ion-content>
-
 <ion-button color="danger" expand="full" (click)="stopScan()" *ngIf="!content_visibility">
   Cancelar
 </ion-button>

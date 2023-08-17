@@ -19,20 +19,20 @@ export const isLoggedInGuard: CanMatchFn = () => {
           nav.navigateRoot('login');
           localStorage.removeItem('token');
           localStorage.removeItem('uid');
-          showAlert(alertController, 'Por favor inicie sesión nuevamente.', 'Su sesión ha expirado');
+          showAlert(alertController, 'Por favor, inicie sesión nuevamente.', 'Su sesión ha expirado');
           return false;
         } else {
           return true;
         }
       }),
       catchError(error => {
-        showAlert(alertController, 'Ha ocurrido un error al comunicarse con el servidor, intente nuevamente.', 'Error en el servidor');
+        showAlert(alertController, 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente', 'Error en el servidor');
         return of(false);
       })
     );
   } else {
     nav.navigateRoot('login');
-    showAlert(alertController, 'Por favor inicie sesión nuevamente.', 'Su sesión ha expirado');
+    showAlert(alertController, 'Por favor, inicie sesión nuevamente.', 'Su sesión ha expirado');
     return of(false); // Retorna un Observable<boolean> usando el operador of
   }
 };

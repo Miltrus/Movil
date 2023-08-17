@@ -160,8 +160,8 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
               }
             } catch (error) {
               const errorAlert = await this.alert.create({
-                header: 'Error',
-                message: 'Ha ocurrido un error al guardar los cambios.',
+                header: 'Error en el servidor',
+                message: 'Ha ocurrido un error al guardar los cambios. Por favor, inténtalo nuevamente.',
                 buttons: ['Aceptar']
               });
               await errorAlert.present();

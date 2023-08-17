@@ -87,8 +87,8 @@ export class ViewProfilePage implements OnInit {
       async (error) => {
         await loading.dismiss();
         const alert = await this.alert.create({
-          header: 'Error',
-          message: 'Ha ocurrido un error al cargar los datos del usuario. Por favor, inténtalo de nuevo más tarde.',
+          header: 'Error en el servidor',
+          message: 'Ha ocurrido un error al cargar los datos del usuario. Por favor, inténtalo nuevamente.',
           buttons: ['Aceptar'],
         });
         await alert.present();

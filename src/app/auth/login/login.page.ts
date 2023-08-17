@@ -81,7 +81,7 @@ export class LoginPage {
         await loading.dismiss();
         const alert = await this.alert.create({
           header: 'Error en el servidor',
-          message: 'Ha ocurrido un error al iniciar sesión. Por favor, inténtalo de nuevo más tarde.',
+          message: 'Ha ocurrido un error al iniciar sesión. Por favor, inténtalo nuevamente.',
           buttons: ['Aceptar'],
         });
         await alert.present();
@@ -120,7 +120,7 @@ export class LoginPage {
         await loading.dismiss();
         const alert = await this.alert.create({
           header: 'Error en el servidor',
-          message: 'Ha ocurrido un error al intentar recuperar tu contraseña. Por favor inténtalo de nuevo más tarde.',
+          message: 'Ha ocurrido un error al recuperar tu contraseña. Por favor, inténtalo nuevamente.',
           buttons: ['Aceptar'],
         });
         await alert.present();

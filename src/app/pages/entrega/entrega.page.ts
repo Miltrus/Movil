@@ -47,14 +47,14 @@ export class EntregaPage {
     this.saveSignature();
     const confirmAlert = await this.alert.create({
       header: 'Confirmar entrega',
-      message: '¿Está seguro de que desea confirmar la entrega?',
+      message: '¿Está seguro de que deseas confirmar la entrega?',
       buttons: [
         {
           text: 'Cancelar',
           role: 'cancel'
         },
         {
-          text: 'Aceptar',
+          text: 'Confirmar',
           handler: async () => {
             this.dateAndTime();
             const entregaData: EntregaInterface = this.newForm.value;
@@ -62,12 +62,13 @@ export class EntregaPage {
             await confirmAlert.dismiss();
             const loading = await this.loading.create({
               message: 'Guardando...',
+              spinner: 'lines'
             });
             await loading.present();
 
             try {
               const data = await this.api.postEntrega(entregaData).toPromise();
-              if (data?.status === 'ok') {
+              if (data?.status == 'ok') {
                 await loading.dismiss();
                 this.nav.navigateRoot('/tabs/tab1');
                 this.clearCanvas();
@@ -88,9 +89,10 @@ export class EntregaPage {
               }
             } catch (error) {
               console.error('Error:', error);
+              await loading.dismiss();
               const errorAlert = await this.alert.create({
-                header: 'Error',
-                message: 'Ha ocurrido un error al confirmar la entrega.',
+                header: 'Error en el servidor',
+                message: 'Ha ocurrido un error al confirmar la entrega. Por favor, inténtalo nuevamente.',
                 buttons: ['Aceptar'],
               });
               await errorAlert.present();

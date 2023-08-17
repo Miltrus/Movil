@@ -50,7 +50,7 @@ export class EscanerPage implements OnDestroy {
       } else if (status.denied) {
         const alert = await this.alert.create({
           header: 'Error',
-          message: 'No se ha concedido el permiso para acceder a la cámara',
+          message: 'No se ha concedido el permiso para acceder a la cámara.',
           buttons: [
             'Cancelar',
             {
@@ -109,7 +109,7 @@ export class EscanerPage implements OnDestroy {
         } catch (error) {
           const alert = await this.alert.create({
             header: 'QR inválido',
-            message: 'El QR escaneado es inválido. Por favor, escanee un QR válido o introduzca el código manualmente.',
+            message: 'El QR escaneado no es válido. Por favor, escanee un QR válido o introduzca el código manualmente.',
             buttons: ['OK']
           });
           await alert.present();
@@ -127,7 +127,7 @@ export class EscanerPage implements OnDestroy {
         {
           name: 'manualCode',
           type: 'text',
-          placeholder: 'Ingrese el código aquí'
+          placeholder: 'Ingresa el código del paquete aquí'
         }
       ],
       buttons: [
@@ -158,8 +158,8 @@ export class EscanerPage implements OnDestroy {
                     await loading.dismiss();
                     if (res.status == 'error') {
                       const alert = await this.alert.create({
-                        header: 'Error',
-                        message: 'El código ingresado es inválido. Por favor, ingrese un código válido o escanee el QR.',
+                        header: 'Código inválido',
+                        message: 'El código ingresado no es válido. Por favor, ingrese un código válido o escanee el QR.',
                         buttons: ['OK']
                       });
                       await alert.present();
@@ -177,7 +177,7 @@ export class EscanerPage implements OnDestroy {
                     await loading.dismiss();
                     const alert = await this.alert.create({
                       header: 'Error en el servidor',
-                      message: 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtelo nuevamente.',
+                      message: 'Ha ocurrido un error al validar el código. Por favor, inténtalo nuevamente.',
                       buttons: ['OK']
                     });
                     await alert.present();
