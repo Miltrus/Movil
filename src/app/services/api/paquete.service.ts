@@ -36,7 +36,7 @@ export class PaqueteService {
   }
 
   getPaqueteByCodigo(codigo: any): Observable<PaqueteInterface> {
-    let address = this.url + 'paquete/codigo/' + codigo;
+    let address = this.url + 'paquete/data/' + codigo;
     const headers = this.getHeaders();
     return this.http.get<PaqueteInterface>(address, { headers });
   }

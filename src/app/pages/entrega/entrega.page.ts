@@ -83,7 +83,7 @@ export class EntregaPage {
                 const errorAlert = await this.alert.create({
                   header: 'Error',
                   message: data?.msj,
-                  buttons: ['Aceptar'],
+                  buttons: ['OK'],
                 });
                 await errorAlert.present();
               }
@@ -93,7 +93,7 @@ export class EntregaPage {
               const errorAlert = await this.alert.create({
                 header: 'Error en el servidor',
                 message: 'Ha ocurrido un error al confirmar la entrega. Por favor, inténtalo nuevamente.',
-                buttons: ['Aceptar'],
+                buttons: ['OK'],
               });
               await errorAlert.present();
             } finally {

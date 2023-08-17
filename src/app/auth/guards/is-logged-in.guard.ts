@@ -41,7 +41,7 @@ async function showAlert(alertController: AlertController, message: string, head
   const alert = await alertController.create({
     header: header,
     message: message,
-    buttons: ['Aceptar']
+    buttons: ['OK']
   });
   await alert.present();
 }

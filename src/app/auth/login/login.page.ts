@@ -72,7 +72,7 @@ export class LoginPage {
           const alert = await this.alert.create({
             header: 'Error',
             message: data.msj,
-            buttons: ['Aceptar'],
+            buttons: ['OK'],
           });
           await alert.present();
         }
@@ -82,7 +82,7 @@ export class LoginPage {
         const alert = await this.alert.create({
           header: 'Error en el servidor',
           message: 'Ha ocurrido un error al iniciar sesión. Por favor, inténtalo nuevamente.',
-          buttons: ['Aceptar'],
+          buttons: ['OK'],
         });
         await alert.present();
       }
@@ -103,7 +103,7 @@ export class LoginPage {
           const successAlert = await this.alert.create({
             header: 'Revisa tu correo',
             message: 'Hemos enviado un correo electrónico a tu cuenta con un enlace para restablecer tu contraseña.',
-            buttons: ['Aceptar'],
+            buttons: ['OK'],
           });
           await successAlert.present();
         } else {
@@ -111,7 +111,7 @@ export class LoginPage {
           const alert = await this.alert.create({
             header: 'Error',
             message: data.msj,
-            buttons: ['Aceptar'],
+            buttons: ['OK'],
           });
           await alert.present();
         }
@@ -121,7 +121,7 @@ export class LoginPage {
         const alert = await this.alert.create({
           header: 'Error en el servidor',
           message: 'Ha ocurrido un error al recuperar tu contraseña. Por favor, inténtalo nuevamente.',
-          buttons: ['Aceptar'],
+          buttons: ['OK'],
         });
         await alert.present();
       }

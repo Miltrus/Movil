@@ -88,11 +88,16 @@ export class EscanerPage implements OnDestroy {
       if (result.hasContent) {
         try {
           const qrDataArray: any[] = JSON.parse(result.content);
-          if (Array.isArray(qrDataArray) && qrDataArray.length > 0) {
+          if (qrDataArray.every((item) =>
+            Object.keys(item).length == 3 &&
+            item.hasOwnProperty("cod") &&
+            item.hasOwnProperty("lat") &&
+            item.hasOwnProperty("lng")
+          )) {
             const qrData = qrDataArray[0].cod;
 
             const codExists = this.scannedResults.find((nestedArray: any) =>
-              nestedArray.some((item: any) => item.cod === qrData)
+              nestedArray.some((item: any) => item.cod == qrData)
             );
 
             if (codExists) {
@@ -105,6 +110,13 @@ export class EscanerPage implements OnDestroy {
             } else {
               this.scannedResults.push(qrDataArray);
             }
+          } else {
+            const alert = await this.alert.create({
+              header: 'QR inválido',
+              message: 'El QR escaneado no es válido. Por favor, escanee un QR válido o introduzca el código manualmente.',
+              buttons: ['OK']
+            });
+            await alert.present();
           }
         } catch (error) {
           const alert = await this.alert.create({
@@ -136,7 +148,7 @@ export class EscanerPage implements OnDestroy {
           role: 'cancel',
         },
         {
-          text: 'Aceptar',
+          text: 'Confirmar',
           handler: async (data) => {
             if (data.manualCode) {
               const loading = await this.loading.create({
@@ -159,7 +171,7 @@ export class EscanerPage implements OnDestroy {
                     if (res.status == 'error') {
                       const alert = await this.alert.create({
                         header: 'Código inválido',
-                        message: 'El código ingresado no es válido. Por favor, ingrese un código válido o escanee el QR.',
+                        message: 'El código ingresado no es válido. Por favor, ingresa un código válido o escanee el QR.',
                         buttons: ['OK']
                       });
                       await alert.present();
@@ -188,7 +200,7 @@ export class EscanerPage implements OnDestroy {
               await alertInput.dismiss();
               const alert = await this.alert.create({
                 header: 'Error',
-                message: 'No se ha ingresado ningún código. Por favor, ingrese un código válido o escanee el QR.',
+                message: 'No se ha ingresado ningún código. Por favor, ingresa un código válido o escanee el QR.',
                 buttons: ['OK']
               });
               await alert.present();

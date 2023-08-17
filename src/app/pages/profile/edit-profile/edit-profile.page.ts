@@ -97,7 +97,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
           const errorAlert = this.alert.create({
             header: 'Error en el servidor',
             message: 'Ha ocurrido un error al cargar los datos. Por favor, inténtalo nuevamente',
-            buttons: ['Aceptar']
+            buttons: ['OK']
           });
           errorAlert.then((alert) => alert.present());
         }
@@ -154,7 +154,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
                 const errorAlert = await this.alert.create({
                   header: 'Error',
                   message: data?.msj,
-                  buttons: ['Aceptar']
+                  buttons: ['OK']
                 });
                 await errorAlert.present();
               }
@@ -162,7 +162,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
               const errorAlert = await this.alert.create({
                 header: 'Error en el servidor',
                 message: 'Ha ocurrido un error al guardar los cambios. Por favor, inténtalo nuevamente.',
-                buttons: ['Aceptar']
+                buttons: ['OK']
               });
               await errorAlert.present();
             } finally {

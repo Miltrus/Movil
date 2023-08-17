@@ -89,7 +89,7 @@ export class ViewProfilePage implements OnInit {
         const alert = await this.alert.create({
           header: 'Error en el servidor',
           message: 'Ha ocurrido un error al cargar los datos del usuario. Por favor, inténtalo nuevamente.',
-          buttons: ['Aceptar'],
+          buttons: ['OK'],
         });
         await alert.present();
 
