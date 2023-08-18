@@ -96,7 +96,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
         (error) => {
           const errorAlert = this.alert.create({
             header: 'Error en el servidor',
-            message: 'Ha ocurrido un error al cargar los datos. Por favor, inténtalo nuevamente',
+            message: 'Ha ocurrido un error al cargar los datos. Por favor, inténtalo nuevamente.',
             buttons: ['OK']
           });
           errorAlert.then((alert) => alert.present());

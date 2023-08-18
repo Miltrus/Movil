@@ -1,4 +1,4 @@
-<ion-header *ngIf="content_visibility">
+<ion-header *ngIf="contentVisibility">
   <ion-toolbar>
     <ion-title>
       Escaner
@@ -7,7 +7,7 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-fab *ngIf="content_visibility" vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab *ngIf="contentVisibility" vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button color="primary">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
@@ -21,12 +21,12 @@
     </ion-fab-list>
   </ion-fab>
 
-  <ion-list *ngIf="scannedResults && scannedResults.length > 0 && content_visibility">
+  <ion-list *ngIf="scannedResults && scannedResults.length > 0 && contentVisibility">
     <ion-list-header mode="ios">
       Paquetes agregados: {{ scannedResults.length }}
     </ion-list-header>
 
-    <div class="container" *ngIf="content_visibility">
+    <div class="container" *ngIf="contentVisibility">
       <ion-item *ngFor="let nestedArray of scannedResults; let i = index">
         <ion-label color="primary">Paquete #{{ i + 1 }}:</ion-label>
         <ion-text *ngFor="let code of nestedArray">
@@ -45,8 +45,8 @@
     </div>
   </ion-list>
 
-  <div class="sample-background" *ngIf="!content_visibility"></div>
-  <div class="container-scan" *ngIf="!content_visibility">
+  <div class="sample-background" *ngIf="!contentVisibility"></div>
+  <div class="container-scan" *ngIf="!contentVisibility">
     <div class="barcode-scanner--area--container">
       <div class="relative">
         <p>Apunta tu cámara al código QR</p>
@@ -59,13 +59,13 @@
     </div>
   </div>
 
-  <ion-fab *ngIf="!content_visibility" vertical="bottom" horizontal="center" slot="fixed">
+  <ion-fab *ngIf="!contentVisibility" vertical="bottom" horizontal="center" slot="fixed">
     <ion-fab-button color="primary" (click)="toggleFlashlight()">
       <ion-icon [name]="isFlashlightOn ? 'flash-off-outline' : 'flash-outline'"></ion-icon>
     </ion-fab-button>
   </ion-fab>
 
 </ion-content>
-<ion-button color="danger" expand="full" (click)="stopScan()" *ngIf="!content_visibility">
+<ion-button color="danger" expand="full" (click)="stopScan()" *ngIf="!contentVisibility">
   Cancelar
 </ion-button>

@@ -5,14 +5,14 @@ import { WayPointInterface } from 'src/app/models/waypoint.interface';
 import { PaqueteService } from 'src/app/services/api/paquete.service';
 
 @Component({
-  selector: 'app-tab2',
+  selector: 'app-escaner',
   templateUrl: 'escaner.page.html',
   styleUrls: ['escaner.page.scss']
 })
 export class EscanerPage implements OnDestroy {
 
   scannedResults: any = [];
-  content_visibility = true;
+  contentVisibility = true;
   isFlashlightOn = false;
 
   constructor(
@@ -25,8 +25,8 @@ export class EscanerPage implements OnDestroy {
   generateWaypointsFromScannedResults(): WayPointInterface[] {
     const waypoints: WayPointInterface[] = [];
 
-    for (const nestedArray of this.scannedResults) {
-      const latLng = { lat: nestedArray[0].lat, lng: nestedArray[0].lng };
+    for (const i of this.scannedResults) {
+      const latLng = { lat: i[0].lat, lng: i[0].lng };
       waypoints.push({ location: latLng, stopover: true });
     }
 
@@ -34,11 +34,8 @@ export class EscanerPage implements OnDestroy {
   }
 
   async startRoute() {
-    if (this.scannedResults.length > 0) {
-      const waypoints = this.generateWaypointsFromScannedResults();
-
-      this.nav.navigateRoot('/tabs/mapa', { queryParams: { state: waypoints } });
-    }
+    const waypoints = this.generateWaypointsFromScannedResults();
+    this.nav.navigateRoot('/tabs/mapa', { queryParams: { state: waypoints } });
   }
 
 
@@ -50,7 +47,7 @@ export class EscanerPage implements OnDestroy {
       } else if (status.denied) {
         const alert = await this.alert.create({
           header: 'Error',
-          message: 'No se ha concedido el permiso para acceder a la cámara.',
+          message: 'No se ha otorgado el permiso para acceder a la cámara. Por favor, otorgalo a continuación.',
           buttons: [
             'Cancelar',
             {
@@ -79,9 +76,10 @@ export class EscanerPage implements OnDestroy {
 
       await BarcodeScanner.hideBackground();
       document.querySelector('body')!.classList.add('scanner-active');
-      this.content_visibility = false;
+      this.contentVisibility = false;
+
       const result = await BarcodeScanner.startScan();
-      this.content_visibility = true;
+      this.contentVisibility = true;
       BarcodeScanner.showBackground();
       document.querySelector('body')!.classList.remove('scanner-active');
 
@@ -89,15 +87,16 @@ export class EscanerPage implements OnDestroy {
         try {
           const qrDataArray: any[] = JSON.parse(result.content);
           if (qrDataArray.every((item) =>
-            Object.keys(item).length == 3 &&
+            Object.keys(item).length == 4 &&
+            item.hasOwnProperty("id") &&
             item.hasOwnProperty("cod") &&
             item.hasOwnProperty("lat") &&
             item.hasOwnProperty("lng")
           )) {
             const qrData = qrDataArray[0].cod;
 
-            const codExists = this.scannedResults.find((nestedArray: any) =>
-              nestedArray.some((item: any) => item.cod == qrData)
+            const codExists = this.scannedResults.find((i: any) =>
+              i.some((item: any) => item.cod == qrData)
             );
 
             if (codExists) {
@@ -113,7 +112,7 @@ export class EscanerPage implements OnDestroy {
           } else {
             const alert = await this.alert.create({
               header: 'QR inválido',
-              message: 'El QR escaneado no es válido. Por favor, escanee un QR válido o introduzca el código manualmente.',
+              message: 'El QR escaneado no es válido. Por favor, escanea un QR válido o introduzca el código manualmente.',
               buttons: ['OK']
             });
             await alert.present();
@@ -121,7 +120,7 @@ export class EscanerPage implements OnDestroy {
         } catch (error) {
           const alert = await this.alert.create({
             header: 'QR inválido',
-            message: 'El QR escaneado no es válido. Por favor, escanee un QR válido o introduzca el código manualmente.',
+            message: 'El QR escaneado no es válido. Por favor, escanea un QR válido o introduzca el código manualmente.',
             buttons: ['OK']
           });
           await alert.present();
@@ -156,8 +155,8 @@ export class EscanerPage implements OnDestroy {
                 spinner: 'lines'
               });
               await loading.present();
-              if (this.scannedResults.find((nestedArray: any) =>
-                nestedArray.some((item: any) => item.cod === data.manualCode.toUpperCase()))) {
+              if (this.scannedResults.find((i: any) =>
+                i.some((item: any) => item.cod === data.manualCode.toUpperCase()))) {
                 await loading.dismiss();
                 this.alert.create({
                   header: 'Paquete duplicado',
@@ -171,12 +170,13 @@ export class EscanerPage implements OnDestroy {
                     if (res.status == 'error') {
                       const alert = await this.alert.create({
                         header: 'Código inválido',
-                        message: 'El código ingresado no es válido. Por favor, ingresa un código válido o escanee el QR.',
+                        message: 'El código ingresado no es válido. Por favor, ingresa un código válido o escanea el QR.',
                         buttons: ['OK']
                       });
                       await alert.present();
                     } else {
                       const scannedPackage = {
+                        id: res.idPaquete,
                         cod: res.codigoPaquete,
                         lat: res.lat,
                         lng: res.lng
@@ -200,7 +200,7 @@ export class EscanerPage implements OnDestroy {
               await alertInput.dismiss();
               const alert = await this.alert.create({
                 header: 'Error',
-                message: 'No se ha ingresado ningún código. Por favor, ingresa un código válido o escanee el QR.',
+                message: 'No se ha ingresado ningún código. Por favor, ingresa un código válido o escanea el QR.',
                 buttons: ['OK']
               });
               await alert.present();
@@ -217,7 +217,7 @@ export class EscanerPage implements OnDestroy {
   }
 
   async stopScan() {
-    this.content_visibility = true;
+    this.contentVisibility = true;
     BarcodeScanner.showBackground();
     await BarcodeScanner.stopScan();
     document.querySelector('body')!.classList.remove('scanner-active');
