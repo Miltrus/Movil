@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { LoadingController, NavController } from '@ionic/angular';
 import { WayPointInterface } from 'src/app/models/waypoint.interface';
+import { WaypointsService } from 'src/app/services/waypoints.service';
 
 declare var google: any;
 
@@ -25,6 +25,8 @@ export class MapPage {
   origin: { lat: number, lng: number } = { lat: 0, lng: 0 };
   destination = { lat: 6.26732, lng: -75.59406 };
 
+  entregaButton: boolean = false;
+
   waypoints: WayPointInterface[] = [
     { location: { lat: 6.29747, lng: -75.55033 }, stopover: true },
   ];
@@ -32,22 +34,14 @@ export class MapPage {
   constructor(
     private loading: LoadingController,
     private nav: NavController,
-    private route: ActivatedRoute
+    private waypointService: WaypointsService
   ) { }
 
   ionViewDidEnter() {
     this.shouldCalculateRoute = true;
-    this.route.queryParams.subscribe(params => {
-      const scannedWaypoints = params['state'];
-      if (scannedWaypoints) {
-        console.log('nuevos waypoints:', scannedWaypoints);
-        this.waypoints = scannedWaypoints;
-        this.clearCurrentLocationMarker();
-        this.loadMap();
-      } else {
-        console.log('no hay nuevos waypoints');
-      }
-    });
+    this.waypoints = this.waypointService.getWaypoints();
+    this.clearCurrentLocationMarker();
+    this.loadMap();
   }
 
   ionViewWillLeave() {
@@ -55,7 +49,6 @@ export class MapPage {
     if (this.locationWatchId !== null) {
       navigator.geolocation.clearWatch(this.locationWatchId);
     }
-    this.shouldCalculateRoute = false;
   }
 
   async loadMap() {
@@ -161,8 +154,9 @@ export class MapPage {
 
           if (this.shouldCalculateRoute) {
             if (this.isCloseToWaypoint(this.origin, waypointLatLng)) {
-              console.log(`Llegaste al waypoint ${this.currentWaypointIndex + 1}`, currentLeg);
+              console.log(`Llegaste al waypoint ${this.currentWaypointIndex}`, currentLeg);
               this.currentWaypointIndex++;
+              this.entregaButton = true;
 
               if (this.currentWaypointIndex < this.waypoints.length) {
                 // si hay mas waypoints, intentamos calcular la ruta nuevamente
@@ -200,7 +194,7 @@ export class MapPage {
   }
 
   isCloseToWaypoint(currentLatLng: { lat: number, lng: number }, waypointLatLng: { lat: number, lng: number }): boolean {
-    const proximidad = 50; // umbral de proximidad en metros
+    const proximidad = 2000; // umbral de proximidad en metros
 
     // calculamos la distancia entre la ubicación actual y el waypoint
     const distance = google.maps.geometry.spherical.computeDistanceBetween(
@@ -211,6 +205,58 @@ export class MapPage {
     // verificamos si la distancia es menor que el umbral de proximidad
     return distance < proximidad;
   }
+
+  openGoogleMaps() {
+    let googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${this.origin.lat},${this.origin.lng}&destination=${this.origin.lat},${this.origin.lng}`;
+
+    if (this.waypoints.length > 0) {
+      const waypointsString = this.waypoints
+        .map(waypoint => `${waypoint.location.lat},${waypoint.location.lng}`)
+        .join('|');
+      googleMapsUrl += `&waypoints=${waypointsString}`;
+    }
+
+    window.open(googleMapsUrl, '_system');
+  }
+
+  // ... (resto del código)
+
+  deliverPaquete() {
+    const currentWaypoint = this.getCurrentWaypoint();
+    const packageId = this.getPackageIdFromWaypoint(currentWaypoint);
+
+    if (packageId !== null) {
+      console.log("Paquete a entregar:", packageId, currentWaypoint);
+      this.entregaButton = false;
+      this.nav.navigateForward('tabs/entrega');
+    } else {
+      console.log("No se encontró el paquete asociado al waypoint.");
+      // Puedes mostrar un mensaje de error o realizar otras acciones apropiadas.
+    }
+  }
+
+  getCurrentWaypoint(): any {
+    if (this.currentWaypointIndex < this.waypoints.length) {
+      return this.waypoints[this.currentWaypointIndex - 1];
+    } else {
+      console.log("Ya has entregado todos los paquetes.");
+      // Puedes mostrar un mensaje o realizar otras acciones apropiadas.
+      return null;
+    }
+  }
+
+  getPackageIdFromWaypoint(waypoint: WayPointInterface): any {
+    const packageId = this.waypointService.getPackageIdFromWaypoint(waypoint);
+    if (packageId !== null) {
+      return packageId;
+    } else {
+      console.log("No se encontró el paquete asociado al waypoint.");
+      // Puedes mostrar un mensaje o realizar otras acciones apropiadas.
+      return null;
+    }
+  }
+
+
 
 
   // para actualizar la posición del marcador

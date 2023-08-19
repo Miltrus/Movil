@@ -176,6 +176,6 @@ export class EntregaPage {
   }
 
   goBack() {
-    this.nav.navigateBack('tabs/tab1');
+    this.nav.back();
   }
 }

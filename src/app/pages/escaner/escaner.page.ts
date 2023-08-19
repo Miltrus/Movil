@@ -3,6 +3,7 @@ import { BarcodeScanner, TorchStateResult } from '@capacitor-community/barcode-s
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import { WayPointInterface } from 'src/app/models/waypoint.interface';
 import { PaqueteService } from 'src/app/services/api/paquete.service';
+import { WaypointsService } from 'src/app/services/waypoints.service';
 
 @Component({
   selector: 'app-escaner',
@@ -19,23 +20,31 @@ export class EscanerPage implements OnDestroy {
     private alert: AlertController,
     private api: PaqueteService,
     private loading: LoadingController,
-    private nav: NavController
+    private nav: NavController,
+    private waypointService: WaypointsService
   ) { }
 
   generateWaypointsFromScannedResults(): WayPointInterface[] {
     const waypoints: WayPointInterface[] = [];
 
     for (const i of this.scannedResults) {
+      const packageId = i[0].id;
       const latLng = { lat: i[0].lat, lng: i[0].lng };
-      waypoints.push({ location: latLng, stopover: true });
+      const waypoint: WayPointInterface = { location: latLng, stopover: true };
+
+      waypoints.push(waypoint);
+      this.waypointService.associatePackageWithWaypoint(packageId, waypoint);
+      console.log("VIDA TRIPLE HP", packageId, waypoint);
     }
 
     return waypoints;
   }
 
+
   async startRoute() {
     const waypoints = this.generateWaypointsFromScannedResults();
-    this.nav.navigateRoot('/tabs/mapa', { queryParams: { state: waypoints } });
+    await this.waypointService.setWaypoints(waypoints);
+    this.nav.navigateForward('/tabs/mapa');
   }
 
 
