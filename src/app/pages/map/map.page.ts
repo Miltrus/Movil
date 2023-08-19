@@ -219,8 +219,6 @@ export class MapPage {
     window.open(googleMapsUrl, '_system');
   }
 
-  // ... (resto del código)
-
   deliverPaquete() {
     const currentWaypoint = this.getCurrentWaypoint();
     const packageId = this.getPackageIdFromWaypoint(currentWaypoint);
@@ -231,7 +229,6 @@ export class MapPage {
       this.nav.navigateForward('tabs/entrega');
     } else {
       console.log("No se encontró el paquete asociado al waypoint.");
-      // Puedes mostrar un mensaje de error o realizar otras acciones apropiadas.
     }
   }
 
@@ -240,7 +237,6 @@ export class MapPage {
       return this.waypoints[this.currentWaypointIndex - 1];
     } else {
       console.log("Ya has entregado todos los paquetes.");
-      // Puedes mostrar un mensaje o realizar otras acciones apropiadas.
       return null;
     }
   }
@@ -251,12 +247,9 @@ export class MapPage {
       return packageId;
     } else {
       console.log("No se encontró el paquete asociado al waypoint.");
-      // Puedes mostrar un mensaje o realizar otras acciones apropiadas.
       return null;
     }
   }
-
-
 
 
   // para actualizar la posición del marcador
