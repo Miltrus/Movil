@@ -4,6 +4,7 @@ import { UsuarioInterface } from '../../models/usuario.interface';
 import { ClienteInterface } from '../../models/cliente.interface';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ResponseInterface } from 'src/app/models/response.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -39,6 +40,12 @@ export class PaqueteService {
     let address = this.url + 'paquete/data/' + codigo;
     const headers = this.getHeaders();
     return this.http.get<PaqueteInterface>(address, { headers });
+  }
+
+  putPaquete(id: any): Observable<ResponseInterface> {
+    let address = this.url + 'paquete/' + id;
+    const headers = this.getHeaders();
+    return this.http.put<ResponseInterface>(address, id, { headers });
   }
 
   getUsuario(): Observable<UsuarioInterface[]> {

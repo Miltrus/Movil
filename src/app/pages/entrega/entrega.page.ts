@@ -53,8 +53,8 @@ export class EntregaPage {
       this.paqService.getOnePaquete(this.paqId).subscribe(data => {
         this.paquete = data;
         loading.dismiss();
-      }
-      );
+      });
+      return this.paqId;
     });
   }
 
@@ -81,9 +81,9 @@ export class EntregaPage {
               spinner: 'lines'
             });
             await loading.present();
-
-            try {
-              const data = await this.api.postEntrega(entregaData).toPromise();
+            this.paquete.idEstado = 3
+            this.paqService.putPaquete(this.paquete).subscribe(async data => {
+              console.log(data)
               if (data?.status == 'ok') {
                 await loading.dismiss();
                 this.nav.navigateRoot('/tabs/tab1');
@@ -92,6 +92,29 @@ export class EntregaPage {
                   header: 'Entrega exitosa',
                   message: 'La entrega se ha confirmado correctamente.',
                   buttons: ['Aceptar'],
+                });
+                await successAlert.present();
+              } else {
+                await loading.dismiss();
+                const errorAlert = await this.alert.create({
+                  header: 'Error',
+                  message: data?.msj,
+                  buttons: ['OK'],
+                });
+                await errorAlert.present();
+              }
+            });
+
+            /* try {
+              const data = await this.api.postEntrega(entregaData).toPromise();
+              if (data?.status == 'ok') {
+                await loading.dismiss();
+                this.nav.navigateRoot('/tabs/tab1');
+                this.clearCanvas();
+                const successAlert = await this.alert.create({
+                  header: 'Entrega exitosa',
+                  message: 'La entrega se ha confirmado correctamente.',
+                  buttons: ['OK'],
                 });
                 await successAlert.present();
               } else {
@@ -113,7 +136,7 @@ export class EntregaPage {
               await errorAlert.present();
             } finally {
               await loading.dismiss();
-            }
+            } */
           },
         },
       ],

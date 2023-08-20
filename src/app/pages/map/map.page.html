@@ -11,11 +11,17 @@
 
 <ion-content>
   <div id="map"></div>
-  <ion-button *ngIf="entregaButton" expand="block" class="open-entrega-button" (click)="deliverPaquete()">Entregar
+  <ion-fab vertical="center" horizontal="start" slot="fixed">
+    <ion-fab-button color="danger" (click)="reportarNovedad()">
+      <ion-icon name="alert"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <ion-button mode="ios" *ngIf="entregaButton" expand="block" class="open-entrega-button"
+    (click)="deliverPaquete()">Entregar
     <ion-icon name="pin-sharp" slot="end"></ion-icon>
   </ion-button>
   <div id="indicators"></div>
-  <ion-button expand="block" class="open-maps-button" (click)="openGoogleMaps()">Ir a Google Maps
+  <ion-button mode="ios" expand="block" class="open-maps-button" (click)="openGoogleMaps()">Ir a Google Maps
     <ion-icon name="location-sharp" slot="end"></ion-icon>
   </ion-button>
 </ion-content>

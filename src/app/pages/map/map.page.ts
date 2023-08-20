@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { LoadingController, NavController } from '@ionic/angular';
+import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import { WayPointInterface } from 'src/app/models/waypoint.interface';
+import { NovedadService } from 'src/app/services/api/novedad.service';
 import { WaypointsService } from 'src/app/services/waypoints.service';
 
 declare var google: any;
@@ -33,8 +34,10 @@ export class MapPage {
 
   constructor(
     private loading: LoadingController,
+    private alert: AlertController,
     private nav: NavController,
-    private waypointService: WaypointsService
+    private waypointService: WaypointsService,
+    private novService: NovedadService
   ) { }
 
   ionViewDidEnter() {
@@ -253,6 +256,81 @@ export class MapPage {
     }
   }
 
+  tipoNovedad: any[] = [];
+
+  async reportarNovedad() {
+    const loading = await this.loading.create({
+      message: 'Cargando...',
+      spinner: 'lines',
+    });
+    await loading.present();
+    this.novService.getTipoNovedad().subscribe(
+      data => {
+        this.tipoNovedad = data;
+      },
+      error => {
+        console.log(error);
+        this.alert.create({
+          header: 'Error en el servidor',
+          message: 'No se pudo cargar el tipo de novedad. Por favor, inténtalo nuevamente.',
+          buttons: ['OK']
+        }).then(alert => alert.present());
+      }
+    );
+    await loading.dismiss();
+
+    const tipoNovedadAlert = await this.alert.create({
+      header: 'Tipo novedad',
+      inputs: this.tipoNovedad.map((tipo: any) => ({
+        type: 'radio',
+        label: tipo.tipoNovedad,
+        value: tipo.idTipoNovedad,
+        checked: false
+      })),
+      buttons: [
+        'Cancelar',
+        {
+          text: 'Siguiente',
+          handler: tipoNovedadId => {
+            this.mostrarDescripcionAlert(tipoNovedadId);
+            console.log('seleccion:', tipoNovedadId);
+          }
+        }
+      ]
+    });
+
+    await tipoNovedadAlert.present();
+  }
+
+  async mostrarDescripcionAlert(tipoNovedad: any) {
+    console.log('lo q le mandamos a la desc:', tipoNovedad);
+    const descripcionAlert = await this.alert.create({
+      header: 'Detalles novedad',
+      inputs: [
+        {
+          name: 'descripcion',
+          type: 'textarea',
+          placeholder: 'Detalles adicionales...'
+        }
+      ],
+      buttons: [
+        'Cancelar',
+        {
+          text: 'Reportar',
+          handler: (data: any) => {
+            const descripcion = data.descripcion;
+            console.log('desc:', descripcion);
+          }
+        }
+      ]
+    });
+
+    await descripcionAlert.present();
+  }
+
+  getTipoNovedadById(idTipoNovedad: any) {
+    return this.tipoNovedad.find(tipo => tipo.id === idTipoNovedad);
+  }
 
   // para actualizar la posición del marcador
   updateMarkerPosition(position: { lat: number, lng: number }) {

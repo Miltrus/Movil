@@ -9,7 +9,7 @@
 <ion-content [fullscreen]="true">
   <ion-fab *ngIf="contentVisibility" vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button color="primary">
-      <ion-icon name="add"></ion-icon>
+      <ion-icon name="scan"></ion-icon>
     </ion-fab-button>
     <ion-fab-list side="top">
       <ion-fab-button (click)="enterCodeManually()">
@@ -66,6 +66,6 @@
   </ion-fab>
 
 </ion-content>
-<ion-button color="danger" expand="block" (click)="stopScan()" *ngIf="!contentVisibility">
+<ion-button mode="ios" color="danger" expand="block" (click)="stopScan()" *ngIf="!contentVisibility">
   Cancelar
 </ion-button>
