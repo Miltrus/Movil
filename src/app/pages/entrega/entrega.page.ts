@@ -1,10 +1,12 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import SignaturePad from 'signature_pad';
 import { EntregaInterface } from 'src/app/models/entrega.interface';
 import { ListaPaquetesInterface } from 'src/app/models/lista-paquetes.interface';
 import { EntregaService } from 'src/app/services/api/entrega.service';
+import { PaqueteService } from 'src/app/services/api/paquete.service';
 
 @Component({
   selector: 'app-entrega',
@@ -14,11 +16,13 @@ import { EntregaService } from 'src/app/services/api/entrega.service';
 export class EntregaPage {
 
   @ViewChild('canvas', { static: true }) signaturePadElement?: ElementRef;
+
   signaturePad: any;
 
   newForm: FormGroup;
-
   listaPaquetes: ListaPaquetesInterface[] = [];
+  paqId: any;
+  paquete: any;
 
   constructor(
     private api: EntregaService,
@@ -27,6 +31,8 @@ export class EntregaPage {
     private formBuilder: FormBuilder,
     private nav: NavController,
     private elementRef: ElementRef,
+    private route: ActivatedRoute,
+    private paqService: PaqueteService
   ) {
     this.newForm = this.formBuilder.group({
       firmaDestinatario: [''],
@@ -35,13 +41,23 @@ export class EntregaPage {
     });
   }
 
-  /* async ngOnInit(): Promise<void> {
+  async ngOnInit() {
     const loading = await this.loading.create({
       message: 'Cargando...',
+      spinner: 'lines'
     });
-
     await loading.present();
-  }*/
+
+    this.route.queryParams.subscribe(params => {
+      this.paqId = params['paqId'];
+      this.paqService.getOnePaquete(this.paqId).subscribe(data => {
+        this.paquete = data;
+        loading.dismiss();
+      }
+      );
+    });
+  }
+
 
   async save(): Promise<void> {
     this.saveSignature();
@@ -88,7 +104,6 @@ export class EntregaPage {
                 await errorAlert.present();
               }
             } catch (error) {
-              console.error('Error:', error);
               await loading.dismiss();
               const errorAlert = await this.alert.create({
                 header: 'Error en el servidor',

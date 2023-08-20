@@ -150,7 +150,12 @@ export class MapPage {
           const route = response.routes[0];
           const legs = route.legs;
           const currentLeg = legs[this.currentWaypointIndex];
+          console.log("this.waypoints:", this.waypoints); // Verifica que this.waypoints tenga valores
+          console.log("currentWaypointIndex:", this.currentWaypointIndex); // Verifica el valor de this.currentWaypointIndex
+          console.log("location:", this.waypoints[this.currentWaypointIndex]?.location); // Verifica la propiedad location en el objeto de waypoint
+
           const waypointLatLng = this.waypoints[this.currentWaypointIndex].location;
+          console.log("waypointLatLng:", waypointLatLng); // Verifica que waypointLatLng tenga un valor
 
           if (this.shouldCalculateRoute) {
             if (this.isCloseToWaypoint(this.origin, waypointLatLng)) {
@@ -221,24 +226,21 @@ export class MapPage {
 
   deliverPaquete() {
     const currentWaypoint = this.getCurrentWaypoint();
-    const packageId = this.getPackageIdFromWaypoint(currentWaypoint);
+    const paqId = this.getPackageIdFromWaypoint(currentWaypoint);
 
-    if (packageId !== null) {
-      console.log("Paquete a entregar:", packageId, currentWaypoint);
+    if (paqId !== null) {
+      console.log("Paquete a entregar:", paqId, currentWaypoint);
       this.entregaButton = false;
-      this.nav.navigateForward('tabs/entrega');
+
+      // Pasar el ID del paquete como query parameter en la URL al navegar
+      this.nav.navigateForward('/tabs/entrega', { queryParams: { paqId } });
     } else {
       console.log("No se encontró el paquete asociado al waypoint.");
     }
   }
 
   getCurrentWaypoint(): any {
-    if (this.currentWaypointIndex < this.waypoints.length) {
-      return this.waypoints[this.currentWaypointIndex - 1];
-    } else {
-      console.log("Ya has entregado todos los paquetes.");
-      return null;
-    }
+    return this.waypoints[this.currentWaypointIndex - 1];
   }
 
   getPackageIdFromWaypoint(waypoint: WayPointInterface): any {
