@@ -9,11 +9,6 @@ const routes: Routes = [
     component: TabsPage,
     children: [
       {
-        path: 'tab1',
-        canMatch: [isLoggedInGuard],
-        loadChildren: () => import('../pages/tab1/tab1.module').then(m => m.Tab1PageModule)
-      },
-      {
         path: 'escaner',
         canMatch: [isLoggedInGuard],
         loadChildren: () => import('../pages/escaner/escaner.module').then(m => m.Tab2PageModule)

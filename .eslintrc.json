@@ -10,7 +10,7 @@
       ],
       "parserOptions": {
         "project": [
-          "mobile/StarRouting/tsconfig.json"
+          "tsconfig.json"
         ],
         "createDefaultProgram": true
       },
