@@ -7,11 +7,11 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
   providedIn: 'root'
 })
 export class TokenService {
-  url: string = 'http://localhost:3030/';
+  url: string = 'http://127.0.0.1:3030/';
 
   constructor(private http: HttpClient) { }
 
-  verifyToken(token: string): Observable<ResponseInterface> {
+  verifyToken(token: any): Observable<ResponseInterface> {
     const address = this.url + 'token';
 
     const headers = new HttpHeaders({
