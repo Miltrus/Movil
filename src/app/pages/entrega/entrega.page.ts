@@ -6,6 +6,7 @@ import SignaturePad from 'signature_pad';
 import { EntregaInterface } from 'src/app/models/entrega.interface';
 import { ListaPaquetesInterface } from 'src/app/models/lista-paquetes.interface';
 import { EntregaService } from 'src/app/services/api/entrega.service';
+import { NovedadService } from 'src/app/services/api/novedad.service';
 import { PaqueteService } from 'src/app/services/api/paquete.service';
 
 @Component({
@@ -32,7 +33,8 @@ export class EntregaPage {
     private nav: NavController,
     private elementRef: ElementRef,
     private route: ActivatedRoute,
-    private paqService: PaqueteService
+    private paqService: PaqueteService,
+    private novService: NovedadService
   ) {
     this.newForm = this.formBuilder.group({
       firmaDestinatario: [''],
@@ -61,6 +63,8 @@ export class EntregaPage {
 
   async save(): Promise<void> {
     this.saveSignature();
+    this.dateAndTime();
+    console.log(this.newForm.value);
     const confirmAlert = await this.alert.create({
       header: 'Confirmar entrega',
       message: '¿Está seguro de que deseas confirmar la entrega?',
@@ -72,7 +76,6 @@ export class EntregaPage {
         {
           text: 'Confirmar',
           handler: async () => {
-            this.dateAndTime();
             const entregaData: EntregaInterface = this.newForm.value;
             console.log("POST: ", entregaData);
             await confirmAlert.dismiss();
@@ -86,7 +89,6 @@ export class EntregaPage {
               console.log(data)
               if (data?.status == 'ok') {
                 await loading.dismiss();
-                this.nav.navigateRoot('/tabs/tab1');
                 this.clearCanvas();
                 const successAlert = await this.alert.create({
                   header: 'Entrega exitosa',
@@ -94,6 +96,7 @@ export class EntregaPage {
                   buttons: ['Aceptar'],
                 });
                 await successAlert.present();
+                this.nav.back();
               } else {
                 await loading.dismiss();
                 const errorAlert = await this.alert.create({
@@ -172,8 +175,6 @@ export class EntregaPage {
     this.newForm.patchValue({
       fechaEntrega: formattedFechaEntrega,
     });
-
-    console.log("VIDA HP", this.newForm.value.fechaEntrega);
   }
 
   saveSignature() {
@@ -181,7 +182,6 @@ export class EntregaPage {
     this.newForm.patchValue({
       firmaDestinatario: dataURL,
     });
-    console.log(this.newForm.value);
     /* const blob = this.convertBase64toBlob(dataURL);
     console.log(blob); */
   }
@@ -211,6 +211,90 @@ export class EntregaPage {
 
   clearCanvas() {
     this.signaturePad.clear();
+  }
+
+  tipoNovedad: any[] = [];
+
+  async reportNovedad() {
+    const loading = await this.loading.create({
+      message: 'Cargando...',
+      spinner: 'lines',
+    });
+    await loading.present();
+    this.novService.getTipoNovedad().subscribe(
+      data => {
+        this.tipoNovedad = data;
+      },
+      error => {
+        console.log(error);
+        this.alert.create({
+          header: 'Error en el servidor',
+          message: 'No se pudo cargar el tipo de novedad. Por favor, inténtalo nuevamente.',
+          buttons: ['OK']
+        }).then(alert => alert.present());
+      }
+    );
+    await loading.dismiss();
+
+    const tipoNovedadAlert = await this.alert.create({
+      header: 'Tipo novedad',
+      inputs: this.tipoNovedad.map((tipo: any) => ({
+        type: 'radio',
+        label: tipo.tipoNovedad,
+        value: tipo.idTipoNovedad,
+        checked: false
+      })),
+      buttons: [
+        'Cancelar',
+        {
+          text: 'Siguiente',
+          handler: tipoNovedadId => {
+            if (!tipoNovedadId) {
+              this.alert.create({
+                header: 'Error',
+                message: 'Debes seleccionar un tipo de novedad.',
+                buttons: ['OK']
+              }).then(alert => alert.present());
+              return
+            }
+            this.mostrarDescripcionAlert(tipoNovedadId);
+            console.log('seleccion:', tipoNovedadId);
+          }
+        }
+      ]
+    });
+
+    await tipoNovedadAlert.present();
+  }
+
+  async mostrarDescripcionAlert(tipoNovedad: any) {
+    const descripcionAlert = await this.alert.create({
+      header: 'Detalles novedad',
+      inputs: [
+        {
+          name: 'descripcion',
+          type: 'textarea',
+          placeholder: 'Detalles adicionales...'
+        }
+      ],
+      buttons: [
+        'Cancelar',
+        {
+          text: 'Reportar',
+          handler: (data: any) => {
+            const descripcion = data.descripcion;
+            console.log('Idtipo:', tipoNovedad);
+            console.log('desc:', descripcion);
+          }
+        }
+      ]
+    });
+
+    await descripcionAlert.present();
+  }
+
+  getTipoNovedadById(idTipoNovedad: any) {
+    return this.tipoNovedad.find(tipo => tipo.id === idTipoNovedad);
   }
 
   goBack() {

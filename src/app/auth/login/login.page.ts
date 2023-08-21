@@ -61,10 +61,17 @@ export class LoginPage {
           const toast = await this.toast.create({
             header: 'Inicio de sesión exitoso',
             message: 'Bienvenido, ' + this.userData!.nombreUsuario,
-            duration: 2500,
+            duration: 3000,
             position: 'top',
             icon: 'checkmark-circle-outline',
             mode: 'md',
+            buttons: [
+              {
+                side: 'end',
+                icon: 'close',
+                role: 'cancel',
+              }
+            ],
           });
           toast.present();
         } else {

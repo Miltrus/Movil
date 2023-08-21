@@ -5,6 +5,19 @@
         <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button id="click-trigger">
+        <ion-icon name="ellipsis-vertical"></ion-icon>
+      </ion-button>
+      <ion-popover trigger="click-trigger" triggerAction="click" dismissOnSelect="true">
+        <ng-template>
+          <ion-item (click)="reportNovedad()">
+            <ion-icon slot="start" name="alert-circle"></ion-icon>
+            <p>Reportar novedad</p>
+          </ion-item>
+        </ng-template>
+      </ion-popover>
+    </ion-buttons>
     <ion-title>Entrega</ion-title>
   </ion-toolbar>
 </ion-header>

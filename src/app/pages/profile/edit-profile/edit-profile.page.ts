@@ -142,10 +142,17 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
                 const toast = await this.toast.create({
                   header: 'Cambios guardados',
                   message: 'Los cambios se han guardado correctamente.',
-                  duration: 2500,
+                  duration: 3000,
                   position: 'top',
-                  icon: 'checkmark-outline',
+                  icon: 'checkmark',
                   mode: 'md',
+                  buttons: [
+                    {
+                      side: 'end',
+                      icon: 'close',
+                      role: 'cancel',
+                    }
+                  ],
                 });
                 loading.dismiss();
                 toast.present();

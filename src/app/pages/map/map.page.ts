@@ -20,8 +20,7 @@ export class MapPage {
   directionsDisplay = new google.maps.DirectionsRenderer(); // para mostrar la ruta
   marker: google.maps.Marker | null = null; // para el marcador de la ubicación actual
   locationWatchId: number | null = null; // para almacenar el id de la suscripción de watchPosition
-  currentWaypointIndex: number = 0;
-  shouldCalculateRoute: boolean = true;
+  currentWaypointIndex: any = 0;
 
   origin: { lat: number, lng: number } = { lat: 0, lng: 0 };
   destination = { lat: 6.26732, lng: -75.59406 };
@@ -41,7 +40,6 @@ export class MapPage {
   ) { }
 
   ionViewDidEnter() {
-    this.shouldCalculateRoute = true;
     this.waypoints = this.waypointService.getWaypoints();
     this.clearCurrentLocationMarker();
     this.loadMap();
@@ -160,28 +158,27 @@ export class MapPage {
           const waypointLatLng = this.waypoints[this.currentWaypointIndex].location;
           console.log("waypointLatLng:", waypointLatLng); // Verifica que waypointLatLng tenga un valor
 
-          if (this.shouldCalculateRoute) {
-            if (this.isCloseToWaypoint(this.origin, waypointLatLng)) {
-              console.log(`Llegaste al waypoint ${this.currentWaypointIndex}`, currentLeg);
-              this.currentWaypointIndex++;
-              this.entregaButton = true;
+          if (this.isCloseToWaypoint(this.origin, waypointLatLng)) {
+            console.log(`Llegaste al waypoint ${this.currentWaypointIndex}`, currentLeg);
+            this.currentWaypointIndex++;
+            this.entregaButton = true;
 
-              if (this.currentWaypointIndex < this.waypoints.length) {
-                // si hay mas waypoints, intentamos calcular la ruta nuevamente
-                tryCalculateRoute();
-              } else {
-                console.log('Has llegado a tu destino.');
-              }
-              loading.dismiss();
+            if (this.currentWaypointIndex < this.waypoints.length) {
+              // si hay mas waypoints, intentamos calcular la ruta nuevamente
+              tryCalculateRoute();
             } else {
-              console.log('Aún no has llegado al waypoint actual.', currentLeg);
-              loading.dismiss();
-              setTimeout(() => {
-                tryCalculateRoute();
-              }, 50000000);
+              console.log('Has llegado a tu destino.');
             }
             loading.dismiss();
+          } else {
+            console.log('Aún no has llegado al waypoint actual.', currentLeg);
+            loading.dismiss();
+            setTimeout(() => {
+              tryCalculateRoute();
+            }, 50000000);
           }
+          loading.dismiss();
+
         } else {
           console.warn('No se pudo calcular la ruta:', status);
 
@@ -233,7 +230,6 @@ export class MapPage {
 
     if (paqId !== null) {
       console.log("Paquete a entregar:", paqId, currentWaypoint);
-      this.entregaButton = false;
 
       // Pasar el ID del paquete como query parameter en la URL al navegar
       this.nav.navigateForward('/tabs/entrega', { queryParams: { paqId } });
@@ -258,7 +254,7 @@ export class MapPage {
 
   tipoNovedad: any[] = [];
 
-  async reportarNovedad() {
+  async reportNovedad() {
     const loading = await this.loading.create({
       message: 'Cargando...',
       spinner: 'lines',
@@ -292,6 +288,14 @@ export class MapPage {
         {
           text: 'Siguiente',
           handler: tipoNovedadId => {
+            if (!tipoNovedadId) {
+              this.alert.create({
+                header: 'Error',
+                message: 'Debes seleccionar un tipo de novedad.',
+                buttons: ['OK']
+              }).then(alert => alert.present());
+              return
+            }
             this.mostrarDescripcionAlert(tipoNovedadId);
             console.log('seleccion:', tipoNovedadId);
           }
@@ -303,7 +307,6 @@ export class MapPage {
   }
 
   async mostrarDescripcionAlert(tipoNovedad: any) {
-    console.log('lo q le mandamos a la desc:', tipoNovedad);
     const descripcionAlert = await this.alert.create({
       header: 'Detalles novedad',
       inputs: [
@@ -319,6 +322,7 @@ export class MapPage {
           text: 'Reportar',
           handler: (data: any) => {
             const descripcion = data.descripcion;
+            console.log('Idtipo:', tipoNovedad);
             console.log('desc:', descripcion);
           }
         }
