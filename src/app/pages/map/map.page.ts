@@ -41,6 +41,7 @@ export class MapPage {
 
   ionViewDidEnter() {
     this.waypoints = this.waypointService.getWaypoints();
+    console.log("nuevos way:", this.waypoints)
     this.clearCurrentLocationMarker();
     this.loadMap();
   }
