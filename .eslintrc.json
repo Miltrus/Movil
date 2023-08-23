@@ -10,7 +10,7 @@
       ],
       "parserOptions": {
         "project": [
-          "mobile/tsconfig.json"
+          "frontend/mobile/tsconfig.json"
         ],
         "createDefaultProgram": true
       },

@@ -76,22 +76,12 @@ export class LoginPage {
           toast.present();
         } else {
           await loading.dismiss();
-          const alert = await this.alert.create({
-            header: 'Error',
-            message: data.msj,
-            buttons: ['OK'],
-          });
-          await alert.present();
+          this.presentAlert('Error', data.msj);
         }
       },
       async (error) => {
         await loading.dismiss();
-        const alert = await this.alert.create({
-          header: 'Error en el servidor',
-          message: 'Ha ocurrido un error al iniciar sesión. Por favor, inténtalo nuevamente.',
-          buttons: ['OK'],
-        });
-        await alert.present();
+        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al iniciar sesión. Por favor, inténtalo nuevamente.');
       }
     );
   }
@@ -107,35 +97,30 @@ export class LoginPage {
       async (data) => {
         if (data.status == 'ok') {
           await loading.dismiss();
-          const successAlert = await this.alert.create({
-            header: 'Revisa tu correo',
-            message: 'Hemos enviado un correo electrónico a tu cuenta con un enlace para restablecer tu contraseña.',
-            buttons: ['OK'],
-          });
-          await successAlert.present();
+          this.presentAlert('Revisa tu correo', data.msj);
         } else {
           await loading.dismiss();
-          const alert = await this.alert.create({
-            header: 'Error',
-            message: data.msj,
-            buttons: ['OK'],
-          });
-          await alert.present();
+          this.presentAlert('Error', data.msj);
         }
       },
       async (error) => {
         await loading.dismiss();
-        const alert = await this.alert.create({
-          header: 'Error en el servidor',
-          message: 'Ha ocurrido un error al recuperar tu contraseña. Por favor, inténtalo nuevamente.',
-          buttons: ['OK'],
-        });
-        await alert.present();
+        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al recuperar tu contraseña. Por favor, inténtalo nuevamente.');
       }
     );
   }
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
+  }
+
+  async presentAlert(title: string, message: string) {
+    const alert = await this.alert.create({
+      header: title,
+      message: message,
+      buttons: ['OK']
+    });
+
+    await alert.present();
   }
 }

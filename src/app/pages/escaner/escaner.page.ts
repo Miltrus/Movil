@@ -109,30 +109,49 @@ export class EscanerPage implements OnDestroy {
             );
 
             if (codExists) {
-              const alert = await this.alert.create({
-                header: 'Paquete duplicado',
-                message: 'Este paquete ya ha sido ingresado anteriormente.',
-                buttons: ['OK']
-              });
-              await alert.present();
+              this.presentAlert('Paquete duplicado', 'Este paquete ya ha sido ingresado anteriormente.');
             } else {
-              this.scannedResults.push(qrDataArray);
+              const loading = await this.loading.create({
+                message: 'Cargando...',
+                spinner: 'lines'
+              });
+              await loading.present();
+
+              this.api.getOnePaquete(qrDataArray[0].id).subscribe(
+                async (data: any) => {
+                  if (data.status !== 'error') {
+                    data.idUsuario = parseInt(localStorage.getItem('uid')!);
+
+                    this.api.putPaquete(data).subscribe(
+                      (data: any) => {
+                        if (data.status != 'error') {
+                          console.log('Paquete actualizado', data);
+                          this.scannedResults.push(qrDataArray);
+                        } else {
+                          this.presentAlert('Error', data.msj);
+                        }
+                        loading.dismiss();
+                      },
+                      (error) => {
+                        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+                        loading.dismiss();
+                      }
+                    );
+                  } else {
+                    await loading.dismiss();
+                  }
+                },
+                async (error) => {
+                  this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+                  await loading.dismiss();
+                }
+              );
             }
           } else {
-            const alert = await this.alert.create({
-              header: 'QR inválido',
-              message: 'El QR escaneado no es válido. Por favor, escanea un QR válido o introduzca el código manualmente.',
-              buttons: ['OK']
-            });
-            await alert.present();
+            this.presentAlert('Error', 'El QR escaneado no es válido. Por favor, escanea un QR válido o introduzca el código manualmente.');
           }
         } catch (error) {
-          const alert = await this.alert.create({
-            header: 'QR inválido',
-            message: 'El QR escaneado no es válido. Por favor, escanea un QR válido o introduzca el código manualmente.',
-            buttons: ['OK']
-          });
-          await alert.present();
+          this.presentAlert('Error', 'El QR escaneado no es válido. Por favor, escanea un QR válido o introduzca el código manualmente.');
         }
       }
     } catch (error) {
@@ -167,52 +186,46 @@ export class EscanerPage implements OnDestroy {
               if (this.scannedResults.find((i: any) =>
                 i.some((item: any) => item.cod === data.manualCode.toUpperCase()))) {
                 await loading.dismiss();
-                this.alert.create({
-                  header: 'Paquete duplicado',
-                  message: 'Este paquete ya ha sido ingresado anteriormente.',
-                  buttons: ['OK']
-                }).then(alert => alert.present());
+                this.presentAlert('Paquete duplicado', 'Este paquete ya ha sido ingresado anteriormente.');
               } else {
                 this.api.getPaqueteByCodigo(data.manualCode).subscribe(
                   async (res: any) => {
-                    await loading.dismiss();
                     if (res.status == 'error') {
-                      const alert = await this.alert.create({
-                        header: 'Código inválido',
-                        message: 'El código ingresado no es válido. Por favor, ingresa un código válido o escanea el QR.',
-                        buttons: ['OK']
-                      });
-                      await alert.present();
+                      this.presentAlert('Error', 'El código ingresado no es válido. Por favor, ingresa un código válido o escanea el QR.');
                     } else {
-                      const scannedPackage = {
-                        id: res.idPaquete,
-                        cod: res.codigoPaquete,
-                        lat: res.lat,
-                        lng: res.lng
-                      };
-                      await this.scannedResults.push([scannedPackage]);
-                      loading.dismiss();
+                      res.idUsuario = parseInt(localStorage.getItem('uid')!);
+                      this.api.putPaquete(res).subscribe(
+                        async (data: any) => {
+                          if (data.status != 'error') {
+                            console.log('Paquete actualizado', data);
+                            const scannedPackage = {
+                              id: res.idPaquete,
+                              cod: res.codigoPaquete,
+                              lat: res.lat,
+                              lng: res.lng
+                            };
+                            await this.scannedResults.push([scannedPackage]);
+                          } else {
+                            this.presentAlert('Error', data.msj);
+                          }
+                          loading.dismiss();
+                        },
+                        (error) => {
+                          this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+                          loading.dismiss();
+                        }
+                      );
                     }
                   },
                   async (error) => {
                     await loading.dismiss();
-                    const alert = await this.alert.create({
-                      header: 'Error en el servidor',
-                      message: 'Ha ocurrido un error al validar el código. Por favor, inténtalo nuevamente.',
-                      buttons: ['OK']
-                    });
-                    await alert.present();
+                    this.presentAlert('Error en el servidor', 'Ha ocurrido un error al validar el código. Por favor, inténtalo nuevamente.');
                   }
                 );
               }
             } else {
               await alertInput.dismiss();
-              const alert = await this.alert.create({
-                header: 'Error',
-                message: 'No se ha ingresado ningún código. Por favor, ingresa un código válido o escanea el QR.',
-                buttons: ['OK']
-              });
-              await alert.present();
+              this.presentAlert('Error', 'No se ha ingresado ningún código. Por favor, ingresa un código válido o escanea el QR.');
             }
           }
         }
@@ -221,9 +234,46 @@ export class EscanerPage implements OnDestroy {
     await alertInput.present();
   }
 
-  removePaquete(index: number) {
-    this.scannedResults.splice(index, 1);
+  async removePaquete(index: number) {
+    const paqueteToRemove = this.scannedResults[index];
+
+    const loading = await this.loading.create({
+      message: 'Cargando...',
+      spinner: 'lines'
+    });
+    await loading.present();
+
+    this.api.getOnePaquete(paqueteToRemove[0].id).subscribe(
+      async (data: any) => {
+        if (data.status !== 'error') {
+          data.idUsuario = null;
+
+          this.api.putPaquete(data).subscribe(
+            async (data: any) => {
+              if (data.status != 'error') {
+                console.log('Paquete actualizado', data);
+                this.scannedResults.splice(index, 1);
+              } else {
+                this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+              }
+              loading.dismiss();
+            },
+            (error) => {
+              this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+              loading.dismiss();
+            }
+          );
+        } else {
+          await loading.dismiss();
+        }
+      },
+      async (error) => {
+        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+        await loading.dismiss();
+      }
+    );
   }
+
 
   async stopScan() {
     this.contentVisibility = true;
@@ -247,6 +297,16 @@ export class EscanerPage implements OnDestroy {
 
   ngOnDestroy() {
     this.stopScan();
+  }
+
+  async presentAlert(title: string, message: string) {
+    const alert = await this.alert.create({
+      header: title,
+      message: message,
+      buttons: ['OK']
+    });
+
+    await alert.present();
   }
 
 }

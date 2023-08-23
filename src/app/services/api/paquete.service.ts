@@ -42,10 +42,10 @@ export class PaqueteService {
     return this.http.get<PaqueteInterface>(address, { headers });
   }
 
-  putPaquete(id: any): Observable<ResponseInterface> {
+  putPaquete(id: any): Observable<any> {
     let address = this.url + 'paquete/' + id;
     const headers = this.getHeaders();
-    return this.http.put<ResponseInterface>(address, id, { headers });
+    return this.http.put<any>(address, id, { headers });
   }
 
   getUsuario(): Observable<UsuarioInterface[]> {
