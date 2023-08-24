@@ -6,8 +6,8 @@ import { WayPointInterface } from '../models/waypoint.interface';
 })
 export class WaypointsService {
 
-  private packageIdToWaypointMap: Map<string, WayPointInterface> = new Map();
-  private waypointsKey = 'waypoitns'
+  packageIdToWaypointMap: Map<any, WayPointInterface> = new Map();
+  waypointsKey = 'waypoitns'
 
   constructor() { }
 
@@ -24,9 +24,11 @@ export class WaypointsService {
     this.packageIdToWaypointMap.set(packageId, waypoint);
   }
 
-  getPackageIdFromWaypoint(waypoint: WayPointInterface): string | null {
+  getPackageIdFromWaypoint(waypoint: any) {
+    console.log('waypoint q recibi', waypoint)
+    console.log('this.packageIdToWaypointMap', this.packageIdToWaypointMap);
     for (const [packageId, associatedWaypoint] of this.packageIdToWaypointMap) {
-      if (associatedWaypoint === waypoint) {
+      if (associatedWaypoint == waypoint) {
         return packageId;
       }
     }

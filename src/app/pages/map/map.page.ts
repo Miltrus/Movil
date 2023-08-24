@@ -223,14 +223,14 @@ export class MapPage {
     window.open(googleMapsUrl, '_system');
   }
 
+
+  // ESTO NO SIRVE ARREGLARLO
   deliverPaquete() {
     const currentWaypoint = this.getCurrentWaypoint();
-    const paqId = this.getPackageIdFromWaypoint(currentWaypoint);
-
-    if (paqId !== null) {
+    const paqId = this.waypointService.getPackageIdFromWaypoint(currentWaypoint);
+    if (paqId != null) {
       console.log("Paquete a entregar:", paqId, currentWaypoint);
 
-      // Pasar el ID del paquete como query parameter en la URL al navegar
       this.nav.navigateForward('/tabs/entrega', { queryParams: { paqId } });
     } else {
       console.log("No se encontró el paquete asociado al waypoint.");
@@ -241,15 +241,6 @@ export class MapPage {
     return this.waypoints[this.currentWaypointIndex - 1];
   }
 
-  getPackageIdFromWaypoint(waypoint: WayPointInterface): any {
-    const packageId = this.waypointService.getPackageIdFromWaypoint(waypoint);
-    if (packageId !== null) {
-      return packageId;
-    } else {
-      console.log("No se encontró el paquete asociado al waypoint.");
-      return null;
-    }
-  }
 
   tipoNovedad: any[] = [];
 

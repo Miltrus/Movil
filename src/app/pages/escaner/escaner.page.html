@@ -3,15 +3,15 @@
     <ion-title>
       Escaner
     </ion-title>
-    <ion-buttons slot="end" *ngIf="scannedResults.length > 0">
-      <ion-button id="click-trigger">
+    <ion-buttons mode="ios" slot="end" *ngIf="scannedResults.length > 0">
+      <ion-button id="click-trigger-scan">
         <ion-icon name="help-circle-outline"></ion-icon>
       </ion-button>
-      <ion-popover trigger="click-trigger" triggerAction="click" dismissOnSelect="true">
+      <ion-popover trigger="click-trigger-scan" triggerAction="click" dismissOnSelect="true">
         <ng-template>
-          <ion-content class="ion-padding">
-
-          </ion-content>
+          <ion-item (click)="openHelp(true)">
+            <p>¿Necesitas ayuda?</p>
+          </ion-item>
         </ng-template>
       </ion-popover>
     </ion-buttons>
@@ -34,14 +34,14 @@
   </ion-fab>
 
 
-  <ion-card *ngIf="scannedResults.length < 1">
+  <ion-card mode="ios" *ngIf="scannedResults.length < 1 && contentVisibility">
     <ion-card-header>
-      <ion-card-title>Guía de inicio</ion-card-title>
+      <ion-card-title>Guía de uso</ion-card-title>
     </ion-card-header>
     <ion-card-content>
       <p>
         Bienvenido a la guía de escaneo de códigos. Aquí te explicaremos cómo usar las funciones de escaneo disponibles
-        en la aplicación.
+        en la aplicación que encontraras en el boton azul abajo a la derecha.
       </p>
       <hr>
       <ion-card-subtitle>Escanear código QR</ion-card-subtitle>
@@ -56,10 +56,7 @@
         Si prefieres ingresar el código del paquete manualmente, toca el ícono de teclado en el menú flotante. Esto te
         permitirá ingresar el código utilizando el teclado en pantalla.
       </p>
-      <hr>
-      <p>
-        ¡Explora estas funciones y disfruta de una experiencia conveniente para rastrear tus paquetes!
-      </p>
+      <ion-img src="../../../assets/icon/LogoFondoBlanco.jpg"></ion-img>
     </ion-card-content>
   </ion-card>
 
@@ -87,6 +84,48 @@
       </ion-item>
     </div>
   </ion-list>
+
+  <ion-modal mode="ios" [isOpen]="isHelpOpen">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Ayuda</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="openHelp(false)">Cerrar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-card mode="ios">
+          <ion-card-header>
+            <ion-card-title>Guía de uso</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p>
+              Bienvenido a la guía de escaneo de códigos. Aquí te explicaremos cómo usar las funciones de escaneo
+              disponibles en la aplicación que encontraras en el boton azul abajo a la derecha.
+            </p>
+            <hr>
+            <ion-card-subtitle>Escanear código QR</ion-card-subtitle>
+            <p>
+              Para escanear un código QR, simplemente presiona el ícono de escaneo de código en el menú flotante y
+              apunta la
+              cámara hacia el código QR. La aplicación reconocerá automáticamente el código y realizará la acción
+              correspondiente.
+            </p>
+            <hr>
+            <ion-card-subtitle>Ingresar código manualmente</ion-card-subtitle>
+            <p>
+              Si prefieres ingresar el código del paquete manualmente, toca el ícono de teclado en el menú flotante.
+              Esto te
+              permitirá ingresar el código utilizando el teclado en pantalla.
+            </p>
+            <ion-img src="../../../assets/icon/LogoFondoBlanco.jpg"></ion-img>
+          </ion-card-content>
+        </ion-card>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 
   <div class="sample-background" *ngIf="!contentVisibility"></div>
   <div class="container-scan" *ngIf="!contentVisibility">

@@ -15,6 +15,9 @@ export class EscanerPage implements OnInit, OnDestroy {
   scannedResults: any = [];
   contentVisibility = true;
   isFlashlightOn = false;
+  isHelpOpen = false;
+
+  uid = localStorage.getItem('uid');
 
   constructor(
     private alert: AlertController,
@@ -26,10 +29,9 @@ export class EscanerPage implements OnInit, OnDestroy {
 
 
   ngOnInit(): void {
-    const scannedLocalResults = localStorage.getItem('scannedResults');
+    const scannedLocalResults = localStorage.getItem(`scannedResults_${this.uid}`);
     if (scannedLocalResults) {
       this.scannedResults = JSON.parse(scannedLocalResults);
-      console.log("esto es la vuelta:", this.scannedResults)
     } else {
       this.scannedResults = [];
     }
@@ -45,7 +47,6 @@ export class EscanerPage implements OnInit, OnDestroy {
 
       waypoints.push(waypoint);
       this.waypointService.associatePackageWithWaypoint(packageId, waypoint);
-      console.log("VIDA TRIPLE HP", packageId, waypoint);
     }
 
     return waypoints;
@@ -129,42 +130,44 @@ export class EscanerPage implements OnInit, OnDestroy {
               });
               await loading.present();
 
-              this.api.getOnePaquete(qrDataArray[0].id).subscribe(
+              this.api.getPaqueteByCodigo(qrDataArray[0].cod).subscribe(
                 async (data: any) => {
+                  console.log("esto es lo q me trajo", data);
                   if (data.status != 'error') {
 
-                    const uid = localStorage.getItem('uid');
-
-                    if (data.idUsuario != null && data.idEstado == 4 && data.idUsuario != parseInt(uid!)) {
+                    if (data.idUsuario != null && data.idUsuario != parseInt(this.uid!)) {
                       await loading.dismiss();
                       this.presentAlert('Paquete ya asignado', 'Este paquete ya ha sido asignado a otro mensajero o ya ha sido entregado.');
                       return;
                     }
-                    data.idUsuario = parseInt(localStorage.getItem('uid')!);
 
+                    data.idUsuario = parseInt(this.uid!);
+                    data.idEstado = 2;
                     this.api.putPaquete(data).subscribe(
-                      async (data: any) => {
-                        if (data.status != 'error') {
-                          console.log('Paquete actualizado', data);
+                      async (res: any) => {
+                        console.log("esto es lo q mandamo", data);
+                        if (res.status != 'error') {
+                          console.log('Paquete actualizado', res);
                           await this.scannedResults.push(qrDataArray);
-                          localStorage.setItem('scannedResults', JSON.stringify(this.scannedResults));
+                          localStorage.setItem(`scannedResults_${this.uid}`, JSON.stringify(this.scannedResults));
                         } else {
-                          this.presentAlert('Error', data.msj);
+                          this.presentAlert('Error', res.msj);
                         }
                         loading.dismiss();
                       },
-                      (error) => {
+                      async (error) => {
+                        await loading.dismiss();
                         this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
-                        loading.dismiss();
                       }
                     );
                   } else {
                     await loading.dismiss();
+                    this.presentAlert('Error', 'El QR escaneado no es válido. Por favor, escanea un QR válido o ingresa el código manualmente.');
                   }
                 },
                 async (error) => {
-                  this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
                   await loading.dismiss();
+                  this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
                 }
               );
             }
@@ -207,23 +210,25 @@ export class EscanerPage implements OnInit, OnDestroy {
               await loading.present();
               if (this.scannedResults.find((i: any) =>
                 i.some((item: any) => item.cod === data.manualCode.toUpperCase()))) {
+                await alertInput.dismiss();
                 await loading.dismiss();
                 this.presentAlert('Paquete duplicado', 'Este paquete ya ha sido ingresado anteriormente.');
               } else {
                 this.api.getPaqueteByCodigo(data.manualCode).subscribe(
                   async (res: any) => {
                     if (res.status == 'error') {
+                      await loading.dismiss();
                       this.presentAlert('Error', 'El código ingresado no es válido. Por favor, ingresa un código válido o escanea el QR.');
                     } else {
 
-                      const uid = parseInt(localStorage.getItem('uid')!);
-
-                      if (res.idUsuario != null && res.idEstado == 4 && res.idUsuario != uid) {
+                      if (res.idUsuario != null && res.idUsuario != parseInt(this.uid!)) {
                         await loading.dismiss();
                         this.presentAlert('Paquete ya asignado', 'Este paquete ya ha sido asignado a otro mensajero o ya ha sido entregado.');
                         return;
                       }
-                      res.idUsuario = uid;
+                      res.idUsuario = parseInt(this.uid!);
+                      res.idEstado = 2;
+                      console.log("lo q le mandamos alla", res)
                       this.api.putPaquete(res).subscribe(
                         async (data: any) => {
                           if (data.status != 'error') {
@@ -235,15 +240,15 @@ export class EscanerPage implements OnInit, OnDestroy {
                               lng: res.lng
                             };
                             await this.scannedResults.push([scannedPackage]);
-                            localStorage.setItem('scannedResults', JSON.stringify(this.scannedResults));
+                            localStorage.setItem(`scannedResults_${this.uid}`, JSON.stringify(this.scannedResults));
                           } else {
                             this.presentAlert('Error', data.msj);
                           }
-                          loading.dismiss();
+                          await loading.dismiss();
                         },
-                        (error) => {
+                        async (error) => {
+                          await loading.dismiss();
                           this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
-                          loading.dismiss();
                         }
                       );
                     }
@@ -279,6 +284,7 @@ export class EscanerPage implements OnInit, OnDestroy {
         {
           text: 'Confirmar',
           handler: async () => {
+            await alert.dismiss();
             const loading = await this.loading.create({
               message: 'Cargando...',
               spinner: 'lines'
@@ -290,31 +296,32 @@ export class EscanerPage implements OnInit, OnDestroy {
               async (data: any) => {
                 if (data.status != 'error') {
                   data.idUsuario = null;
+                  data.idEstado = 1;
 
                   this.api.putPaquete(data).subscribe(
                     async (data: any) => {
                       if (data.status != 'error') {
                         console.log('Paquete actualizado', data);
                         this.scannedResults.splice(index, 1);
-                        localStorage.setItem('scannedResults', JSON.stringify(this.scannedResults));
+                        localStorage.setItem(`scannedResults_${this.uid}`, JSON.stringify(this.scannedResults));
                       } else {
                         this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
                       }
-                      loading.dismiss();
+                      await loading.dismiss();
                     },
-                    (error) => {
+                    async (error) => {
+                      await loading.dismiss();
                       this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
-                      loading.dismiss();
                     }
                   );
                 } else {
-                  this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
                   await loading.dismiss();
+                  this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
                 }
               },
               async (error) => {
-                this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
                 await loading.dismiss();
+                this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
               }
             );
           }
@@ -349,10 +356,16 @@ export class EscanerPage implements OnInit, OnDestroy {
     this.stopScan();
   }
 
-  async presentAlert(title: string, message: string) {
+  openHelp(isOpen: boolean) {
+    this.isHelpOpen = isOpen;
+
+  }
+
+
+  async presentAlert(title: string, msg: string) {
     const alert = await this.alert.create({
       header: title,
-      message: message,
+      message: msg,
       buttons: ['OK']
     });
 
