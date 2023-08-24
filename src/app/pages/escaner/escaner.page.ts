@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BarcodeScanner, TorchStateResult } from '@capacitor-community/barcode-scanner';
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import { WayPointInterface } from 'src/app/models/waypoint.interface';
@@ -10,7 +10,7 @@ import { WaypointsService } from 'src/app/services/waypoints.service';
   templateUrl: 'escaner.page.html',
   styleUrls: ['escaner.page.scss']
 })
-export class EscanerPage implements OnDestroy {
+export class EscanerPage implements OnInit, OnDestroy {
 
   scannedResults: any = [];
   contentVisibility = true;
@@ -23,6 +23,17 @@ export class EscanerPage implements OnDestroy {
     private nav: NavController,
     private waypointService: WaypointsService
   ) { }
+
+
+  ngOnInit(): void {
+    const scannedLocalResults = localStorage.getItem('scannedResults');
+    if (scannedLocalResults) {
+      this.scannedResults = JSON.parse(scannedLocalResults);
+      console.log("esto es la vuelta:", this.scannedResults)
+    } else {
+      this.scannedResults = [];
+    }
+  }
 
   generateWaypointsFromScannedResults(): WayPointInterface[] {
     const waypoints: WayPointInterface[] = [];
@@ -119,14 +130,21 @@ export class EscanerPage implements OnDestroy {
 
               this.api.getOnePaquete(qrDataArray[0].id).subscribe(
                 async (data: any) => {
-                  if (data.status !== 'error') {
+                  if (data.status != 'error') {
+
+                    if (data.idUsuario != null) {
+                      await loading.dismiss();
+                      this.presentAlert('Paquete ya asignado', 'Este paquete ya ha sido asignado a otro mensajero.');
+                      return;
+                    }
                     data.idUsuario = parseInt(localStorage.getItem('uid')!);
 
                     this.api.putPaquete(data).subscribe(
-                      (data: any) => {
+                      async (data: any) => {
                         if (data.status != 'error') {
                           console.log('Paquete actualizado', data);
-                          this.scannedResults.push(qrDataArray);
+                          await this.scannedResults.push(qrDataArray);
+                          localStorage.setItem('scannedResults', JSON.stringify(this.scannedResults));
                         } else {
                           this.presentAlert('Error', data.msj);
                         }
@@ -193,6 +211,12 @@ export class EscanerPage implements OnDestroy {
                     if (res.status == 'error') {
                       this.presentAlert('Error', 'El código ingresado no es válido. Por favor, ingresa un código válido o escanea el QR.');
                     } else {
+
+                      if (res.idUsuario != null) {
+                        await loading.dismiss();
+                        this.presentAlert('Paquete ya asignado', 'Este paquete ya ha sido asignado a otro mensajero.');
+                        return;
+                      }
                       res.idUsuario = parseInt(localStorage.getItem('uid')!);
                       this.api.putPaquete(res).subscribe(
                         async (data: any) => {
@@ -205,6 +229,7 @@ export class EscanerPage implements OnDestroy {
                               lng: res.lng
                             };
                             await this.scannedResults.push([scannedPackage]);
+                            localStorage.setItem('scannedResults', JSON.stringify(this.scannedResults));
                           } else {
                             this.presentAlert('Error', data.msj);
                           }
@@ -235,43 +260,60 @@ export class EscanerPage implements OnDestroy {
   }
 
   async removePaquete(index: number) {
-    const paqueteToRemove = this.scannedResults[index];
 
-    const loading = await this.loading.create({
-      message: 'Cargando...',
-      spinner: 'lines'
-    });
-    await loading.present();
+    const alert = await this.alert.create({
+      header: 'Confirmar',
+      message: '¿Estás seguro de que deseas eliminar este paquete de tu lista?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Confirmar',
+          handler: async () => {
+            const paqueteToRemove = this.scannedResults[index];
+            const loading = await this.loading.create({
+              message: 'Cargando...',
+              spinner: 'lines'
+            });
+            await loading.present();
 
-    this.api.getOnePaquete(paqueteToRemove[0].id).subscribe(
-      async (data: any) => {
-        if (data.status !== 'error') {
-          data.idUsuario = null;
+            this.api.getOnePaquete(paqueteToRemove[0].id).subscribe(
+              async (data: any) => {
+                if (data.status != 'error') {
+                  data.idUsuario = null;
 
-          this.api.putPaquete(data).subscribe(
-            async (data: any) => {
-              if (data.status != 'error') {
-                console.log('Paquete actualizado', data);
-                this.scannedResults.splice(index, 1);
-              } else {
+                  this.api.putPaquete(data).subscribe(
+                    async (data: any) => {
+                      if (data.status != 'error') {
+                        console.log('Paquete actualizado', data);
+                        this.scannedResults.splice(index, 1);
+                        localStorage.setItem('scannedResults', JSON.stringify(this.scannedResults));
+                      } else {
+                        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+                      }
+                      loading.dismiss();
+                    },
+                    (error) => {
+                      this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+                      loading.dismiss();
+                    }
+                  );
+                } else {
+                  await loading.dismiss();
+                }
+              },
+              async (error) => {
                 this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+                await loading.dismiss();
               }
-              loading.dismiss();
-            },
-            (error) => {
-              this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
-              loading.dismiss();
-            }
-          );
-        } else {
-          await loading.dismiss();
+            );
+          }
         }
-      },
-      async (error) => {
-        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
-        await loading.dismiss();
-      }
-    );
+      ]
+    });
+    await alert.present();
   }
 
 

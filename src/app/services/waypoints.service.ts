@@ -6,7 +6,6 @@ import { WayPointInterface } from '../models/waypoint.interface';
 })
 export class WaypointsService {
 
-  private waypoints: WayPointInterface[] = [];
   private packageIdToWaypointMap: Map<string, WayPointInterface> = new Map();
   private waypointsKey = 'waypoitns'
 
