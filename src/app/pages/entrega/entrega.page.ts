@@ -4,9 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import SignaturePad from 'signature_pad';
 import { EntregaInterface } from 'src/app/models/entrega.interface';
-import { ListaPaquetesInterface } from 'src/app/models/lista-paquetes.interface';
 import { EntregaService } from 'src/app/services/api/entrega.service';
-import { NovedadService } from 'src/app/services/api/novedad.service';
 import { PaqueteService } from 'src/app/services/api/paquete.service';
 
 @Component({
@@ -21,7 +19,6 @@ export class EntregaPage {
   signaturePad: any;
 
   newForm: FormGroup;
-  listaPaquetes: ListaPaquetesInterface[] = [];
   paqId: any;
   paquete: any;
 
@@ -34,7 +31,6 @@ export class EntregaPage {
     private elementRef: ElementRef,
     private route: ActivatedRoute,
     private paqService: PaqueteService,
-    private novService: NovedadService
   ) {
     this.newForm = this.formBuilder.group({
       firmaDestinatario: [''],
@@ -221,7 +217,7 @@ export class EntregaPage {
       spinner: 'lines',
     });
     await loading.present();
-    this.novService.getTipoNovedad().subscribe(
+    /* this.novService.getTipoNovedad().subscribe(
       data => {
         this.tipoNovedad = data;
       },
@@ -233,7 +229,7 @@ export class EntregaPage {
           buttons: ['OK']
         }).then(alert => alert.present());
       }
-    );
+    ); */
     await loading.dismiss();
 
     const tipoNovedadAlert = await this.alert.create({

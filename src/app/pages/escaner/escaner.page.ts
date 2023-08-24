@@ -86,6 +86,7 @@ export class EscanerPage implements OnInit, OnDestroy {
     }
   }
 
+
   async scanQR() {
     this.isFlashlightOn = false
     try {
@@ -132,9 +133,11 @@ export class EscanerPage implements OnInit, OnDestroy {
                 async (data: any) => {
                   if (data.status != 'error') {
 
-                    if (data.idUsuario != null) {
+                    const uid = localStorage.getItem('uid');
+
+                    if (data.idUsuario != null && data.idEstado == 4 && data.idUsuario != parseInt(uid!)) {
                       await loading.dismiss();
-                      this.presentAlert('Paquete ya asignado', 'Este paquete ya ha sido asignado a otro mensajero.');
+                      this.presentAlert('Paquete ya asignado', 'Este paquete ya ha sido asignado a otro mensajero o ya ha sido entregado.');
                       return;
                     }
                     data.idUsuario = parseInt(localStorage.getItem('uid')!);
@@ -177,6 +180,7 @@ export class EscanerPage implements OnInit, OnDestroy {
     }
   }
 
+
   async enterCodeManually() {
     const alertInput = await this.alert.create({
       header: 'Introducir código manualmente',
@@ -212,12 +216,14 @@ export class EscanerPage implements OnInit, OnDestroy {
                       this.presentAlert('Error', 'El código ingresado no es válido. Por favor, ingresa un código válido o escanea el QR.');
                     } else {
 
-                      if (res.idUsuario != null) {
+                      const uid = parseInt(localStorage.getItem('uid')!);
+
+                      if (res.idUsuario != null && res.idEstado == 4 && res.idUsuario != uid) {
                         await loading.dismiss();
-                        this.presentAlert('Paquete ya asignado', 'Este paquete ya ha sido asignado a otro mensajero.');
+                        this.presentAlert('Paquete ya asignado', 'Este paquete ya ha sido asignado a otro mensajero o ya ha sido entregado.');
                         return;
                       }
-                      res.idUsuario = parseInt(localStorage.getItem('uid')!);
+                      res.idUsuario = uid;
                       this.api.putPaquete(res).subscribe(
                         async (data: any) => {
                           if (data.status != 'error') {
@@ -259,6 +265,7 @@ export class EscanerPage implements OnInit, OnDestroy {
     await alertInput.present();
   }
 
+
   async removePaquete(index: number) {
 
     const alert = await this.alert.create({
@@ -272,12 +279,12 @@ export class EscanerPage implements OnInit, OnDestroy {
         {
           text: 'Confirmar',
           handler: async () => {
-            const paqueteToRemove = this.scannedResults[index];
             const loading = await this.loading.create({
               message: 'Cargando...',
               spinner: 'lines'
             });
             await loading.present();
+            const paqueteToRemove = this.scannedResults[index];
 
             this.api.getOnePaquete(paqueteToRemove[0].id).subscribe(
               async (data: any) => {
@@ -301,6 +308,7 @@ export class EscanerPage implements OnInit, OnDestroy {
                     }
                   );
                 } else {
+                  this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
                   await loading.dismiss();
                 }
               },

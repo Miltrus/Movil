@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import { WayPointInterface } from 'src/app/models/waypoint.interface';
-import { NovedadService } from 'src/app/services/api/novedad.service';
 import { WaypointsService } from 'src/app/services/waypoints.service';
 
 declare var google: any;
@@ -36,7 +35,6 @@ export class MapPage {
     private alert: AlertController,
     private nav: NavController,
     private waypointService: WaypointsService,
-    private novService: NovedadService
   ) { }
 
   ionViewDidEnter() {
@@ -261,7 +259,7 @@ export class MapPage {
       spinner: 'lines',
     });
     await loading.present();
-    this.novService.getTipoNovedad().subscribe(
+    /* this.novService.getTipoNovedad().subscribe(
       data => {
         this.tipoNovedad = data;
       },
@@ -273,7 +271,7 @@ export class MapPage {
           buttons: ['OK']
         }).then(alert => alert.present());
       }
-    );
+    ); */
     await loading.dismiss();
 
     const tipoNovedadAlert = await this.alert.create({

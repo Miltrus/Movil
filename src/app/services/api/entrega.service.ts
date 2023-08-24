@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ResponseInterface } from 'src/app/models/response.interface';
 import { EntregaInterface } from 'src/app/models/entrega.interface';
-import { ListaPaquetesInterface } from 'src/app/models/lista-paquetes.interface';
 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -13,7 +12,7 @@ export class EntregaService {
 
   url: string = 'http://127.0.0.1:3030/';
 
-  constructor( private http: HttpClient ) { }
+  constructor(private http: HttpClient) { }
 
   private getHeaders(): HttpHeaders {
     // Aquí agregamos el token a las cabeceras
@@ -52,11 +51,5 @@ export class EntregaService {
     let addres = this.url + 'entrega/' + id;
     const headers = this.getHeaders();
     return this.http.delete<ResponseInterface>(addres, { headers });
-  }
-
-  getListaPaquetes(): Observable<ListaPaquetesInterface[]> {
-    const address = this.url + 'listapaquete';
-    const headers = this.getHeaders();
-    return this.http.get<ListaPaquetesInterface[]>(address, { headers });
   }
 }

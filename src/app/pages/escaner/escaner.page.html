@@ -3,6 +3,18 @@
     <ion-title>
       Escaner
     </ion-title>
+    <ion-buttons slot="end" *ngIf="scannedResults.length > 0">
+      <ion-button id="click-trigger">
+        <ion-icon name="help-circle-outline"></ion-icon>
+      </ion-button>
+      <ion-popover trigger="click-trigger" triggerAction="click" dismissOnSelect="true">
+        <ng-template>
+          <ion-content class="ion-padding">
+
+          </ion-content>
+        </ng-template>
+      </ion-popover>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -20,6 +32,37 @@
       </ion-fab-button>
     </ion-fab-list>
   </ion-fab>
+
+
+  <ion-card *ngIf="scannedResults.length < 1">
+    <ion-card-header>
+      <ion-card-title>Guía de inicio</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>
+        Bienvenido a la guía de escaneo de códigos. Aquí te explicaremos cómo usar las funciones de escaneo disponibles
+        en la aplicación.
+      </p>
+      <hr>
+      <ion-card-subtitle>Escanear código QR</ion-card-subtitle>
+      <p>
+        Para escanear un código QR, simplemente presiona el ícono de escaneo de código en el menú flotante y apunta la
+        cámara hacia el código QR. La aplicación reconocerá automáticamente el código y realizará la acción
+        correspondiente.
+      </p>
+      <hr>
+      <ion-card-subtitle>Ingresar código manualmente</ion-card-subtitle>
+      <p>
+        Si prefieres ingresar el código del paquete manualmente, toca el ícono de teclado en el menú flotante. Esto te
+        permitirá ingresar el código utilizando el teclado en pantalla.
+      </p>
+      <hr>
+      <p>
+        ¡Explora estas funciones y disfruta de una experiencia conveniente para rastrear tus paquetes!
+      </p>
+    </ion-card-content>
+  </ion-card>
+
 
   <ion-list *ngIf="scannedResults && scannedResults.length > 0 && contentVisibility">
     <ion-list-header mode="ios">
@@ -49,7 +92,7 @@
   <div class="container-scan" *ngIf="!contentVisibility">
     <div class="barcode-scanner--area--container">
       <div class="relative">
-        <p>Apunta tu cámara al código QR</p>
+        <p class="qr-text">Apunta tu cámara al código QR</p>
       </div>
       <div class="square surround-cover">
         <div class="barcode-scanner--area--outer surround-cover">

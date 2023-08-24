@@ -2,11 +2,21 @@
     box-sizing: border-box;
 }
 
-p {
+.qr-text {
     color: #fff;
     font-family: sans-serif;
     text-align: center;
     font-weight: 600;
+}
+
+ion-card-subtitle {
+    color: #19237E;
+    font-family: sans-serif;
+    text-align: left;
+    font-weight: 600;
+    font-size: 15px;
+    margin-top: 5px;
+    /* margin-bottom: 5px; */
 }
 
 .container-scan {
