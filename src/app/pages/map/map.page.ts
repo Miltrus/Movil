@@ -198,7 +198,7 @@ export class MapPage {
   }
 
   isCloseToWaypoint(currentLatLng: { lat: number, lng: number }, waypointLatLng: { lat: number, lng: number }): boolean {
-    const proximidad = 2000; // umbral de proximidad en metros
+    const proximidad = 20000; // umbral de proximidad en metros
 
     // calculamos la distancia entre la ubicación actual y el waypoint
     const distance = google.maps.geometry.spherical.computeDistanceBetween(
@@ -228,9 +228,12 @@ export class MapPage {
   deliverPaquete() {
     const currentWaypoint = this.getCurrentWaypoint();
     const paqId = this.waypointService.getPackageIdFromWaypoint(currentWaypoint);
-    if (paqId != null) {
-      console.log("Paquete a entregar:", paqId, currentWaypoint);
 
+    if (paqId !== null) {
+      console.log("Paquete a entregar:", paqId, currentWaypoint);
+      this.entregaButton = false;
+
+      // Pasar el ID del paquete como query parameter en la URL al navegar
       this.nav.navigateForward('/tabs/entrega', { queryParams: { paqId } });
     } else {
       console.log("No se encontró el paquete asociado al waypoint.");
@@ -258,7 +261,7 @@ export class MapPage {
         console.log(error);
         this.alert.create({
           header: 'Error en el servidor',
-          message: 'No se pudo cargar el tipo de novedad. Por favor, inténtalo nuevamente.',
+          message: 'No se pudo cargar el tipo de novedad. Por favor, revisa tu conexión a internet o inténtalo nuevamente',
           buttons: ['OK']
         }).then(alert => alert.present());
       }

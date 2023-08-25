@@ -5,17 +5,25 @@
         <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button id="click-trigger">
+        <ion-icon name="ellipsis-vertical"></ion-icon>
+      </ion-button>
+      <ion-popover trigger="click-trigger" triggerAction="click" dismissOnSelect="true">
+        <ng-template>
+          <ion-item (click)="reportNovedad()">
+            <ion-icon slot="start" name="alert-circle"></ion-icon>
+            <p>Reportar novedad</p>
+          </ion-item>
+        </ng-template>
+      </ion-popover>
+    </ion-buttons>
     <ion-title>Ruta</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <div id="map"></div>
-  <ion-fab vertical="center" horizontal="start" slot="fixed">
-    <ion-fab-button color="danger" (click)="reportNovedad()">
-      <ion-icon name="alert"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
   <ion-button mode="ios" *ngIf="entregaButton" expand="block" class="open-entrega-button"
     (click)="deliverPaquete()">Entregar
     <ion-icon name="pin-sharp" slot="end"></ion-icon>

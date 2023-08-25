@@ -81,7 +81,7 @@ export class LoginPage {
       },
       async (error) => {
         await loading.dismiss();
-        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al iniciar sesión. Por favor, inténtalo nuevamente.');
+        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al iniciar sesión. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
       }
     );
   }
@@ -105,7 +105,7 @@ export class LoginPage {
       },
       async (error) => {
         await loading.dismiss();
-        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al recuperar tu contraseña. Por favor, inténtalo nuevamente.');
+        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al recuperar tu contraseña. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
       }
     );
   }

@@ -26,7 +26,7 @@ export const isLoggedInGuard: CanMatchFn = () => {
         }
       }),
       catchError(error => {
-        showAlert(alertController, 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente', 'Error en el servidor');
+        showAlert(alertController, 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente', 'Error en el servidor');
         return of(false);
       })
     );

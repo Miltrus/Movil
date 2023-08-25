@@ -3,6 +3,7 @@ import { BarcodeScanner, TorchStateResult } from '@capacitor-community/barcode-s
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import { WayPointInterface } from 'src/app/models/waypoint.interface';
 import { PaqueteService } from 'src/app/services/api/paquete.service';
+import { RastreoService } from 'src/app/services/api/rastreo.service';
 import { WaypointsService } from 'src/app/services/waypoints.service';
 
 @Component({
@@ -17,13 +18,16 @@ export class EscanerPage implements OnInit, OnDestroy {
   isFlashlightOn = false;
   isHelpOpen = false;
 
+  packageId: any;
+
   uid = localStorage.getItem('uid');
 
   constructor(
     private alert: AlertController,
-    private api: PaqueteService,
     private loading: LoadingController,
     private nav: NavController,
+    private api: PaqueteService,
+    private rastreo: RastreoService,
     private waypointService: WaypointsService
   ) { }
 
@@ -41,12 +45,12 @@ export class EscanerPage implements OnInit, OnDestroy {
     const waypoints: WayPointInterface[] = [];
 
     for (const i of this.scannedResults) {
-      const packageId = i[0].id;
+      this.packageId = i[0].id;
       const latLng = { lat: i[0].lat, lng: i[0].lng };
       const waypoint: WayPointInterface = { location: latLng, stopover: true };
 
       waypoints.push(waypoint);
-      this.waypointService.associatePackageWithWaypoint(packageId, waypoint);
+      this.waypointService.associatePackageWithWaypoint(this.packageId, waypoint);
     }
 
     return waypoints;
@@ -54,9 +58,45 @@ export class EscanerPage implements OnInit, OnDestroy {
 
 
   async startRoute() {
-    const waypoints = this.generateWaypointsFromScannedResults();
-    await this.waypointService.setWaypoints(waypoints);
-    this.nav.navigateForward('/tabs/mapa');
+    const alert = await this.alert.create({
+      header: 'Confirmar',
+      message: '¿Estás seguro de que deseas iniciar la ruta? Una vez iniciada, no podrás agregar más paquetes a la ruta.',
+      buttons: [{
+        text: 'Cancelar',
+        role: 'cancel'
+      },
+      {
+        text: 'Confirmar',
+        handler: async () => {
+          await alert.dismiss();
+          const loading = await this.loading.create({
+            message: 'Cargando...',
+            spinner: 'lines'
+          });
+          await loading.present();
+          for (const i of this.scannedResults) {
+            for (const j of i) {
+              const rastreo = {
+                idPaquete: j.id,
+              };
+
+              try {
+                await this.rastreo.deleteRastreo(rastreo).toPromise();
+
+                await this.rastreo.postRastreo(rastreo).toPromise();
+                const waypoints = this.generateWaypointsFromScannedResults();
+                await this.waypointService.setWaypoints(waypoints);
+                this.nav.navigateForward('/tabs/mapa');
+              } catch (error) {
+                await loading.dismiss();
+                this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+              }
+            }
+          }
+        }
+      }]
+    });
+    await alert.present();
   }
 
 
@@ -132,7 +172,6 @@ export class EscanerPage implements OnInit, OnDestroy {
 
               this.api.getPaqueteByCodigo(qrDataArray[0].cod).subscribe(
                 async (data: any) => {
-                  console.log("esto es lo q me trajo", data);
                   if (data.status != 'error') {
 
                     if (data.idUsuario != null && data.idUsuario != parseInt(this.uid!)) {
@@ -145,9 +184,7 @@ export class EscanerPage implements OnInit, OnDestroy {
                     data.idEstado = 2;
                     this.api.putPaquete(data).subscribe(
                       async (res: any) => {
-                        console.log("esto es lo q mandamo", data);
                         if (res.status != 'error') {
-                          console.log('Paquete actualizado', res);
                           await this.scannedResults.push(qrDataArray);
                           localStorage.setItem(`scannedResults_${this.uid}`, JSON.stringify(this.scannedResults));
                         } else {
@@ -157,7 +194,7 @@ export class EscanerPage implements OnInit, OnDestroy {
                       },
                       async (error) => {
                         await loading.dismiss();
-                        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+                        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
                       }
                     );
                   } else {
@@ -167,7 +204,7 @@ export class EscanerPage implements OnInit, OnDestroy {
                 },
                 async (error) => {
                   await loading.dismiss();
-                  this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+                  this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
                 }
               );
             }
@@ -228,11 +265,9 @@ export class EscanerPage implements OnInit, OnDestroy {
                       }
                       res.idUsuario = parseInt(this.uid!);
                       res.idEstado = 2;
-                      console.log("lo q le mandamos alla", res)
                       this.api.putPaquete(res).subscribe(
                         async (data: any) => {
                           if (data.status != 'error') {
-                            console.log('Paquete actualizado', data);
                             const scannedPackage = {
                               id: res.idPaquete,
                               cod: res.codigoPaquete,
@@ -248,14 +283,14 @@ export class EscanerPage implements OnInit, OnDestroy {
                         },
                         async (error) => {
                           await loading.dismiss();
-                          this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+                          this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
                         }
                       );
                     }
                   },
                   async (error) => {
                     await loading.dismiss();
-                    this.presentAlert('Error en el servidor', 'Ha ocurrido un error al validar el código. Por favor, inténtalo nuevamente.');
+                    this.presentAlert('Error en el servidor', 'Ha ocurrido un error al validar el código. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
                   }
                 );
               }
@@ -301,27 +336,26 @@ export class EscanerPage implements OnInit, OnDestroy {
                   this.api.putPaquete(data).subscribe(
                     async (data: any) => {
                       if (data.status != 'error') {
-                        console.log('Paquete actualizado', data);
                         this.scannedResults.splice(index, 1);
                         localStorage.setItem(`scannedResults_${this.uid}`, JSON.stringify(this.scannedResults));
                       } else {
-                        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+                        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
                       }
                       await loading.dismiss();
                     },
                     async (error) => {
                       await loading.dismiss();
-                      this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+                      this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
                     }
                   );
                 } else {
                   await loading.dismiss();
-                  this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+                  this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
                 }
               },
               async (error) => {
                 await loading.dismiss();
-                this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, inténtalo nuevamente.');
+                this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
               }
             );
           }
@@ -358,7 +392,6 @@ export class EscanerPage implements OnInit, OnDestroy {
 
   openHelp(isOpen: boolean) {
     this.isHelpOpen = isOpen;
-
   }
 
 
@@ -368,7 +401,6 @@ export class EscanerPage implements OnInit, OnDestroy {
       message: msg,
       buttons: ['OK']
     });
-
     await alert.present();
   }
 
