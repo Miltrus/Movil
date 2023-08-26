@@ -4,8 +4,11 @@ import { ActivatedRoute } from '@angular/router';
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import SignaturePad from 'signature_pad';
 import { EntregaInterface } from 'src/app/models/entrega.interface';
+import { WayPointInterface } from 'src/app/models/waypoint.interface';
 import { EntregaService } from 'src/app/services/api/entrega.service';
 import { PaqueteService } from 'src/app/services/api/paquete.service';
+import { RastreoService } from 'src/app/services/api/rastreo.service';
+import { WaypointsService } from 'src/app/services/waypoints.service';
 
 @Component({
   selector: 'app-entrega',
@@ -17,6 +20,8 @@ export class EntregaPage {
   @ViewChild('canvas', { static: true }) signaturePadElement?: ElementRef;
 
   signaturePad: any;
+
+  uid = localStorage.getItem('uid')!;
 
   newForm: FormGroup;
   paqId: any;
@@ -31,28 +36,25 @@ export class EntregaPage {
     private elementRef: ElementRef,
     private route: ActivatedRoute,
     private paqService: PaqueteService,
+    private rastreoService: RastreoService,
+    private wayService: WaypointsService
   ) {
     this.newForm = this.formBuilder.group({
       firmaDestinatario: [''],
       fechaEntrega: [''],
-      idLista: [21]
+      idRastreo: []
     });
   }
 
   async ngOnInit() {
-    const loading = await this.loading.create({
-      message: 'Cargando...',
-      spinner: 'lines'
-    });
-    await loading.present();
+    const loading = await this.loadingAlert('Cargando...');
 
     this.route.queryParams.subscribe(params => {
       this.paqId = params['paqId'];
-      this.paqService.getOnePaquete(this.paqId).subscribe(data => {
+      this.paqService.getOnePaquete(this.paqId).subscribe(async data => {
         this.paquete = data;
-        loading.dismiss();
+        await loading.dismiss();
       });
-      return this.paqId;
     });
   }
 
@@ -60,7 +62,6 @@ export class EntregaPage {
   async save(): Promise<void> {
     this.saveSignature();
     this.dateAndTime();
-    console.log(this.newForm.value);
     const confirmAlert = await this.alert.create({
       header: 'Confirmar entrega',
       message: '¿Está seguro de que deseas confirmar la entrega?',
@@ -73,69 +74,59 @@ export class EntregaPage {
           text: 'Confirmar',
           handler: async () => {
             const entregaData: EntregaInterface = this.newForm.value;
-            console.log("POST: ", entregaData);
             await confirmAlert.dismiss();
-            const loading = await this.loading.create({
-              message: 'Guardando...',
-              spinner: 'lines'
-            });
-            await loading.present();
+            const loading = await this.loadingAlert('Guardando...');
             this.paquete.idEstado = 3
-            this.paqService.putPaquete(this.paquete).subscribe(async data => {
-              console.log(data)
-              if (data?.status == 'ok') {
-                await loading.dismiss();
-                this.clearCanvas();
-                const successAlert = await this.alert.create({
-                  header: 'Entrega exitosa',
-                  message: 'La entrega se ha confirmado correctamente.',
-                  buttons: ['Aceptar'],
-                });
-                await successAlert.present();
-                this.nav.back();
-              } else {
-                await loading.dismiss();
-                const errorAlert = await this.alert.create({
-                  header: 'Error',
-                  message: data?.msj,
-                  buttons: ['OK'],
-                });
-                await errorAlert.present();
-              }
-            });
 
-            /* try {
-              const data = await this.api.postEntrega(entregaData).toPromise();
-              if (data?.status == 'ok') {
-                await loading.dismiss();
-                this.nav.navigateRoot('/tabs/tab1');
-                this.clearCanvas();
-                const successAlert = await this.alert.create({
-                  header: 'Entrega exitosa',
-                  message: 'La entrega se ha confirmado correctamente.',
-                  buttons: ['OK'],
-                });
-                await successAlert.present();
-              } else {
-                await loading.dismiss();
-                const errorAlert = await this.alert.create({
-                  header: 'Error',
-                  message: data?.msj,
-                  buttons: ['OK'],
-                });
-                await errorAlert.present();
+            try {
+              await this.paqService.putPaquete(this.paquete).toPromise();
+
+              let getRastreo = await this.rastreoService.getRastreoByPaquete(this.paquete.idPaquete).toPromise();
+              getRastreo!.idEstado = 1;
+
+              entregaData.idRastreo = getRastreo!.idRastreo;
+              await this.rastreoService.putRastreo(getRastreo).toPromise();
+
+              await this.api.postEntrega(entregaData).toPromise();
+
+              const localPaq = JSON.parse(localStorage.getItem(`scannedResults_${this.uid}`)!);
+
+              for (let i = 0; i < localPaq.length; i++) {
+                localPaq[i] = await localPaq[i].filter((item: any) => item.id !== this.paquete.idPaquete);
               }
+
+              const updatedPaqs = await localPaq.filter((subarray: any) => subarray.length > 0);
+
+              localStorage.setItem(`scannedResults_${this.uid}`, JSON.stringify(updatedPaqs));
+
+              let packageId: any
+
+              const generateWaypointsFromScannedResults = () => {
+                const waypoints: WayPointInterface[] = [];
+
+                for (const i of updatedPaqs) {
+                  packageId = i[0].id;
+                  const latLng = { lat: i[0].lat, lng: i[0].lng };
+                  const waypoint: WayPointInterface = { location: latLng, stopover: true };
+
+                  waypoints.push(waypoint);
+                  this.wayService.associatePackageWithWaypoint(packageId, waypoint);
+                }
+                return waypoints;
+              }
+              const waypoints = generateWaypointsFromScannedResults();
+              await this.wayService.setWaypoints(waypoints);
+
+              await loading.dismiss();
+              await this.presentAlert('Entrega confirmada', 'La entrega se ha confirmado exitosamente.', 'Aceptar');
+              this.nav.back();
+
             } catch (error) {
+              console.log(error);
               await loading.dismiss();
-              const errorAlert = await this.alert.create({
-                header: 'Error en el servidor',
-                message: 'Ha ocurrido un error al confirmar la entrega. Por favor, inténtalo nuevamente.',
-                buttons: ['OK'],
-              });
-              await errorAlert.present();
-            } finally {
-              await loading.dismiss();
-            } */
+              this.presentAlert('Error en el servidor', 'Ha ocurrido un error al confirmar la entrega. Por favor, revisa tu conexión a internet inténtalo nuevamente.', 'OK');
+              return;
+            }
           },
         },
       ],
@@ -147,7 +138,6 @@ export class EntregaPage {
     const canvas: any = this.elementRef.nativeElement.querySelector('canvas');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight - 140;
-    console.log(canvas.width, ' -- ', canvas.height);
 
     if (this.signaturePad) {
       this.signaturePad.clear();
@@ -178,24 +168,7 @@ export class EntregaPage {
     this.newForm.patchValue({
       firmaDestinatario: dataURL,
     });
-    /* const blob = this.convertBase64toBlob(dataURL);
-    console.log(blob); */
   }
-
-  /* convertBase64toBlob(dataURL: any): Blob {
-    const base64Prefix = 'data:image/png;base64,';
-    const base64Data = dataURL.substring(base64Prefix.length);
-
-    const byteCharacters = atob(base64Data);
-    const byteArrays = new Uint8Array(byteCharacters.length);
-
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteArrays[i] = byteCharacters.charCodeAt(i);
-    }
-
-    const blob = new Blob([byteArrays], { type: 'image/png' });
-    return blob;
-  } */
 
   isCanvasBlank(): boolean {
     if (this.signaturePad) {
@@ -209,91 +182,119 @@ export class EntregaPage {
     this.signaturePad.clear();
   }
 
-  tipoNovedad: any[] = [];
-
   async reportNovedad() {
-    const loading = await this.loading.create({
-      message: 'Cargando...',
-      spinner: 'lines',
-    });
-    await loading.present();
-    /* this.novService.getTipoNovedad().subscribe(
-      data => {
-        this.tipoNovedad = data;
-      },
-      error => {
-        console.log(error);
-        this.alert.create({
-          header: 'Error en el servidor',
-          message: 'No se pudo cargar el tipo de novedad. Por favor, inténtalo nuevamente.',
-          buttons: ['OK']
-        }).then(alert => alert.present());
-      }
-    ); */
-    await loading.dismiss();
 
-    const tipoNovedadAlert = await this.alert.create({
-      header: 'Tipo novedad',
-      inputs: this.tipoNovedad.map((tipo: any) => ({
-        type: 'radio',
-        label: tipo.tipoNovedad,
-        value: tipo.idTipoNovedad,
-        checked: false
-      })),
-      buttons: [
-        'Cancelar',
-        {
-          text: 'Siguiente',
-          handler: tipoNovedadId => {
-            if (!tipoNovedadId) {
-              this.alert.create({
-                header: 'Error',
-                message: 'Debes seleccionar un tipo de novedad.',
-                buttons: ['OK']
-              }).then(alert => alert.present());
-              return
-            }
-            this.mostrarDescripcionAlert(tipoNovedadId);
-            console.log('seleccion:', tipoNovedadId);
-          }
-        }
-      ]
-    });
-
-    await tipoNovedadAlert.present();
-  }
-
-  async mostrarDescripcionAlert(tipoNovedad: any) {
-    const descripcionAlert = await this.alert.create({
-      header: 'Detalles novedad',
+    const descAlert = await this.alert.create({
+      header: 'Detalles adicionales',
       inputs: [
         {
           name: 'descripcion',
           type: 'textarea',
-          placeholder: 'Detalles adicionales...'
+          placeholder: '¿Qué ha pasado con este paquete?'
         }
       ],
       buttons: [
         'Cancelar',
         {
           text: 'Reportar',
-          handler: (data: any) => {
-            const descripcion = data.descripcion;
-            console.log('Idtipo:', tipoNovedad);
-            console.log('desc:', descripcion);
+          handler: async (data: any) => {
+            if (!data.descripcion) {
+              this.presentAlert('Error', 'Debes ingresar una descripción de la novedad.', 'OK');
+            } else {
+              await descAlert.dismiss();
+              this.paquete.idEstado = 4
+              const confirmAlert = await this.alert.create({
+                header: 'Confirmar reporte',
+                message: 'Una vez confirmado, no podrá ser modificado o eliminado y este paquete ya no podrá ser entregado en esta ruta y deberá volver a bodega.',
+                buttons: [
+                  {
+                    text: 'Cancelar',
+                    role: 'cancel'
+                  },
+                  {
+                    text: 'Confirmar',
+                    handler: async () => {
+                      await confirmAlert.dismiss();
+                      const loading = await this.loadingAlert('Guardando...');
+
+                      try {
+
+                        await this.paqService.putPaquete(this.paquete).toPromise();
+
+                        let getRastreo = await this.rastreoService.getRastreoByPaquete(this.paquete.idPaquete).toPromise();
+                        getRastreo!.idEstado = 2;
+                        getRastreo!.motivoNoEntrega = data.descripcion;
+
+                        await this.rastreoService.putRastreo(getRastreo).toPromise();
+
+                        const localPaq = JSON.parse(localStorage.getItem(`scannedResults_${this.uid}`)!);
+
+                        for (let i = 0; i < localPaq.length; i++) {
+                          localPaq[i] = await localPaq[i].filter((item: any) => item.id !== this.paquete.idPaquete);
+                        }
+
+                        const updatedPaqs = await localPaq.filter((subarray: any) => subarray.length > 0);
+
+                        localStorage.setItem(`scannedResults_${this.uid}`, JSON.stringify(updatedPaqs));
+
+                        let packageId: any
+
+                        const generateWaypointsFromScannedResults = () => {
+                          const waypoints: WayPointInterface[] = [];
+
+                          for (const i of updatedPaqs) {
+                            packageId = i[0].id;
+                            const latLng = { lat: i[0].lat, lng: i[0].lng };
+                            const waypoint: WayPointInterface = { location: latLng, stopover: true };
+
+                            waypoints.push(waypoint);
+                            this.wayService.associatePackageWithWaypoint(packageId, waypoint);
+                          }
+                          return waypoints;
+                        }
+                        const waypoints = generateWaypointsFromScannedResults();
+                        await this.wayService.setWaypoints(waypoints);
+
+                        await loading.dismiss();
+                        await this.presentAlert('Novedad reportada', 'La novedad se ha reportado exitosamente.', 'Aceptar');
+                        this.nav.back();
+                      } catch (error) {
+                        await loading.dismiss();
+                        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al reportar la novedad. Por favor, revisa tu conexión a internet o inténtalo nuevamente.', 'OK');
+                        return;
+                      }
+                    }
+                  }
+                ]
+              });
+              await confirmAlert.present();
+            }
           }
         }
       ]
     });
-
-    await descripcionAlert.present();
-  }
-
-  getTipoNovedadById(idTipoNovedad: any) {
-    return this.tipoNovedad.find(tipo => tipo.id === idTipoNovedad);
+    await descAlert.present();
   }
 
   goBack() {
     this.nav.back();
+  }
+
+  async presentAlert(title: string, msg: string, button: string) {
+    const alert = await this.alert.create({
+      header: title,
+      message: msg,
+      buttons: [button]
+    });
+    await alert.present();
+  }
+
+  async loadingAlert(msg: string) {
+    const loading = await this.loading.create({
+      message: msg,
+      spinner: 'lines',
+    });
+    await loading.present();
+    return loading;
   }
 }

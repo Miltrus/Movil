@@ -28,8 +28,14 @@ export class RastreoService {
     return this.http.get<RastreoInterface[]>(address, { headers });
   }
 
-  getOnerastreo(id: any): Observable<RastreoInterface> {
+  getOneRastreo(id: any): Observable<RastreoInterface> {
     let address = this.url + 'rastreo/' + id;
+    const headers = this.getHeaders();
+    return this.http.get<RastreoInterface>(address, { headers });
+  }
+
+  getRastreoByPaquete(id: any): Observable<RastreoInterface> {
+    let address = this.url + 'rastreo/paquete/' + id;
     const headers = this.getHeaders();
     return this.http.get<RastreoInterface>(address, { headers });
   }

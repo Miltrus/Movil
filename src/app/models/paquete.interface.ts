@@ -16,7 +16,7 @@ export interface PaqueteInterface {
     fechaAproxEntrega?: any | null | undefined;
     documentoRemitente?: string | null | undefined;
     idUsuario?: any | null | undefined;
-    idEstado?: string | null | undefined;
+    idEstado?: any | null | undefined;
     idTamano?: string | null | undefined;
     idTipo?: string | null | undefined;
     lat?: any | null | undefined;

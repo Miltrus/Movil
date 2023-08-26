@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import { WayPointInterface } from 'src/app/models/waypoint.interface';
+import { PaqueteService } from 'src/app/services/api/paquete.service';
+import { RastreoService } from 'src/app/services/api/rastreo.service';
 import { WaypointsService } from 'src/app/services/waypoints.service';
 
 declare var google: any;
@@ -30,11 +32,16 @@ export class MapPage {
     { location: { lat: 6.29747, lng: -75.55033 }, stopover: true },
   ];
 
+  paquete: any;
+  uid = parseInt(localStorage.getItem('uid')!);
+
   constructor(
     private loading: LoadingController,
     private alert: AlertController,
     private nav: NavController,
     private waypointService: WaypointsService,
+    private paqService: PaqueteService,
+    private rastreoService: RastreoService
   ) { }
 
   ionViewDidEnter() {
@@ -123,11 +130,7 @@ export class MapPage {
 
 
   async calculateRoute() {
-    const loading = await this.loading.create({
-      message: 'Calculando la ruta...',
-      spinner: 'lines',
-    });
-    await loading.present();
+    const loading = await this.loadingAlert('Calculando la ruta...');
 
     let attempts = 0;
     const maxAttempts = 10;
@@ -150,12 +153,8 @@ export class MapPage {
           const route = response.routes[0];
           const legs = route.legs;
           const currentLeg = legs[this.currentWaypointIndex];
-          console.log("this.waypoints:", this.waypoints); // Verifica que this.waypoints tenga valores
-          console.log("currentWaypointIndex:", this.currentWaypointIndex); // Verifica el valor de this.currentWaypointIndex
-          console.log("location:", this.waypoints[this.currentWaypointIndex]?.location); // Verifica la propiedad location en el objeto de waypoint
 
           const waypointLatLng = this.waypoints[this.currentWaypointIndex].location;
-          console.log("waypointLatLng:", waypointLatLng); // Verifica que waypointLatLng tenga un valor
 
           if (this.isCloseToWaypoint(this.origin, waypointLatLng)) {
             console.log(`Llegaste al waypoint ${this.currentWaypointIndex}`, currentLeg);
@@ -198,7 +197,7 @@ export class MapPage {
   }
 
   isCloseToWaypoint(currentLatLng: { lat: number, lng: number }, waypointLatLng: { lat: number, lng: number }): boolean {
-    const proximidad = 20000; // umbral de proximidad en metros
+    const proximidad = 100; // umbral de proximidad en metros
 
     // calculamos la distancia entre la ubicación actual y el waypoint
     const distance = google.maps.geometry.spherical.computeDistanceBetween(
@@ -231,7 +230,6 @@ export class MapPage {
 
     if (paqId !== null) {
       console.log("Paquete a entregar:", paqId, currentWaypoint);
-      this.entregaButton = false;
 
       // Pasar el ID del paquete como query parameter en la URL al navegar
       this.nav.navigateForward('/tabs/entrega', { queryParams: { paqId } });
@@ -245,88 +243,74 @@ export class MapPage {
   }
 
 
-  tipoNovedad: any[] = [];
-
   async reportNovedad() {
-    const loading = await this.loading.create({
-      message: 'Cargando...',
-      spinner: 'lines',
-    });
-    await loading.present();
-    /* this.novService.getTipoNovedad().subscribe(
-      data => {
-        this.tipoNovedad = data;
-      },
-      error => {
-        console.log(error);
-        this.alert.create({
-          header: 'Error en el servidor',
-          message: 'No se pudo cargar el tipo de novedad. Por favor, revisa tu conexión a internet o inténtalo nuevamente',
-          buttons: ['OK']
-        }).then(alert => alert.present());
-      }
-    ); */
-    await loading.dismiss();
-
-    const tipoNovedadAlert = await this.alert.create({
-      header: 'Tipo novedad',
-      inputs: this.tipoNovedad.map((tipo: any) => ({
-        type: 'radio',
-        label: tipo.tipoNovedad,
-        value: tipo.idTipoNovedad,
-        checked: false
-      })),
-      buttons: [
-        'Cancelar',
-        {
-          text: 'Siguiente',
-          handler: tipoNovedadId => {
-            if (!tipoNovedadId) {
-              this.alert.create({
-                header: 'Error',
-                message: 'Debes seleccionar un tipo de novedad.',
-                buttons: ['OK']
-              }).then(alert => alert.present());
-              return
-            }
-            this.mostrarDescripcionAlert(tipoNovedadId);
-            console.log('seleccion:', tipoNovedadId);
-          }
-        }
-      ]
-    });
-
-    await tipoNovedadAlert.present();
-  }
-
-  async mostrarDescripcionAlert(tipoNovedad: any) {
-    const descripcionAlert = await this.alert.create({
-      header: 'Detalles novedad',
+    const descAlert = await this.alert.create({
+      header: 'Detalles adicionales',
       inputs: [
         {
           name: 'descripcion',
           type: 'textarea',
-          placeholder: 'Detalles adicionales...'
+          placeholder: '¿Qué ha pasado?'
         }
       ],
       buttons: [
         'Cancelar',
         {
           text: 'Reportar',
-          handler: (data: any) => {
-            const descripcion = data.descripcion;
-            console.log('Idtipo:', tipoNovedad);
-            console.log('desc:', descripcion);
+          handler: async (desc: any) => {
+            if (!desc.descripcion) {
+              this.presentAlert('Error', 'Debes ingresar una descripción de la novedad.', 'OK');
+            } else {
+              await descAlert.dismiss();
+              const confirmAlert = await this.alert.create({
+                header: 'Confirmar reporte',
+                message: 'Una vez confirmado, no podrá ser modificado o eliminado y los paquetes que no hayan sido entregados en esta ruta deberán volver a bodega, y la ruta se finalizará',
+                buttons: [
+                  {
+                    text: 'Cancelar',
+                    role: 'cancel'
+                  },
+                  {
+                    text: 'Confirmar',
+                    handler: async () => {
+                      await confirmAlert.dismiss();
+                      const loading = await this.loadingAlert('Guardando...');
+                      try {
+                        this.paqService.getPaqueteByUser(this.uid).subscribe(async (data: any) => {
+                          this.paquete = data;
+
+                          for (const paqueteItem of this.paquete) {
+                            paqueteItem.idEstado = 4;
+
+                            await this.paqService.putPaquete(paqueteItem).toPromise();
+
+                            let getRastreo = await this.rastreoService.getRastreoByPaquete(paqueteItem.idPaquete).toPromise();
+
+                            getRastreo!.idEstado = 2;
+                            getRastreo!.motivoNoEntrega = desc.descripcion;
+
+                            await this.rastreoService.putRastreo(getRastreo).toPromise();
+
+                          }
+                          await loading.dismiss();
+                          await this.presentAlert('Novedad reportada', 'La novedad se ha reportado exitosamente.', 'Aceptar');
+                        });
+                      } catch (error) {
+                        await loading.dismiss();
+                        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al reportar la novedad. Por favor, revisa tu conexión a internet o inténtalo nuevamente.', 'OK');
+                        return;
+                      }
+                    }
+                  }
+                ]
+              });
+              await confirmAlert.present();
+            }
           }
         }
       ]
     });
-
-    await descripcionAlert.present();
-  }
-
-  getTipoNovedadById(idTipoNovedad: any) {
-    return this.tipoNovedad.find(tipo => tipo.id === idTipoNovedad);
+    await descAlert.present();
   }
 
   // para actualizar la posición del marcador
@@ -355,5 +339,23 @@ export class MapPage {
     // limpiar el marcador de la ubicación actual cuando se navega hacia atrás
     this.clearCurrentLocationMarker();
     this.nav.navigateBack('tabs/escaner');
+  }
+
+  async presentAlert(title: string, msg: string, button: string) {
+    const alert = await this.alert.create({
+      header: title,
+      message: msg,
+      buttons: [button]
+    });
+    await alert.present();
+  }
+
+  async loadingAlert(msg: string) {
+    const loading = await this.loading.create({
+      message: msg,
+      spinner: 'lines',
+    });
+    await loading.present();
+    return loading;
   }
 }

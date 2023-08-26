@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { BarcodeScanner, TorchStateResult } from '@capacitor-community/barcode-scanner';
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import { WayPointInterface } from 'src/app/models/waypoint.interface';
@@ -11,7 +11,7 @@ import { WaypointsService } from 'src/app/services/waypoints.service';
   templateUrl: 'escaner.page.html',
   styleUrls: ['escaner.page.scss']
 })
-export class EscanerPage implements OnInit, OnDestroy {
+export class EscanerPage implements OnDestroy {
 
   scannedResults: any = [];
   contentVisibility = true;
@@ -20,7 +20,7 @@ export class EscanerPage implements OnInit, OnDestroy {
 
   packageId: any;
 
-  uid = localStorage.getItem('uid');
+  uid = parseInt(localStorage.getItem('uid')!);
 
   constructor(
     private alert: AlertController,
@@ -32,7 +32,7 @@ export class EscanerPage implements OnInit, OnDestroy {
   ) { }
 
 
-  ngOnInit(): void {
+  ionViewDidEnter() {
     const scannedLocalResults = localStorage.getItem(`scannedResults_${this.uid}`);
     if (scannedLocalResults) {
       this.scannedResults = JSON.parse(scannedLocalResults);
@@ -69,29 +69,30 @@ export class EscanerPage implements OnInit, OnDestroy {
         text: 'Confirmar',
         handler: async () => {
           await alert.dismiss();
-          const loading = await this.loading.create({
-            message: 'Cargando...',
-            spinner: 'lines'
-          });
-          await loading.present();
-          for (const i of this.scannedResults) {
-            for (const j of i) {
-              const rastreo = {
-                idPaquete: j.id,
-              };
+          const loading = await this.loadingAlert('Cargando...');
+          try {
+            for (const i of this.scannedResults) {
+              for (const j of i) {
+                const rastreo = {
+                  idPaquete: j.id,
+                };
 
-              try {
-                await this.rastreo.deleteRastreo(rastreo).toPromise();
-
-                await this.rastreo.postRastreo(rastreo).toPromise();
-                const waypoints = this.generateWaypointsFromScannedResults();
-                await this.waypointService.setWaypoints(waypoints);
-                this.nav.navigateForward('/tabs/mapa');
-              } catch (error) {
-                await loading.dismiss();
-                this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+                try {
+                  await this.rastreo.deleteRastreo(rastreo).toPromise();
+                  await this.rastreo.postRastreo(rastreo).toPromise();
+                } catch (error) {
+                  this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+                }
               }
             }
+
+            const waypoints = this.generateWaypointsFromScannedResults();
+            await this.waypointService.setWaypoints(waypoints);
+            this.nav.navigateForward('/tabs/mapa');
+            await loading.dismiss();
+          } catch (error) {
+            await loading.dismiss();
+            this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
           }
         }
       }]
@@ -164,23 +165,19 @@ export class EscanerPage implements OnInit, OnDestroy {
             if (codExists) {
               this.presentAlert('Paquete duplicado', 'Este paquete ya ha sido ingresado anteriormente.');
             } else {
-              const loading = await this.loading.create({
-                message: 'Cargando...',
-                spinner: 'lines'
-              });
-              await loading.present();
+              const loading = await this.loadingAlert('Cargando...');
 
               this.api.getPaqueteByCodigo(qrDataArray[0].cod).subscribe(
                 async (data: any) => {
                   if (data.status != 'error') {
 
-                    if (data.idUsuario != null && data.idUsuario != parseInt(this.uid!)) {
+                    if (data.idUsuario != null && data.idUsuario != this.uid) {
                       await loading.dismiss();
                       this.presentAlert('Paquete ya asignado', 'Este paquete ya ha sido asignado a otro mensajero o ya ha sido entregado.');
                       return;
                     }
 
-                    data.idUsuario = parseInt(this.uid!);
+                    data.idUsuario = this.uid;
                     data.idEstado = 2;
                     this.api.putPaquete(data).subscribe(
                       async (res: any) => {
@@ -240,11 +237,7 @@ export class EscanerPage implements OnInit, OnDestroy {
           text: 'Confirmar',
           handler: async (data) => {
             if (data.manualCode) {
-              const loading = await this.loading.create({
-                message: 'Validando...',
-                spinner: 'lines'
-              });
-              await loading.present();
+              const loading = await this.loadingAlert('Validando...');
               if (this.scannedResults.find((i: any) =>
                 i.some((item: any) => item.cod === data.manualCode.toUpperCase()))) {
                 await alertInput.dismiss();
@@ -258,12 +251,12 @@ export class EscanerPage implements OnInit, OnDestroy {
                       this.presentAlert('Error', 'El código ingresado no es válido. Por favor, ingresa un código válido o escanea el QR.');
                     } else {
 
-                      if (res.idUsuario != null && res.idUsuario != parseInt(this.uid!)) {
+                      if (res.idUsuario != null && res.idUsuario != this.uid) {
                         await loading.dismiss();
                         this.presentAlert('Paquete ya asignado', 'Este paquete ya ha sido asignado a otro mensajero o ya ha sido entregado.');
                         return;
                       }
-                      res.idUsuario = parseInt(this.uid!);
+                      res.idUsuario = this.uid;
                       res.idEstado = 2;
                       this.api.putPaquete(res).subscribe(
                         async (data: any) => {
@@ -320,11 +313,7 @@ export class EscanerPage implements OnInit, OnDestroy {
           text: 'Confirmar',
           handler: async () => {
             await alert.dismiss();
-            const loading = await this.loading.create({
-              message: 'Cargando...',
-              spinner: 'lines'
-            });
-            await loading.present();
+            const loading = await this.loadingAlert('Cargando...');
             const paqueteToRemove = this.scannedResults[index];
 
             this.api.getOnePaquete(paqueteToRemove[0].id).subscribe(
@@ -402,6 +391,15 @@ export class EscanerPage implements OnInit, OnDestroy {
       buttons: ['OK']
     });
     await alert.present();
+  }
+
+  async loadingAlert(msg: string) {
+    const loading = await this.loading.create({
+      message: msg,
+      spinner: 'lines',
+    });
+    await loading.present();
+    return loading;
   }
 
 }
