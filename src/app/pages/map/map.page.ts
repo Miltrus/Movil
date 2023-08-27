@@ -23,8 +23,8 @@ export class MapPage {
   locationWatchId: number | null = null; // para almacenar el id de la suscripción de watchPosition
   currentWaypointIndex: any = 0;
 
-  origin: { lat: number, lng: number } = { lat: 0, lng: 0 };
-  destination = { lat: 6.26732, lng: -75.59406 };
+  origin: google.maps.LatLng = new google.maps.LatLng(0, 0);
+  destination: google.maps.LatLng = new google.maps.LatLng(6.29051, -75.57353);
 
   entregaButton: boolean = false;
 
@@ -41,7 +41,7 @@ export class MapPage {
     private nav: NavController,
     private waypointService: WaypointsService,
     private paqService: PaqueteService,
-    private rastreoService: RastreoService
+    private rastreoService: RastreoService,
   ) { }
 
   ionViewDidEnter() {
@@ -92,10 +92,7 @@ export class MapPage {
       const tryGetLocation = () => {
         this.locationWatchId = navigator.geolocation.watchPosition(
           (position) => {
-            const currentLatLng = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            };
+            const currentLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 
             this.origin = currentLatLng;
             this.updateMarkerPosition(currentLatLng);
@@ -140,11 +137,12 @@ export class MapPage {
 
       this.directionsService.route({
         origin: this.origin,
-        destination: this.origin,
+        destination: this.destination,
         waypoints: this.waypoints,
         optimizeWaypoints: true,
-        travelMode: google.maps.TravelMode.DRIVING
-      }, (response: any, status: any) => {
+        travelMode: google.maps.TravelMode.DRIVING,
+        unitSystem: google.maps.UnitSystem.METRIC
+      }, async (response: any, status: any) => {
 
         if (status === google.maps.DirectionsStatus.OK) {
           this.directionsDisplay.setDirections(response);
@@ -154,10 +152,8 @@ export class MapPage {
           const legs = route.legs;
           const currentLeg = legs[this.currentWaypointIndex];
 
-          const waypointLatLng = this.waypoints[this.currentWaypointIndex].location;
-
-          if (this.isCloseToWaypoint(this.origin, waypointLatLng)) {
-            console.log(`Llegaste al waypoint ${this.currentWaypointIndex}`, currentLeg);
+          if (await this.isCloseToWaypoint(currentLeg)) {
+            console.log(`Llegaste al waypoint ${this.currentWaypointIndex + 1}`, currentLeg);
             this.currentWaypointIndex++;
             this.entregaButton = true;
 
@@ -173,7 +169,7 @@ export class MapPage {
             loading.dismiss();
             setTimeout(() => {
               tryCalculateRoute();
-            }, 50000000);
+            }, 10000);
           }
           loading.dismiss();
 
@@ -196,27 +192,25 @@ export class MapPage {
     tryCalculateRoute(); // llamamos la función recursiva para calcular la ruta
   }
 
-  isCloseToWaypoint(currentLatLng: { lat: number, lng: number }, waypointLatLng: { lat: number, lng: number }): boolean {
-    const proximidad = 100; // umbral de proximidad en metros
+  async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
+    const proximidad = 2000; // Umbral de proximidad en metros
 
-    // calculamos la distancia entre la ubicación actual y el waypoint
-    const distance = google.maps.geometry.spherical.computeDistanceBetween(
-      new google.maps.LatLng(currentLatLng.lat, currentLatLng.lng),
-      new google.maps.LatLng(waypointLatLng.lat, waypointLatLng.lng)
-    );
+    const remainingDistance = currentLeg.distance.value;
+    console.log('Distancia restante al waypoint:', remainingDistance);
 
-    // verificamos si la distancia es menor que el umbral de proximidad
-    return distance < proximidad;
+    const isClose = remainingDistance < proximidad;
+    console.log('¿Estás cerca del waypoint?', isClose);
+    return isClose;
   }
 
-  openGoogleMaps() {
-    let googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${this.origin.lat},${this.origin.lng}&destination=${this.origin.lat},${this.origin.lng}`;
 
-    if (this.waypoints.length > 0) {
-      const waypointsString = this.waypoints
-        .map(waypoint => `${waypoint.location.lat},${waypoint.location.lng}`)
-        .join('|');
-      googleMapsUrl += `&waypoints=${waypointsString}`;
+  openGoogleMaps() {
+    let googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${this.origin.lat()},${this.origin.lng()}&destination=${this.destination.lat()},${this.destination.lng()}`;
+
+    if (this.currentWaypointIndex < this.waypoints.length - 1) {
+      const nextWaypoint = this.waypoints[this.currentWaypointIndex + 1];
+      const nextWaypointString = `${nextWaypoint.location.lat},${nextWaypoint.location.lng}`;
+      googleMapsUrl += `&waypoints=${nextWaypointString}`;
     }
 
     window.open(googleMapsUrl, '_system');
@@ -239,7 +233,7 @@ export class MapPage {
   }
 
   getCurrentWaypoint(): any {
-    return this.waypoints[this.currentWaypointIndex - 1];
+    return this.waypoints[this.currentWaypointIndex];
   }
 
 

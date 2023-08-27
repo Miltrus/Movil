@@ -23,33 +23,9 @@ export class EntregaService {
     });
   }
 
-  getAllEntregas(): Observable<EntregaInterface[]> {
-    let address = this.url + 'entrega';
-    const headers = this.getHeaders();
-    return this.http.get<EntregaInterface[]>(address, { headers });
-  }
-
-  getOneEntrega(id: any): Observable<EntregaInterface> {
-    let address = this.url + 'entrega/' + id;
-    const headers = this.getHeaders();
-    return this.http.get<EntregaInterface>(address, { headers });
-  }
-
   postEntrega(form: EntregaInterface): Observable<ResponseInterface> {
     let address = this.url + 'entrega';
     const headers = this.getHeaders();
     return this.http.post<ResponseInterface>(address, form, { headers });
-  }
-
-  putEntrega(id: any): Observable<ResponseInterface> {
-    let address = this.url + 'entrega/' + id;
-    const headers = this.getHeaders();
-    return this.http.put<ResponseInterface>(address, id, { headers });
-  }
-
-  deleteEntrega(id: any): Observable<ResponseInterface> {
-    let addres = this.url + 'entrega/' + id;
-    const headers = this.getHeaders();
-    return this.http.delete<ResponseInterface>(addres, { headers });
   }
 }

@@ -88,7 +88,7 @@ export class ViewProfilePage implements OnInit {
         await loading.dismiss();
         const alert = await this.alert.create({
           header: 'Error en el servidor',
-          message: 'Ha ocurrido un error al cargar los datos del usuario. Por favor, inténtalo nuevamente.',
+          message: 'Ha ocurrido un error al cargar los datos del usuario. Por favor, revisa tu conexión a internet o inténtalo nuevamente.',
           buttons: ['OK'],
         });
         await alert.present();
@@ -107,7 +107,7 @@ export class ViewProfilePage implements OnInit {
   async changeAvatar() {
     const alert = await this.alert.create({
       header: 'Seleccionar Avatar',
-      inputs: this.defaultAvatars.map((avatar, index) => ({
+      inputs: this.defaultAvatars.map((avatar) => ({
         type: 'radio',
         label: avatar.name,
         value: avatar,

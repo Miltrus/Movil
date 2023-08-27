@@ -96,7 +96,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
         (error) => {
           const errorAlert = this.alert.create({
             header: 'Error en el servidor',
-            message: 'Ha ocurrido un error al cargar los datos. Por favor, inténtalo nuevamente.',
+            message: 'Ha ocurrido un error al cargar los datos. Por favor, revisa tu conexión a internet o inténtalo nuevamente.',
             buttons: ['OK']
           });
           errorAlert.then((alert) => alert.present());
@@ -168,7 +168,7 @@ export class EditProfilePage implements OnInit, HasUnsavedChanges {
             } catch (error) {
               const errorAlert = await this.alert.create({
                 header: 'Error en el servidor',
-                message: 'Ha ocurrido un error al guardar los cambios. Por favor, inténtalo nuevamente.',
+                message: 'Ha ocurrido un error al guardar los cambios. Por favor, revisa tu conexión a internet o inténtalo nuevamente.',
                 buttons: ['OK']
               });
               await errorAlert.present();

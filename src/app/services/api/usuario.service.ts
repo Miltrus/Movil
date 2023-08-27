@@ -25,34 +25,16 @@ export class UsuarioService {
     });
   }
 
-  getAllUsuarios(): Observable<UsuarioInterface[]> {
-    let address = this.url + 'usuario';
-    const headers = this.getHeaders();
-    return this.http.get<UsuarioInterface[]>(address, { headers });
-  }
-
   getOneUsuario(id: any): Observable<UsuarioInterface> {
     let address = this.url + 'usuario/' + id;
     const headers = this.getHeaders();
     return this.http.get<UsuarioInterface>(address, { headers });
   }
 
-  postUsuario(form: UsuarioInterface): Observable<ResponseInterface> {
-    let address = this.url + 'usuario';
-    const headers = this.getHeaders();
-    return this.http.post<ResponseInterface>(address, form, { headers });
-  }
-
   putUsuario(id: any): Observable<ResponseInterface> {
     let address = this.url + 'usuario/' + id;
     const headers = this.getHeaders();
     return this.http.put<ResponseInterface>(address, id, { headers });
-  }
-
-  deleteUsuario(id: any): Observable<ResponseInterface> {
-    let addres = this.url + 'usuario/' + id;
-    const headers = this.getHeaders();
-    return this.http.delete<ResponseInterface>(addres, { headers });
   }
 
   getTipoDocumento(): Observable<TipoDocumentoInterface[]> {

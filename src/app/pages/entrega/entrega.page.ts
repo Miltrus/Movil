@@ -115,7 +115,7 @@ export class EntregaPage {
                 return waypoints;
               }
               const waypoints = generateWaypointsFromScannedResults();
-              await this.wayService.setWaypoints(waypoints);
+              this.wayService.setWaypoints(waypoints);
 
               await loading.dismiss();
               await this.presentAlert('Entrega confirmada', 'La entrega se ha confirmado exitosamente.', 'Aceptar');
@@ -239,7 +239,7 @@ export class EntregaPage {
 
                         let packageId: any
 
-                        const generateWaypointsFromScannedResults = () => {
+                        const generateWaypointsFromScannedResults = async () => {
                           const waypoints: WayPointInterface[] = [];
 
                           for (const i of updatedPaqs) {
@@ -252,8 +252,9 @@ export class EntregaPage {
                           }
                           return waypoints;
                         }
+
                         const waypoints = generateWaypointsFromScannedResults();
-                        await this.wayService.setWaypoints(waypoints);
+                        this.wayService.setWaypoints(await waypoints);
 
                         await loading.dismiss();
                         await this.presentAlert('Novedad reportada', 'La novedad se ha reportado exitosamente.', 'Aceptar');
