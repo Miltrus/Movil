@@ -195,7 +195,7 @@ export class MapPage {
   }
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 2000; // Umbral de proximidad en metros
+    const proximidad = 20000; // Umbral de proximidad en metros
 
     const remainingDistance = currentLeg.distance.value;
     console.log('Distancia restante al waypoint:', remainingDistance);
@@ -205,14 +205,19 @@ export class MapPage {
     return isClose;
   }
 
-
+  // ESTO TAMPOCO SIRVE, PUES TOMA LOS WAY RECIBIDOS EN ORDEN Y NO LOS CALCULADOS
   openGoogleMaps() {
-    let googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${this.origin.lat()},${this.origin.lng()}&destination=${this.destination.lat()},${this.destination.lng()}`;
+    let googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${this.origin.lat()},${this.origin.lng()}`;
 
-    if (this.currentWaypointIndex < this.waypoints.length - 1) {
-      const nextWaypoint = this.waypoints[this.currentWaypointIndex + 1];
+    if (this.currentWaypointIndex < this.waypoints.length) {
+      const nextWaypoint = this.waypoints[this.currentWaypointIndex];
+      console.log("nextWaypoint:", nextWaypoint);
       const nextWaypointString = `${nextWaypoint.location.lat},${nextWaypoint.location.lng}`;
-      googleMapsUrl += `&waypoints=${nextWaypointString}`;
+      googleMapsUrl += `&destination=${nextWaypointString}`;
+    } else {
+      // Si no hay más waypoints, usar el destino final
+      const finalDestinationString = `${this.destination.lat()},${this.destination.lng()}`;
+      googleMapsUrl += `&destination=${finalDestinationString}`;
     }
 
     window.open(googleMapsUrl, '_system');
