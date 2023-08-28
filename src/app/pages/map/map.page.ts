@@ -159,6 +159,7 @@ export class MapPage {
 
             if (this.currentWaypointIndex < this.waypoints.length) {
               // si hay mas waypoints, intentamos calcular la ruta nuevamente
+
               tryCalculateRoute();
             } else {
               console.log('Has llegado a tu destino.');
@@ -228,12 +229,12 @@ export class MapPage {
       // Pasar el ID del paquete como query parameter en la URL al navegar
       this.nav.navigateForward('/tabs/entrega', { queryParams: { paqId } });
     } else {
-      console.log("No se encontró el paquete asociado al waypoint.");
+      console.log("No se encontró el paquete asociado al waypoint:", currentWaypoint);
     }
   }
 
   getCurrentWaypoint(): any {
-    return this.waypoints[this.currentWaypointIndex];
+    return this.waypoints[this.currentWaypointIndex - 1];
   }
 
 
