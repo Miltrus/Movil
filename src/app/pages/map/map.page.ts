@@ -16,6 +16,7 @@ export class MapPage {
 
   map = null;
   mapEle: any;
+  formattedFechAct: any
   indicators: any;
   directionsService = new google.maps.DirectionsService();  // para calcular la ruta
   directionsDisplay = new google.maps.DirectionsRenderer(); // para mostrar la ruta
@@ -237,6 +238,15 @@ export class MapPage {
     return this.waypoints[this.currentWaypointIndex - 1];
   }
 
+  getFechAct() {
+    const fechaActual = new Date();
+    this.formattedFechAct = `${fechaActual.getFullYear()}-${(fechaActual.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${fechaActual.getDate().toString().padStart(2, '0')} ${fechaActual.getHours().toString().padStart(2, '0')}:${fechaActual.getMinutes().toString().padStart(2, '0')}:${fechaActual.getSeconds().toString().padStart(2, '0')}`;
+
+    return this.formattedFechAct
+  }
+
 
   async reportNovedad() {
     const descAlert = await this.alert.create({
@@ -256,6 +266,7 @@ export class MapPage {
             if (!desc.descripcion) {
               this.presentAlert('Error', 'Debes ingresar una descripción de la novedad.', 'OK');
             } else {
+              this.getFechAct();
               await descAlert.dismiss();
               const confirmAlert = await this.alert.create({
                 header: 'Confirmar reporte',
@@ -283,6 +294,7 @@ export class MapPage {
 
                             getRastreo!.idEstado = 2;
                             getRastreo!.motivoNoEntrega = desc.descripcion;
+                            getRastreo!.fechaNoEntrega = this.formattedFechAct;
 
                             await this.rastreoService.putRastreo(getRastreo).toPromise();
 

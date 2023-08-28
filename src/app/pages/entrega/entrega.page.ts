@@ -22,6 +22,7 @@ export class EntregaPage {
   signaturePad: any;
 
   uid = localStorage.getItem('uid')!;
+  formattedFechAct: any
 
   newForm: FormGroup;
   paqId: any;
@@ -48,6 +49,7 @@ export class EntregaPage {
 
   async ngOnInit() {
     const loading = await this.loadingAlert('Cargando...');
+    this.getFechAct();
 
     this.route.queryParams.subscribe(params => {
       this.paqId = params['paqId'];
@@ -61,7 +63,6 @@ export class EntregaPage {
 
   async save(): Promise<void> {
     this.saveSignature();
-    this.dateAndTime();
     const confirmAlert = await this.alert.create({
       header: 'Confirmar entrega',
       message: '¿Está seguro de que deseas confirmar la entrega?',
@@ -152,15 +153,16 @@ export class EntregaPage {
     this.signaturePad.clear();
   }
 
-  dateAndTime() {
+  getFechAct() {
     const fechaActual = new Date();
-    const formattedFechaEntrega = `${fechaActual.getFullYear()}-${(fechaActual.getMonth() + 1)
+    this.formattedFechAct = `${fechaActual.getFullYear()}-${(fechaActual.getMonth() + 1)
       .toString()
       .padStart(2, '0')}-${fechaActual.getDate().toString().padStart(2, '0')} ${fechaActual.getHours().toString().padStart(2, '0')}:${fechaActual.getMinutes().toString().padStart(2, '0')}:${fechaActual.getSeconds().toString().padStart(2, '0')}`;
 
     this.newForm.patchValue({
-      fechaEntrega: formattedFechaEntrega,
+      fechaEntrega: this.formattedFechAct,
     });
+    return this.formattedFechAct
   }
 
   saveSignature() {
@@ -224,6 +226,7 @@ export class EntregaPage {
                         let getRastreo = await this.rastreoService.getRastreoByPaquete(this.paquete.idPaquete).toPromise();
                         getRastreo!.idEstado = 2;
                         getRastreo!.motivoNoEntrega = data.descripcion;
+                        getRastreo!.fechaNoEntrega = this.formattedFechAct
 
                         await this.rastreoService.putRastreo(getRastreo).toPromise();
 
