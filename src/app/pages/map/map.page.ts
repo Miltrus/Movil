@@ -195,7 +195,7 @@ export class MapPage {
   }
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 20000; // Umbral de proximidad en metros
+    const proximidad = 200; // Umbral de proximidad en metros
 
     const remainingDistance = currentLeg.distance.value;
     console.log('Distancia restante al waypoint:', remainingDistance);

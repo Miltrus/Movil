@@ -13,7 +13,7 @@ import { WaypointsService } from 'src/app/services/waypoints.service';
 })
 export class EscanerPage implements OnDestroy {
 
-  scannedResults: any = [];
+  scannedResults: any[] = [];
   contentVisibility = true;
   isFlashlightOn = false;
   isHelpOpen = false;
@@ -33,12 +33,22 @@ export class EscanerPage implements OnDestroy {
 
 
   ionViewDidEnter() {
-    const scannedLocalResults = localStorage.getItem(`scannedResults_${this.uid}`);
-    if (scannedLocalResults) {
-      this.scannedResults = JSON.parse(scannedLocalResults);
-    } else {
+    this.api.getPaqueteByUser(this.uid).subscribe((data: any) => {
       this.scannedResults = [];
-    }
+
+      if (data.length >= 1) {
+        for (const item of data) {
+          const scannedPackage = {
+            id: item.idPaquete,
+            cod: item.codigoPaquete,
+            lat: item.lat,
+            lng: item.lng
+          };
+          this.scannedResults.push([scannedPackage]);
+        }
+      }
+    });
+
   }
 
   generateWaypointsFromScannedResults(): WayPointInterface[] {
@@ -71,6 +81,7 @@ export class EscanerPage implements OnDestroy {
           await alert.dismiss();
           const loading = await this.loadingAlert('Cargando...');
           try {
+            console.log("ESTOOO", this.scannedResults)
             for (const i of this.scannedResults) {
               for (const j of i) {
                 const rastreo = {
@@ -171,7 +182,7 @@ export class EscanerPage implements OnDestroy {
                 async (data: any) => {
                   if (data.status != 'error') {
 
-                    if (data.idUsuario != null && data.idUsuario != this.uid) {
+                    if (data.idEstado == 3) {
                       await loading.dismiss();
                       this.presentAlert('Paquete ya asignado', 'Este paquete ya ha sido asignado a otro mensajero o ya ha sido entregado.');
                       return;
@@ -183,7 +194,6 @@ export class EscanerPage implements OnDestroy {
                       async (res: any) => {
                         if (res.status != 'error') {
                           await this.scannedResults.push(qrDataArray);
-                          localStorage.setItem(`scannedResults_${this.uid}`, JSON.stringify(this.scannedResults));
                         } else {
                           this.presentAlert('Error', res.msj);
                         }
@@ -251,7 +261,7 @@ export class EscanerPage implements OnDestroy {
                       this.presentAlert('Error', 'El código ingresado no es válido. Por favor, ingresa un código válido o escanea el QR.');
                     } else {
 
-                      if (res.idUsuario != null && res.idUsuario != this.uid) {
+                      if (res.idEstado == 3) {
                         await loading.dismiss();
                         this.presentAlert('Paquete ya asignado', 'Este paquete ya ha sido asignado a otro mensajero o ya ha sido entregado.');
                         return;
@@ -268,7 +278,6 @@ export class EscanerPage implements OnDestroy {
                               lng: res.lng
                             };
                             await this.scannedResults.push([scannedPackage]);
-                            localStorage.setItem(`scannedResults_${this.uid}`, JSON.stringify(this.scannedResults));
                           } else {
                             this.presentAlert('Error', data.msj);
                           }
@@ -315,6 +324,7 @@ export class EscanerPage implements OnDestroy {
             await alert.dismiss();
             const loading = await this.loadingAlert('Cargando...');
             const paqueteToRemove = this.scannedResults[index];
+            console.log(paqueteToRemove)
 
             this.api.getOnePaquete(paqueteToRemove[0].id).subscribe(
               async (data: any) => {
@@ -326,7 +336,6 @@ export class EscanerPage implements OnDestroy {
                     async (data: any) => {
                       if (data.status != 'error') {
                         this.scannedResults.splice(index, 1);
-                        localStorage.setItem(`scannedResults_${this.uid}`, JSON.stringify(this.scannedResults));
                       } else {
                         this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
                       }

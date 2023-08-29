@@ -61,7 +61,7 @@
   </ion-card>
 
 
-  <ion-list *ngIf="scannedResults && scannedResults.length > 0 && contentVisibility">
+  <ion-list *ngIf="scannedResults.length >= 1 && contentVisibility">
     <ion-list-header mode="ios">
       Paquetes agregados: {{ scannedResults.length }}
     </ion-list-header>

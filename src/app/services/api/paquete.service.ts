@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { PaqueteInterface } from '../../models/paquete.interface';
-import { UsuarioInterface } from '../../models/usuario.interface';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -28,7 +27,7 @@ export class PaqueteService {
     return this.http.get<PaqueteInterface>(address, { headers });
   }
 
-  getPaqueteByUser(uid: any): Observable<PaqueteInterface[]> {
+  getPaqueteByUser(uid: any) {
     let address = this.url + 'paquete/usuario/' + uid
     const headers = this.getHeaders();
     return this.http.get<PaqueteInterface[]>(address, { headers });
