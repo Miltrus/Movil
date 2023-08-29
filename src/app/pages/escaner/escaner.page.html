@@ -19,6 +19,11 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
+
+  <ion-refresher slot="fixed" (ionRefresh)="ionViewDidEnter($event.target)">
+    <ion-refresher-content refreshingSpinner="lines"></ion-refresher-content>
+  </ion-refresher>
+
   <ion-fab *ngIf="contentVisibility" vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button color="primary">
       <ion-icon name="scan"></ion-icon>

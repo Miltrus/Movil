@@ -32,8 +32,9 @@ export class EscanerPage implements OnDestroy {
   ) { }
 
 
-  ionViewDidEnter() {
-    this.api.getPaqueteByUser(this.uid).subscribe((data: any) => {
+  async ionViewDidEnter(refresher?: any) {
+    const loading = await this.loadingAlert('Cargando...');
+    this.api.getPaqueteByUser(this.uid).subscribe(async (data: any) => {
       this.scannedResults = [];
 
       if (data.length >= 1) {
@@ -47,8 +48,18 @@ export class EscanerPage implements OnDestroy {
           this.scannedResults.push([scannedPackage]);
         }
       }
-    });
-
+      await loading.dismiss();
+      if (refresher) {
+        refresher.complete();
+      }
+    },
+      async (error) => {
+        await loading.dismiss();
+        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+        if (refresher) {
+          refresher.complete();
+        }
+      });
   }
 
   generateWaypointsFromScannedResults(): WayPointInterface[] {
@@ -81,7 +92,6 @@ export class EscanerPage implements OnDestroy {
           await alert.dismiss();
           const loading = await this.loadingAlert('Cargando...');
           try {
-            console.log("ESTOOO", this.scannedResults)
             for (const i of this.scannedResults) {
               for (const j of i) {
                 const rastreo = {
@@ -174,7 +184,7 @@ export class EscanerPage implements OnDestroy {
             );
 
             if (codExists) {
-              this.presentAlert('Paquete duplicado', 'Este paquete ya ha sido ingresado anteriormente.');
+              this.presentAlert('Paquete duplicado', 'Ya has ingresado este paquete a tu lista.');
             } else {
               const loading = await this.loadingAlert('Cargando...');
 
@@ -184,7 +194,7 @@ export class EscanerPage implements OnDestroy {
 
                     if (data.idEstado == 3) {
                       await loading.dismiss();
-                      this.presentAlert('Paquete ya asignado', 'Este paquete ya ha sido asignado a otro mensajero o ya ha sido entregado.');
+                      this.presentAlert('Paquete ya entregado', 'Este paquete ya ha sido entregado.');
                       return;
                     }
 
@@ -252,7 +262,7 @@ export class EscanerPage implements OnDestroy {
                 i.some((item: any) => item.cod === data.manualCode.toUpperCase()))) {
                 await alertInput.dismiss();
                 await loading.dismiss();
-                this.presentAlert('Paquete duplicado', 'Este paquete ya ha sido ingresado anteriormente.');
+                this.presentAlert('Paquete duplicado', 'Ya has ingresado este paquete a tu lista.');
               } else {
                 this.api.getPaqueteByCodigo(data.manualCode).subscribe(
                   async (res: any) => {
@@ -263,7 +273,7 @@ export class EscanerPage implements OnDestroy {
 
                       if (res.idEstado == 3) {
                         await loading.dismiss();
-                        this.presentAlert('Paquete ya asignado', 'Este paquete ya ha sido asignado a otro mensajero o ya ha sido entregado.');
+                        this.presentAlert('Paquete ya entregado', 'Este paquete ya ha sido entregado.');
                         return;
                       }
                       res.idUsuario = this.uid;

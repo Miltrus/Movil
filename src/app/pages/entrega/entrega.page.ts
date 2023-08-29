@@ -21,7 +21,9 @@ export class EntregaPage {
 
   signaturePad: any;
 
-  uid = localStorage.getItem('uid')!;
+  uid = parseInt(localStorage.getItem('uid')!);
+  scannedResults: any[] = [];
+
   formattedFechAct: any
 
   newForm: FormGroup;
@@ -90,22 +92,27 @@ export class EntregaPage {
 
               await this.api.postEntrega(entregaData).toPromise();
 
-              const localPaq = JSON.parse(localStorage.getItem(`scannedResults_${this.uid}`)!);
+              console.log("VIDIA doblemente SETENTA HP", this.scannedResults);
 
-              for (let i = 0; i < localPaq.length; i++) {
-                localPaq[i] = await localPaq[i].filter((item: any) => item.id !== this.paquete.idPaquete);
+              const paqsData = await this.paqService.getPaqueteByUser(this.uid).toPromise();
+              if (paqsData!.length >= 1) {
+                for (const item of paqsData!) {
+                  const scannedPackage = {
+                    id: item.idPaquete,
+                    cod: item.codigoPaquete,
+                    lat: item.lat,
+                    lng: item.lng
+                  };
+                  this.scannedResults.push([scannedPackage]);
+                }
               }
-
-              const updatedPaqs = await localPaq.filter((subarray: any) => subarray.length > 0);
-
-              localStorage.setItem(`scannedResults_${this.uid}`, JSON.stringify(updatedPaqs));
 
               let packageId: any
 
+              console.log("VIDIA TRIPLE SETENTA HP", this.scannedResults);
               const generateWaypointsFromScannedResults = () => {
                 const waypoints: WayPointInterface[] = [];
-
-                for (const i of updatedPaqs) {
+                for (const i of this.scannedResults) {
                   packageId = i[0].id;
                   const latLng = { lat: i[0].lat, lng: i[0].lng };
                   const waypoint: WayPointInterface = { location: latLng, stopover: true };
@@ -230,22 +237,27 @@ export class EntregaPage {
 
                         await this.rastreoService.putRastreo(getRastreo).toPromise();
 
-                        const localPaq = JSON.parse(localStorage.getItem(`scannedResults_${this.uid}`)!);
+                        console.log("VIDIA doblemente SETENTA HP", this.scannedResults);
 
-                        for (let i = 0; i < localPaq.length; i++) {
-                          localPaq[i] = await localPaq[i].filter((item: any) => item.id !== this.paquete.idPaquete);
+                        const paqsData = await this.paqService.getPaqueteByUser(this.uid).toPromise();
+                        if (paqsData!.length >= 1) {
+                          for (const item of paqsData!) {
+                            const scannedPackage = {
+                              id: item.idPaquete,
+                              cod: item.codigoPaquete,
+                              lat: item.lat,
+                              lng: item.lng
+                            };
+                            this.scannedResults.push([scannedPackage]);
+                          }
                         }
-
-                        const updatedPaqs = await localPaq.filter((subarray: any) => subarray.length > 0);
-
-                        localStorage.setItem(`scannedResults_${this.uid}`, JSON.stringify(updatedPaqs));
 
                         let packageId: any
 
-                        const generateWaypointsFromScannedResults = async () => {
+                        console.log("VIDIA TRIPLE SETENTA HP", this.scannedResults);
+                        const generateWaypointsFromScannedResults = () => {
                           const waypoints: WayPointInterface[] = [];
-
-                          for (const i of updatedPaqs) {
+                          for (const i of this.scannedResults) {
                             packageId = i[0].id;
                             const latLng = { lat: i[0].lat, lng: i[0].lng };
                             const waypoint: WayPointInterface = { location: latLng, stopover: true };
@@ -255,9 +267,8 @@ export class EntregaPage {
                           }
                           return waypoints;
                         }
-
                         const waypoints = generateWaypointsFromScannedResults();
-                        this.wayService.setWaypoints(await waypoints);
+                        this.wayService.setWaypoints(waypoints);
 
                         await loading.dismiss();
                         await this.presentAlert('Novedad reportada', 'La novedad se ha reportado exitosamente.', 'Aceptar');

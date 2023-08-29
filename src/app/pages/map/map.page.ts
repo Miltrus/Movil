@@ -28,6 +28,7 @@ export class MapPage {
   destination: google.maps.LatLng = new google.maps.LatLng(6.29051, -75.57353);
 
   entregaButton: boolean = false;
+  legs: any
 
   waypoints: WayPointInterface[] = [
     { location: { lat: 6.29747, lng: -75.55033 }, stopover: true },
@@ -150,8 +151,10 @@ export class MapPage {
 
           // verificar si se ha llegado a un waypoint
           const route = response.routes[0];
-          const legs = route.legs;
-          const currentLeg = legs[this.currentWaypointIndex];
+          console.log('route:', route);
+          this.legs = route.legs;
+          console.log('legs:', this.legs);
+          const currentLeg = this.legs[this.currentWaypointIndex];
 
           if (await this.isCloseToWaypoint(currentLeg)) {
             console.log(`Llegaste al waypoint ${this.currentWaypointIndex + 1}`, currentLeg);
@@ -159,7 +162,6 @@ export class MapPage {
             this.entregaButton = true;
 
             if (this.currentWaypointIndex < this.waypoints.length) {
-              // si hay mas waypoints, intentamos calcular la ruta nuevamente
 
               tryCalculateRoute();
             } else {
@@ -195,7 +197,7 @@ export class MapPage {
   }
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 200; // Umbral de proximidad en metros
+    const proximidad = 400; // Umbral de proximidad en metros
 
     const remainingDistance = currentLeg.distance.value;
     console.log('Distancia restante al waypoint:', remainingDistance);
@@ -205,17 +207,14 @@ export class MapPage {
     return isClose;
   }
 
-  // ESTO TAMPOCO SIRVE, PUES TOMA LOS WAY RECIBIDOS EN ORDEN Y NO LOS CALCULADOS
   openGoogleMaps() {
     let googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${this.origin.lat()},${this.origin.lng()}`;
 
-    if (this.currentWaypointIndex < this.waypoints.length) {
-      const nextWaypoint = this.waypoints[this.currentWaypointIndex];
-      console.log("nextWaypoint:", nextWaypoint);
-      const nextWaypointString = `${nextWaypoint.location.lat},${nextWaypoint.location.lng}`;
+    if (this.currentWaypointIndex < this.waypoints.length && this.legs) {
+      const nextWaypoint = this.legs[this.currentWaypointIndex].end_location;
+      const nextWaypointString = `${nextWaypoint.lat()},${nextWaypoint.lng()}`;
       googleMapsUrl += `&destination=${nextWaypointString}`;
     } else {
-      // Si no hay más waypoints, usar el destino final
       const finalDestinationString = `${this.destination.lat()},${this.destination.lng()}`;
       googleMapsUrl += `&destination=${finalDestinationString}`;
     }
