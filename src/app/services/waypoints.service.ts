@@ -27,11 +27,17 @@ export class WaypointsService {
   getPackageIdFromWaypoint(waypoint: WayPointInterface): string | null {
     console.log('way recibido', waypoint);
     console.log('la vuelta a comparar', this.packageIdToWaypointMap);
+
     for (const [packageId, associatedWaypoint] of this.packageIdToWaypointMap) {
-      if (associatedWaypoint === waypoint) {
+      if (
+        associatedWaypoint.location.lat === waypoint.location.lat &&
+        associatedWaypoint.location.lng === waypoint.location.lng
+      ) {
         return packageId;
       }
     }
+
     return null;
   }
+
 }

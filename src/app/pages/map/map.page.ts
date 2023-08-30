@@ -28,7 +28,7 @@ export class MapPage {
   destination: google.maps.LatLng = new google.maps.LatLng(6.29051, -75.57353);
 
   entregaButton: boolean = false;
-  legs: any
+  legs: any;
 
   waypoints: WayPointInterface[] = [
     { location: { lat: 6.29747, lng: -75.55033 }, stopover: true },
@@ -197,7 +197,7 @@ export class MapPage {
   }
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 400; // Umbral de proximidad en metros
+    const proximidad = 2000; // Umbral de proximidad en metros
 
     const remainingDistance = currentLeg.distance.value;
     console.log('Distancia restante al waypoint:', remainingDistance);
@@ -239,8 +239,25 @@ export class MapPage {
   }
 
   getCurrentWaypoint(): any {
-    return this.waypoints[this.currentWaypointIndex - 1];
+    const way = this.legs[this.currentWaypointIndex - 1].end_location;
+    const lat = parseFloat(way.lat());
+    const lng = parseFloat(way.lng());
+
+    const roundedLat = Math.round(lat * 1000) / 1000;
+    const roundedLng = Math.round(lng * 1000) / 1000;
+
+    const convertedWaypoint = {
+      location: {
+        lat: roundedLat,
+        lng: roundedLng
+      },
+      stopover: true
+    };
+
+    console.log('convertedWaypoint:', convertedWaypoint);
+    return convertedWaypoint;
   }
+
 
   getFechAct() {
     const fechaActual = new Date();
