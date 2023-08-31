@@ -99,7 +99,7 @@ export class MapPage {
             this.origin = currentLatLng;
             this.updateMarkerPosition(currentLatLng);
 
-            console.log("nueva ubicación:", currentLatLng);
+            console.log("nueva ubicación:", currentLatLng.lat(), currentLatLng.lng());
           },
           (error) => {
             console.warn('error al obtener la ubicación actual:', error);
@@ -151,7 +151,7 @@ export class MapPage {
 
           // verificar si se ha llegado a un waypoint
           const route = response.routes[0];
-          console.log('route:', route);
+          console.log('routeEEEEEE:', route);
           this.legs = route.legs;
           console.log('legs:', this.legs);
           const currentLeg = this.legs[this.currentWaypointIndex];
