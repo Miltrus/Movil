@@ -114,7 +114,12 @@ export class EntregaPage {
                 const waypoints: WayPointInterface[] = [];
                 for (const i of this.scannedResults) {
                   packageId = i[0].id;
-                  const latLng = { lat: i[0].lat, lng: i[0].lng };
+                  const lat = parseFloat(i[0].lat);
+                  const lng = parseFloat(i[0].lng);
+                  const roundedLat = Math.round(lat * 1000) / 1000; // redondeo a 3 decimales pa errores de precision de google 🤐
+                  const roundedLng = Math.round(lng * 1000) / 1000;
+
+                  const latLng = { lat: roundedLat, lng: roundedLng };
                   const waypoint: WayPointInterface = { location: latLng, stopover: true };
 
                   waypoints.push(waypoint);
@@ -259,7 +264,12 @@ export class EntregaPage {
                           const waypoints: WayPointInterface[] = [];
                           for (const i of this.scannedResults) {
                             packageId = i[0].id;
-                            const latLng = { lat: i[0].lat, lng: i[0].lng };
+                            const lat = parseFloat(i[0].lat);
+                            const lng = parseFloat(i[0].lng);
+                            const roundedLat = Math.round(lat * 1000) / 1000; // redondeo a 3 decimales pa errores de precision de google 🤐
+                            const roundedLng = Math.round(lng * 1000) / 1000;
+
+                            const latLng = { lat: roundedLat, lng: roundedLng };
                             const waypoint: WayPointInterface = { location: latLng, stopover: true };
 
                             waypoints.push(waypoint);

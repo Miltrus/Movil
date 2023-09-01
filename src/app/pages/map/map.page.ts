@@ -18,8 +18,8 @@ export class MapPage {
   mapEle: any;
   formattedFechAct: any
   indicators: any;
-  directionsService = new google.maps.DirectionsService();  // para calcular la ruta
-  directionsDisplay = new google.maps.DirectionsRenderer(); // para mostrar la ruta
+  directionsService = new google.maps.DirectionsService();  // pa calcular la ruta
+  directionsDisplay = new google.maps.DirectionsRenderer(); // pa mostrar la ruta
   marker: google.maps.Marker | null = null; // para el marcador de la ubicación actual
   locationWatchId: number | null = null; // para almacenar el id de la suscripción de watchPosition
   currentWaypointIndex: any = 0;
@@ -90,7 +90,6 @@ export class MapPage {
       let attempts = 0;
       const maxAttempts = 15;
 
-      // funcion recursiva para intentar obtener la ubicacion
       const tryGetLocation = () => {
         this.locationWatchId = navigator.geolocation.watchPosition(
           (position) => {
@@ -121,7 +120,6 @@ export class MapPage {
       // llamamos la función recursiva para obtener la ubicación
       tryGetLocation();
     } else {
-      console.error('El navegador no admite la geolocalización.');
       alert('El navegador no admite la geolocalización.');
     }
   }
@@ -132,9 +130,8 @@ export class MapPage {
     const loading = await this.loadingAlert('Calculando la ruta...');
 
     let attempts = 0;
-    const maxAttempts = 10;
+    const maxAttempts = 15;
 
-    // funcion recursiva para intentar calcular la ruta
     const tryCalculateRoute = () => {
 
       this.directionsService.route({
@@ -207,6 +204,7 @@ export class MapPage {
     return isClose;
   }
 
+
   openGoogleMaps() {
     let googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${this.origin.lat()},${this.origin.lng()}`;
 
@@ -231,7 +229,6 @@ export class MapPage {
     if (paqId !== null) {
       console.log("Paquete a entregar:", paqId, currentWaypoint);
 
-      // Pasar el ID del paquete como query parameter en la URL al navegar
       this.nav.navigateForward('/tabs/entrega', { queryParams: { paqId } });
     } else {
       console.log("No se encontró el paquete asociado al waypoint:", currentWaypoint);

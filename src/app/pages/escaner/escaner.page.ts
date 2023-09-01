@@ -69,7 +69,7 @@ export class EscanerPage implements OnDestroy {
       this.packageId = i[0].id;
       const lat = parseFloat(i[0].lat);
       const lng = parseFloat(i[0].lng);
-      const roundedLat = Math.round(lat * 1000) / 1000; // Redondear a 6 decimales
+      const roundedLat = Math.round(lat * 1000) / 1000; // redondeo a 3 decimales pa errores de precision de google 🤐
       const roundedLng = Math.round(lng * 1000) / 1000;
 
       const latLng = { lat: roundedLat, lng: roundedLng };
