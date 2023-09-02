@@ -75,65 +75,77 @@ export class MapPage {
     google.maps.event.addListenerOnce(this.map, 'idle', async () => {
       this.mapEle.classList.add('show-map');
       await this.getCurrentLocation();
-      this.calculateRoute();
     });
   }
 
   async getCurrentLocation() {
+    const loading = await this.loadingAlert('Obteniendo tu ubicación...');
     if (navigator.geolocation) {
       const geolocationOptions = {
-        enableHighAccuracy: true, // máxima precisión posible
-        timeout: 10000, // time maximo para esperar la respuesta
-        maximumAge: 0 // no usar la caché de la ubicación anterior
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
       };
 
       let attempts = 0;
-      const maxAttempts = 15;
+      const maxAttempts = 60;
 
       const tryGetLocation = () => {
         this.locationWatchId = navigator.geolocation.watchPosition(
-          (position) => {
+          async (position) => {
             const currentLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 
             this.origin = currentLatLng;
             this.updateMarkerPosition(currentLatLng);
 
-            console.log("nueva ubicación:", currentLatLng.lat(), currentLatLng.lng());
+            console.log("Nueva ubicación:", currentLatLng.lat(), currentLatLng.lng());
+            await loading.dismiss();
+            this.calculateRoute();
           },
-          (error) => {
-            console.warn('error al obtener la ubicación actual:', error);
+          async (error) => {
+            console.log('Error al obtener la ubicación:', error);
+            if (error.code == 1) {
+              await loading.dismiss();
+              this.presentAlert('Acceso a la ubicación requerido', 'Para continuar, por favor otorga permiso para acceder a tu ubicación.', 'OK');
+              this.nav.navigateBack('tabs/escaner');
+              return;
+            } else if (error.code == 2 || error.code == 3) {
+              await loading.dismiss();
+              this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, revisa tu conexión o inténtalo nuevamente', 'OK');
+              this.nav.navigateBack('tabs/escaner');
+              return;
+            }
             if (attempts < maxAttempts) {
               attempts++;
-              console.log(`intento ${attempts} de ${maxAttempts}`);
-              // intentamo obtener la ubicacion nuevamente despues de 1 segundo
               setTimeout(() => {
                 tryGetLocation();
               }, 1000);
             } else {
-              alert('No se pudo obtener la ubicación actual después de varios intentos.');
+              await loading.dismiss();
+              this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, revisa tu conexión o inténtalo nuevamente', 'OK');
+              this.nav.navigateBack('tabs/escaner');
+              return;
             }
           },
-          geolocationOptions // pasamos las opciones para la geolocalizacion
+          geolocationOptions
         );
       };
 
-      // llamamos la función recursiva para obtener la ubicación
+      // Llama la función recursiva para obtener la ubicación
       tryGetLocation();
     } else {
       alert('El navegador no admite la geolocalización.');
     }
   }
 
-
-
   async calculateRoute() {
+    console.log('ME LLAMARONN');
     const loading = await this.loadingAlert('Calculando la ruta...');
 
     let attempts = 0;
     const maxAttempts = 15;
 
     const tryCalculateRoute = () => {
-
       this.directionsService.route({
         origin: this.origin,
         destination: this.destination,
@@ -142,7 +154,6 @@ export class MapPage {
         travelMode: google.maps.TravelMode.DRIVING,
         unitSystem: google.maps.UnitSystem.METRIC
       }, async (response: any, status: any) => {
-
         if (status === google.maps.DirectionsStatus.OK) {
           this.directionsDisplay.setDirections(response);
 
@@ -159,7 +170,6 @@ export class MapPage {
             this.entregaButton = true;
 
             if (this.currentWaypointIndex < this.waypoints.length) {
-
               tryCalculateRoute();
             } else {
               console.log('Has llegado a tu destino.');
@@ -172,26 +182,24 @@ export class MapPage {
               tryCalculateRoute();
             }, 10000);
           }
-          loading.dismiss();
-
         } else {
-          console.warn('No se pudo calcular la ruta:', status);
-
           if (attempts < maxAttempts) {
             attempts++;
-            console.log(`Intento ${attempts} de ${maxAttempts}`);
             setTimeout(() => {
               tryCalculateRoute();
             }, 2000);
           } else {
-            alert('No se pudo calcular la ruta después de varios intentos.');
-            loading.dismiss();
+            await loading.dismiss();
+            this.presentAlert('Error al calcular la ruta', 'No se pudo calcular la ruta correctamente. Por favor, revisa tu conexión o inténtalo nuevamente', 'OK');
+            this.nav.navigateBack('tabs/escaner');
+            return;
           }
         }
       });
     };
     tryCalculateRoute(); // llamamos la función recursiva para calcular la ruta
   }
+
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
     const proximidad = 2000; // Umbral de proximidad en metros
@@ -209,7 +217,7 @@ export class MapPage {
     let googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${this.origin.lat()},${this.origin.lng()}`;
 
     if (this.currentWaypointIndex < this.waypoints.length && this.legs) {
-      const nextWaypoint = this.legs[this.currentWaypointIndex].end_location;
+      const nextWaypoint = this.legs[this.currentWaypointIndex - 1].end_location;
       const nextWaypointString = `${nextWaypoint.lat()},${nextWaypoint.lng()}`;
       googleMapsUrl += `&destination=${nextWaypointString}`;
     } else {

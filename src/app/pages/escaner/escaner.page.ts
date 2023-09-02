@@ -83,11 +83,10 @@ export class EscanerPage implements OnDestroy {
   }
 
 
-
   async startRoute() {
     const alert = await this.alert.create({
       header: 'Confirmar',
-      message: '¿Estás seguro de que deseas iniciar la ruta? Una vez iniciada, no podrás agregar más paquetes a la ruta.',
+      message: '¿Estás seguro de que deseas iniciar la ruta?',
       buttons: [{
         text: 'Cancelar',
         role: 'cancel'
