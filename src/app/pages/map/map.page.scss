@@ -27,6 +27,22 @@
     z-index: 2;
 }
 
+.img-text {
+    display: flex;
+    align-items: center;
+}
+
+.img-paquete {
+    width: 20%;
+    height: 20%;
+    margin-right: 5%;
+}
+
+ion-item {
+    margin-bottom: 10px;
+}
+
+
 .open-entrega-button {
     position: fixed;
     bottom: 50px;

@@ -324,10 +324,10 @@ export class EscanerPage implements OnDestroy {
 
 
   async removePaquete(index: number) {
-
+    const paqueteToRemove = this.scannedResults[index];
     const alert = await this.alert.create({
       header: 'Confirmar',
-      message: '¿Estás seguro de que deseas eliminar este paquete de tu lista?',
+      message: `¿Estás seguro de que deseas eliminar el paquete '${paqueteToRemove[0].cod}' de tu lista?`,
       buttons: [
         {
           text: 'Cancelar',
@@ -338,8 +338,6 @@ export class EscanerPage implements OnDestroy {
           handler: async () => {
             await alert.dismiss();
             const loading = await this.loadingAlert('Cargando...');
-            const paqueteToRemove = this.scannedResults[index];
-            console.log(paqueteToRemove)
 
             this.api.getOnePaquete(paqueteToRemove[0].id).subscribe(
               async (data: any) => {

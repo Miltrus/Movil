@@ -73,7 +73,13 @@
 
     <div class="container" *ngIf="contentVisibility">
       <ion-item *ngFor="let nestedArray of scannedResults; let i = index">
-        <ion-label color="primary">Paquete #{{ i + 1 }}:</ion-label>
+        <ion-label>
+          <div class="img-text">
+            <ion-img src="assets/icon/paquete.png" class="img-paquete"></ion-img>
+            <span>#{{i + 1}}</span>
+          </div>
+        </ion-label>
+
         <ion-text *ngFor="let code of nestedArray">
           {{ code.cod }}
         </ion-text>
@@ -90,7 +96,7 @@
     </div>
   </ion-list>
 
-  <ion-modal mode="ios" [isOpen]="isHelpOpen">
+  <ion-modal mode="ios" [initialBreakpoint]="0.5" [breakpoints]="[0.30, 0.75, 1]" [isOpen]="isHelpOpen">
     <ng-template>
       <ion-header>
         <ion-toolbar>

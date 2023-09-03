@@ -11,10 +11,16 @@
       </ion-button>
       <ion-popover trigger="click-trigger-map" triggerAction="click" dismissOnSelect="true">
         <ng-template>
-          <ion-item (click)="reportNovedad()">
-            <ion-icon slot="start" name="alert-circle"></ion-icon>
-            <p>Reportar novedad</p>
-          </ion-item>
+          <ion-content class="ion-padding">
+            <ion-item (click)="reportNovedad()">
+              <ion-icon slot="start" name="alert-circle"></ion-icon>
+              <p>Reportar novedad</p>
+            </ion-item>
+            <ion-item (click)="openMyPaqs(true)">
+              <ion-icon slot="start" name="information-circle"></ion-icon>
+              <p>Ver mis paquetes</p>
+            </ion-item>
+          </ion-content>
         </ng-template>
       </ion-popover>
     </ion-buttons>
@@ -32,4 +38,80 @@
   <ion-button mode="ios" expand="block" class="open-maps-button" (click)="openGoogleMaps()">Ir a Google Maps
     <ion-icon name="location-sharp" slot="end"></ion-icon>
   </ion-button>
+
+  <ion-modal mode="ios" [initialBreakpoint]="0.5" [breakpoints]="[0.30, 0.75, 1]" [isOpen]="isMyPaqsOpen">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Mis paquetes</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="openMyPaqs(false)">Cerrar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-card mode="ios">
+          <ion-card-header>
+            <ion-card-title>Paquetes por entregar</ion-card-title>
+          </ion-card-header>
+          <ion-card-content *ngIf="paquete">
+            <ion-list>
+              <ion-item *ngFor="let paq of paquete">
+                <div class="img-text">
+                  <ion-img src="assets/icon/paquete.png" class="img-paquete"></ion-img>
+                  <span>{{ paq?.codigoPaquete }}</span>
+                </div>
+                <ion-button fill="clear" slot="end" (click)="detailPaq(true, paq)">
+                  <ion-icon name="eye"></ion-icon>
+                </ion-button>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal #modal mode="ios" [initialBreakpoint]="0.5" [breakpoints]="[0.30, 0.75, 1]" [isOpen]="isDetailPaq">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Detalles del paquete</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="detailPaq(false, null)">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content>
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Código paquete</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            {{ paqueteSeleccionado?.codigoPaquete }}
+          </ion-card-content>
+
+          <ion-card-header>
+            <ion-card-title>Información destinatario</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p><strong>Nombre:</strong> {{ paqueteSeleccionado?.nombreDestinatario }}</p>
+            <p><strong>Teléfono:</strong> {{ paqueteSeleccionado?.telefonoDestinatario }}</p>
+            <p><strong>Correo:</strong> {{ paqueteSeleccionado?.correoDestinatario }}</p>
+          </ion-card-content>
+
+          <ion-card-header>
+            <ion-card-title>Dirección</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p>{{ paqueteSeleccionado?.direccionPaquete }} - {{paqueteSeleccionado?.detalleDireccionPaquete}}</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>

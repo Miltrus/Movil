@@ -5,14 +5,13 @@ import { TipoDocumentoInterface } from 'src/app/models/tipo-documento.interface'
 import { UsuarioInterface } from 'src/app/models/usuario.interface';
 import { UsuarioService } from 'src/app/services/api/usuario.service';
 import { AlertController, IonRefresher, LoadingController, NavController, ToastController } from '@ionic/angular';
-import { HasUnsavedChanges } from 'src/app/auth/guards/unsaved-changes.guard';
 
 @Component({
   selector: 'app-edit-profile',
   templateUrl: './edit-profile.page.html',
   styleUrls: ['./edit-profile.page.scss'],
 })
-export class EditProfilePage implements OnInit, HasUnsavedChanges {
+export class EditProfilePage implements OnInit {
 
   editForm: FormGroup;
   pwdForm: FormGroup;

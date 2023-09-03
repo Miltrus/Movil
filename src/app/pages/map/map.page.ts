@@ -36,6 +36,10 @@ export class MapPage {
 
   paquete: any;
   uid = parseInt(localStorage.getItem('uid')!);
+  isMyPaqsOpen = false;
+  isDetailPaq = false;
+  paqueteSeleccionado: any;
+
 
   constructor(
     private loading: LoadingController,
@@ -46,11 +50,12 @@ export class MapPage {
     private rastreoService: RastreoService,
   ) { }
 
-  ionViewDidEnter() {
+  async ionViewDidEnter() {
     this.waypoints = this.waypointService.getWaypoints();
     console.log("nuevos way:", this.waypoints)
     this.clearCurrentLocationMarker();
-    this.loadMap();
+    await this.loadMap();
+    await this.getPaqsByUser();
   }
 
   ionViewWillLeave() {
@@ -130,8 +135,7 @@ export class MapPage {
           geolocationOptions
         );
       };
-
-      // Llama la función recursiva para obtener la ubicación
+      // llamamos la funcion recursiva pa obtener la ubi
       tryGetLocation();
     } else {
       alert('El navegador no admite la geolocalización.');
@@ -197,12 +201,12 @@ export class MapPage {
         }
       });
     };
-    tryCalculateRoute(); // llamamos la función recursiva para calcular la ruta
+    tryCalculateRoute(); // llamamos la funcion recursiva pa calcular la ruta
   }
 
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 2000; // Umbral de proximidad en metros
+    const proximidad = 2000; // umbral de proximidad en mts
 
     const remainingDistance = currentLeg.distance.value;
     console.log('Distancia restante al waypoint:', remainingDistance);
@@ -215,8 +219,9 @@ export class MapPage {
 
   openGoogleMaps() {
     let googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${this.origin.lat()},${this.origin.lng()}`;
-
-    if (this.currentWaypointIndex < this.waypoints.length && this.legs) {
+    console.log('PRIMERA:', this.currentWaypointIndex);
+    console.log('SEGUNDA:', this.waypoints.length);
+    if (this.currentWaypointIndex < this.waypoints.length) {
       const nextWaypoint = this.legs[this.currentWaypointIndex - 1].end_location;
       const nextWaypointString = `${nextWaypoint.lat()},${nextWaypoint.lng()}`;
       googleMapsUrl += `&destination=${nextWaypointString}`;
@@ -229,17 +234,14 @@ export class MapPage {
   }
 
 
-  // ESTO NO SIRVE ARREGLARLO
   deliverPaquete() {
     const currentWaypoint = this.getCurrentWaypoint();
     const paqId = this.waypointService.getPackageIdFromWaypoint(currentWaypoint);
 
     if (paqId !== null) {
-      console.log("Paquete a entregar:", paqId, currentWaypoint);
-
       this.nav.navigateForward('/tabs/entrega', { queryParams: { paqId } });
     } else {
-      console.log("No se encontró el paquete asociado al waypoint:", currentWaypoint);
+      this.presentAlert('Error', 'No se ha encontrado el paquete a entregar. Por favor, inténtalo nuevamente.', 'OK');
     }
   }
 
@@ -267,8 +269,8 @@ export class MapPage {
   getFechAct() {
     const fechaActual = new Date();
     this.formattedFechAct = `${fechaActual.getFullYear()}-${(fechaActual.getMonth() + 1)
-      .toString()
-      .padStart(2, '0')}-${fechaActual.getDate().toString().padStart(2, '0')} ${fechaActual.getHours().toString().padStart(2, '0')}:${fechaActual.getMinutes().toString().padStart(2, '0')}:${fechaActual.getSeconds().toString().padStart(2, '0')}`;
+      .toString().padStart(2, '0')}-${fechaActual.getDate().toString().padStart(2, '0')} ${fechaActual.getHours().toString()
+        .padStart(2, '0')}:${fechaActual.getMinutes().toString().padStart(2, '0')}:${fechaActual.getSeconds().toString().padStart(2, '0')}`;
 
     return this.formattedFechAct
   }
@@ -292,11 +294,11 @@ export class MapPage {
             if (!desc.descripcion) {
               this.presentAlert('Error', 'Debes ingresar una descripción de la novedad.', 'OK');
             } else {
-              this.getFechAct();
+              await this.getFechAct();
               await descAlert.dismiss();
               const confirmAlert = await this.alert.create({
                 header: 'Confirmar reporte',
-                message: 'Una vez confirmado, no podrá ser modificado o eliminado y los paquetes que no hayan sido entregados en esta ruta deberán volver a bodega, y la ruta se finalizará',
+                message: 'Una vez confirmado, no podrá ser modificado o eliminado y los paquetes que no hayan sido entregados en esta ruta deberán volver a bodega y la ruta se finalizará',
                 buttons: [
                   {
                     text: 'Cancelar',
@@ -307,27 +309,25 @@ export class MapPage {
                     handler: async () => {
                       await confirmAlert.dismiss();
                       const loading = await this.loadingAlert('Guardando...');
+                      await this.getPaqsByUser();
                       try {
-                        this.paqService.getPaqueteByUser(this.uid).subscribe(async (data: any) => {
-                          this.paquete = data;
+                        console.log('paquetes:', this.paquete);
+                        for (const paqueteItem of this.paquete) {
+                          paqueteItem.idEstado = 4;
 
-                          for (const paqueteItem of this.paquete) {
-                            paqueteItem.idEstado = 4;
+                          await this.paqService.putPaquete(paqueteItem).toPromise();
 
-                            await this.paqService.putPaquete(paqueteItem).toPromise();
+                          let getRastreo = await this.rastreoService.getRastreoByPaquete(paqueteItem.idPaquete).toPromise();
 
-                            let getRastreo = await this.rastreoService.getRastreoByPaquete(paqueteItem.idPaquete).toPromise();
+                          getRastreo!.idEstado = 2;
+                          getRastreo!.motivoNoEntrega = desc.descripcion;
+                          getRastreo!.fechaNoEntrega = this.formattedFechAct;
 
-                            getRastreo!.idEstado = 2;
-                            getRastreo!.motivoNoEntrega = desc.descripcion;
-                            getRastreo!.fechaNoEntrega = this.formattedFechAct;
+                          await this.rastreoService.putRastreo(getRastreo).toPromise();
 
-                            await this.rastreoService.putRastreo(getRastreo).toPromise();
-
-                          }
-                          await loading.dismiss();
-                          await this.presentAlert('Novedad reportada', 'La novedad se ha reportado exitosamente.', 'Aceptar');
-                        });
+                        }
+                        await loading.dismiss();
+                        await this.presentAlert('Novedad reportada', 'La novedad se ha reportado exitosamente.', 'Aceptar');
                       } catch (error) {
                         await loading.dismiss();
                         this.presentAlert('Error en el servidor', 'Ha ocurrido un error al reportar la novedad. Por favor, revisa tu conexión a internet o inténtalo nuevamente.', 'OK');
@@ -344,6 +344,25 @@ export class MapPage {
       ]
     });
     await descAlert.present();
+  }
+
+  openMyPaqs(isOpen: boolean) {
+    this.isMyPaqsOpen = isOpen;
+  }
+
+  detailPaq(isOpen: boolean, paquete: any) {
+    this.isDetailPaq = isOpen;
+    this.paqueteSeleccionado = paquete;
+  }
+
+
+  async getPaqsByUser() {
+    try {
+      this.paquete = await this.paqService.getPaqueteByUser(this.uid).toPromise();
+    } catch (error) {
+      console.error('Error al obtener paquetes:', error);
+    }
+    console.log('paquetes:', this.paquete);
   }
 
   // para actualizar la posición del marcador
@@ -374,11 +393,11 @@ export class MapPage {
     this.nav.navigateBack('tabs/escaner');
   }
 
-  async presentAlert(title: string, msg: string, button: string) {
+  async presentAlert(title: string, msg: string, btn: string) {
     const alert = await this.alert.create({
       header: title,
       message: msg,
-      buttons: [button]
+      buttons: [btn]
     });
     await alert.present();
   }
