@@ -92,8 +92,6 @@ export class EntregaPage {
 
               await this.api.postEntrega(entregaData).toPromise();
 
-              console.log("VIDIA doblemente SETENTA HP", this.scannedResults);
-
               const paqsData = await this.paqService.getPaqueteByUser(this.uid).toPromise();
               if (paqsData!.length >= 1) {
                 for (const item of paqsData!) {
@@ -109,7 +107,6 @@ export class EntregaPage {
 
               let packageId: any
 
-              console.log("VIDIA TRIPLE SETENTA HP", this.scannedResults);
               const generateWaypointsFromScannedResults = () => {
                 const waypoints: WayPointInterface[] = [];
                 for (const i of this.scannedResults) {

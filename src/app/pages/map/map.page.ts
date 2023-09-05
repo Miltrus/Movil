@@ -165,8 +165,8 @@ export class MapPage {
           const route = response.routes[0];
           this.legs = route.legs;
           console.log('legs:', this.legs);
-          this.currentLeg = this.legs[this.currentWaypointIndex];
-          console.log(":v:V:V:V:v:v", this.currentLeg)
+          this.currentLeg = this.legs[0];
+          console.log("WAY ACTUAL:", this.currentLeg)
 
           await loading.dismiss();
         } else {
@@ -202,15 +202,10 @@ export class MapPage {
 
   openGoogleMaps() {
     let googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${this.origin.lat()},${this.origin.lng()}`;
-    if (this.currentWaypointIndex < this.waypoints.length) {
-      const nextWaypoint = this.legs[0].end_location;
-      console.log('nextWaypointAAAAA:', nextWaypoint);
-      const nextWaypointString = `${nextWaypoint.lat()},${nextWaypoint.lng()}`;
-      googleMapsUrl += `&destination=${nextWaypointString}`;
-    } else {
-      const finalDestinationString = `${this.destination.lat()},${this.destination.lng()}`;
-      googleMapsUrl += `&destination=${finalDestinationString}`;
-    }
+    const nextWaypoint = this.legs[0].end_location;
+    console.log('nextWaypointAAAAA:', nextWaypoint);
+    const nextWaypointString = `${nextWaypoint.lat()},${nextWaypoint.lng()}`;
+    googleMapsUrl += `&destination=${nextWaypointString}`;
 
     window.open(googleMapsUrl, '_system');
   }
@@ -220,15 +215,9 @@ export class MapPage {
     const currentWaypoint = this.getCurrentWaypoint();
     const paqId = this.waypointService.getPackageIdFromWaypoint(currentWaypoint);
 
-    if (await this.isCloseToWaypoint(this.currentLeg)) {
+    if (!await this.isCloseToWaypoint(this.currentLeg)) {
       console.log(`Llegaste al waypoint ${this.currentWaypointIndex + 1}`, this.currentLeg);
-      this.currentWaypointIndex++;
 
-      if (this.currentWaypointIndex < this.waypoints.length) {
-        this.calculateRoute();
-      } else {
-        console.log('Has llegado a tu destino.');
-      }
       if (paqId !== null) {
         this.nav.navigateForward('/tabs/entrega', { queryParams: { paqId } });
       } else {
