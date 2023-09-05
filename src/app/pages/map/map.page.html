@@ -30,8 +30,7 @@
 
 <ion-content>
   <div id="map"></div>
-  <ion-button mode="ios" *ngIf="entregaButton" expand="block" class="open-entrega-button"
-    (click)="deliverPaquete()">Entregar
+  <ion-button mode="ios" expand="block" class="open-entrega-button" (click)="deliverPaquete()">Entregar
     <ion-icon name="pin-sharp" slot="end"></ion-icon>
   </ion-button>
   <div id="indicators"></div>
@@ -78,8 +77,7 @@
         <ion-toolbar>
           <ion-title>Detalles del paquete</ion-title>
           <ion-buttons slot="end">
-            <ion-button (click)="detailPaq(false, null)">
-              <ion-icon name="close"></ion-icon>
+            <ion-button (click)="detailPaq(false, null)">Cerrar
             </ion-button>
           </ion-buttons>
         </ion-toolbar>

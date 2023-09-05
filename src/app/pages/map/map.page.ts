@@ -27,8 +27,8 @@ export class MapPage {
   origin: google.maps.LatLng = new google.maps.LatLng(0, 0);
   destination: google.maps.LatLng = new google.maps.LatLng(6.29051, -75.57353);
 
-  entregaButton: boolean = false;
   legs: any;
+  currentLeg: any
 
   waypoints: WayPointInterface[] = [
     { location: { lat: 6.29747, lng: -75.55033 }, stopover: true },
@@ -105,7 +105,7 @@ export class MapPage {
 
             console.log("Nueva ubicación:", currentLatLng.lat(), currentLatLng.lng());
             await loading.dismiss();
-            this.calculateRoute();
+            await this.calculateRoute();
           },
           async (error) => {
             console.log('Error al obtener la ubicación:', error);
@@ -116,7 +116,7 @@ export class MapPage {
               return;
             } else if (error.code == 2 || error.code == 3) {
               await loading.dismiss();
-              this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, revisa tu conexión o inténtalo nuevamente', 'OK');
+              this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
               this.nav.navigateBack('tabs/escaner');
               return;
             }
@@ -127,7 +127,7 @@ export class MapPage {
               }, 1000);
             } else {
               await loading.dismiss();
-              this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, revisa tu conexión o inténtalo nuevamente', 'OK');
+              this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
               this.nav.navigateBack('tabs/escaner');
               return;
             }
@@ -163,29 +163,12 @@ export class MapPage {
 
           // verificar si se ha llegado a un waypoint
           const route = response.routes[0];
-          console.log('routeEEEEEE:', route);
           this.legs = route.legs;
           console.log('legs:', this.legs);
-          const currentLeg = this.legs[this.currentWaypointIndex];
+          this.currentLeg = this.legs[this.currentWaypointIndex];
+          console.log(":v:V:V:V:v:v", this.currentLeg)
 
-          if (await this.isCloseToWaypoint(currentLeg)) {
-            console.log(`Llegaste al waypoint ${this.currentWaypointIndex + 1}`, currentLeg);
-            this.currentWaypointIndex++;
-            this.entregaButton = true;
-
-            if (this.currentWaypointIndex < this.waypoints.length) {
-              tryCalculateRoute();
-            } else {
-              console.log('Has llegado a tu destino.');
-            }
-            loading.dismiss();
-          } else {
-            console.log('Aún no has llegado al waypoint actual.', currentLeg);
-            loading.dismiss();
-            setTimeout(() => {
-              tryCalculateRoute();
-            }, 10000);
-          }
+          await loading.dismiss();
         } else {
           if (attempts < maxAttempts) {
             attempts++;
@@ -194,7 +177,7 @@ export class MapPage {
             }, 2000);
           } else {
             await loading.dismiss();
-            this.presentAlert('Error al calcular la ruta', 'No se pudo calcular la ruta correctamente. Por favor, revisa tu conexión o inténtalo nuevamente', 'OK');
+            this.presentAlert('Error al calcular la ruta', 'No se pudo calcular la ruta correctamente. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
             this.nav.navigateBack('tabs/escaner');
             return;
           }
@@ -219,10 +202,9 @@ export class MapPage {
 
   openGoogleMaps() {
     let googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${this.origin.lat()},${this.origin.lng()}`;
-    console.log('PRIMERA:', this.currentWaypointIndex);
-    console.log('SEGUNDA:', this.waypoints.length);
     if (this.currentWaypointIndex < this.waypoints.length) {
-      const nextWaypoint = this.legs[this.currentWaypointIndex - 1].end_location;
+      const nextWaypoint = this.legs[0].end_location;
+      console.log('nextWaypointAAAAA:', nextWaypoint);
       const nextWaypointString = `${nextWaypoint.lat()},${nextWaypoint.lng()}`;
       googleMapsUrl += `&destination=${nextWaypointString}`;
     } else {
@@ -234,19 +216,32 @@ export class MapPage {
   }
 
 
-  deliverPaquete() {
+  async deliverPaquete() {
     const currentWaypoint = this.getCurrentWaypoint();
     const paqId = this.waypointService.getPackageIdFromWaypoint(currentWaypoint);
 
-    if (paqId !== null) {
-      this.nav.navigateForward('/tabs/entrega', { queryParams: { paqId } });
+    if (await this.isCloseToWaypoint(this.currentLeg)) {
+      console.log(`Llegaste al waypoint ${this.currentWaypointIndex + 1}`, this.currentLeg);
+      this.currentWaypointIndex++;
+
+      if (this.currentWaypointIndex < this.waypoints.length) {
+        this.calculateRoute();
+      } else {
+        console.log('Has llegado a tu destino.');
+      }
+      if (paqId !== null) {
+        this.nav.navigateForward('/tabs/entrega', { queryParams: { paqId } });
+      } else {
+        this.presentAlert('Ups...', 'No se ha encontrado el paquete a entregar. Por favor, inténtalo nuevamente o inicia nuevamente la ruta ;)', 'OK');
+      }
     } else {
-      this.presentAlert('Error', 'No se ha encontrado el paquete a entregar. Por favor, inténtalo nuevamente.', 'OK');
+      this.presentAlert('¡Aún no llegas!', 'No estás cerca del siguiente punto de entrega.', 'OK');
     }
+
   }
 
   getCurrentWaypoint(): any {
-    const way = this.legs[this.currentWaypointIndex - 1].end_location;
+    const way = this.currentLeg.end_location;
     const lat = parseFloat(way.lat());
     const lng = parseFloat(way.lng());
 
