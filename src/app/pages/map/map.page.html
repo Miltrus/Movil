@@ -30,7 +30,8 @@
 
 <ion-content>
   <div id="map"></div>
-  <ion-button mode="ios" expand="block" class="open-entrega-button" (click)="deliverPaquete()">Entregar
+  <ion-button mode="ios" *ngIf="entregaButton" expand="block" class="open-entrega-button"
+    (click)="deliverPaquete()">Entregar
     <ion-icon name="pin-sharp" slot="end"></ion-icon>
   </ion-button>
   <div id="indicators"></div>
