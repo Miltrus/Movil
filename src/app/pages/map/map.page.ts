@@ -183,7 +183,7 @@ export class MapPage {
             this.entregaButton = false
             return;
           }
-
+          this.entregaButton = true
           await loading.dismiss();
         } else {
           if (attempts < maxAttempts) {
@@ -205,7 +205,7 @@ export class MapPage {
 
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 200; // umbral de proximidad en mts
+    const proximidad = 2000; // umbral de proximidad en mts
 
     const remainingDistance = currentLeg.distance.value;
 
@@ -303,7 +303,6 @@ export class MapPage {
                     handler: async () => {
                       await confirmAlert.dismiss();
                       const loading = await this.loadingAlert('Guardando...');
-                      await this.getPaqsByUser();
                       try {
                         for (const paqueteItem of this.paquete) {
                           paqueteItem.idEstado = 4;
@@ -328,6 +327,7 @@ export class MapPage {
                         this.presentAlert('Error en el servidor', 'Ha ocurrido un error al reportar la novedad. Por favor, revisa tu conexión a internet o inténtalo nuevamente.', 'OK');
                         return;
                       }
+                      await this.getPaqsByUser();
                     }
                   }
                 ]

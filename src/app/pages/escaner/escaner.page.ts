@@ -234,6 +234,23 @@ export class EscanerPage implements OnDestroy {
                         }]
                       });
                       await alert.present();
+                    } else {
+                      data.idUsuario = this.uid;
+                      data.idEstado = 2;
+                      this.api.putPaquete(data).subscribe(
+                        async (res: any) => {
+                          if (res.status != 'error') {
+                            await this.scannedResults.push(qrDataArray);
+                          } else {
+                            this.presentAlert('Error', res.msj);
+                          }
+                          loading.dismiss();
+                        },
+                        async (error) => {
+                          await loading.dismiss();
+                          this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+                        }
+                      );
                     }
                   } else {
                     await loading.dismiss();
@@ -335,6 +352,29 @@ export class EscanerPage implements OnDestroy {
                           }]
                         });
                         await alert.present();
+                      } else {
+                        res.idUsuario = this.uid;
+                        res.idEstado = 2;
+                        this.api.putPaquete(res).subscribe(
+                          async (data: any) => {
+                            if (data.status != 'error') {
+                              const scannedPackage = {
+                                id: res.idPaquete,
+                                cod: res.codigoPaquete,
+                                lat: res.lat,
+                                lng: res.lng
+                              };
+                              await this.scannedResults.push([scannedPackage]);
+                            } else {
+                              this.presentAlert('Error', data.msj);
+                            }
+                            await loading.dismiss();
+                          },
+                          async (error) => {
+                            await loading.dismiss();
+                            this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+                          }
+                        );
                       }
                     }
                   },
