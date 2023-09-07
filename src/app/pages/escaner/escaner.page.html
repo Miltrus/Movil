@@ -3,9 +3,9 @@
     <ion-title>
       Escaner
     </ion-title>
-    <ion-buttons mode="ios" slot="end" *ngIf="scannedResults.length > 0">
+    <ion-buttons slot="end" *ngIf="scannedResults.length > 0">
       <ion-button id="click-trigger-scan">
-        <ion-icon name="help-circle-outline"></ion-icon>
+        <ion-icon name="help"></ion-icon>
       </ion-button>
       <ion-popover trigger="click-trigger-scan" triggerAction="click" dismissOnSelect="true">
         <ng-template>

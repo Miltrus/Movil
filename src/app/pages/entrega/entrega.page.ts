@@ -132,7 +132,6 @@ export class EntregaPage {
               this.nav.back();
 
             } catch (error) {
-              console.log(error);
               await loading.dismiss();
               this.presentAlert('Error en el servidor', 'Ha ocurrido un error al confirmar la entrega. Por favor, revisa tu conexión a internet inténtalo nuevamente.', 'OK');
               return;
@@ -239,7 +238,6 @@ export class EntregaPage {
 
                         await this.rastreoService.putRastreo(getRastreo).toPromise();
 
-                        console.log("VIDIA doblemente SETENTA HP", this.scannedResults);
 
                         const paqsData = await this.paqService.getPaqueteByUser(this.uid).toPromise();
                         if (paqsData!.length >= 1) {
@@ -256,7 +254,6 @@ export class EntregaPage {
 
                         let packageId: any
 
-                        console.log("VIDIA TRIPLE SETENTA HP", this.scannedResults);
                         const generateWaypointsFromScannedResults = () => {
                           const waypoints: WayPointInterface[] = [];
                           for (const i of this.scannedResults) {
