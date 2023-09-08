@@ -55,7 +55,7 @@ export class LoginPage {
           localStorage.setItem('uid', decodedToken.uid);
           this.userData = data.user;
 
-          await this.nav.navigateForward('/tabs/profile');
+          await this.nav.navigateForward('/tabs/escaner');
 
           await loading.dismiss();
           const toast = await this.toast.create({

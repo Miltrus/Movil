@@ -3,9 +3,9 @@
     <ion-title>
       Escaner
     </ion-title>
-    <ion-buttons slot="end" *ngIf="scannedResults.length > 0">
+    <ion-buttons mode="ios" slot="end" *ngIf="scannedResults.length > 0">
       <ion-button id="click-trigger-scan">
-        <ion-icon name="help"></ion-icon>
+        <ion-icon name="help-circle-outline"></ion-icon>
       </ion-button>
       <ion-popover trigger="click-trigger-scan" triggerAction="click" dismissOnSelect="true">
         <ng-template>
@@ -45,13 +45,13 @@
     </ion-card-header>
     <ion-card-content>
       <p>
-        Bienvenido a la guía de escaneo de códigos. Aquí te explicaremos cómo usar las funciones de escaneo disponibles
-        en la aplicación que encontrarás en el botón azul abajo a la derecha.
+        Aquí te explicamos cómo usar las funciones de escaneo disponibles
+        en la aplicación que encontrarás en el menú flotante al tocar el botón azul abajo a la derecha.
       </p>
       <hr>
       <ion-card-subtitle>Escanear código QR</ion-card-subtitle>
       <p>
-        Para escanear un código QR, simplemente presiona el ícono de escaneo de código en el menú flotante y apunta la
+        Para escanear un código QR, simplemente presiona el ícono del QR en el menú flotante y apunta la
         cámara hacia el código QR. La aplicación reconocerá automáticamente el código y realizará las acciones
         correspondientes.
       </p>
@@ -113,14 +113,14 @@
           </ion-card-header>
           <ion-card-content>
             <p>
-              Bienvenido a la guía de escaneo de códigos. Aquí te explicaremos cómo usar las funciones de escaneo
-              disponibles en la aplicación que encontrarás en el botón azul abajo a la derecha.
+              Aquí te explicamos cómo usar las funciones de escaneo
+              disponibles en la aplicación que encontrarás en el menú flotante al tocar el botón azul abajo a la
+              derecha.
             </p>
             <hr>
             <ion-card-subtitle>Escanear código QR</ion-card-subtitle>
             <p>
-              Para escanear un código QR, simplemente presiona el ícono de escaneo de código en el menú flotante y
-              apunta la
+              Para escanear un código QR, simplemente presiona el ícono del QR en el menú flotante y apunta la
               cámara hacia el código QR. La aplicación reconocerá automáticamente el código y realizará las acciones
               correspondientes.
             </p>
