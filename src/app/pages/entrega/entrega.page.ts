@@ -51,7 +51,6 @@ export class EntregaPage {
 
   async ngOnInit() {
     const loading = await this.loadingAlert('Cargando...');
-    this.getFechAct();
 
     this.route.queryParams.subscribe(params => {
       this.paqId = params['paqId'];
@@ -76,6 +75,7 @@ export class EntregaPage {
         {
           text: 'Confirmar',
           handler: async () => {
+            await this.getFechAct();
             const entregaData: EntregaInterface = this.newForm.value;
             await confirmAlert.dismiss();
             const loading = await this.loadingAlert('Guardando...');
@@ -133,7 +133,7 @@ export class EntregaPage {
 
             } catch (error) {
               await loading.dismiss();
-              this.presentAlert('Error en el servidor', 'Ha ocurrido un error al confirmar la entrega. Por favor, revisa tu conexión a internet inténtalo nuevamente.', 'OK');
+              this.presentAlert('Error en el servidor', 'Ha ocurrido un error al confirmar la entrega. Por favor, revisa tu conexión a internet o inténtalo nuevamente.', 'OK');
               return;
             }
           },
@@ -228,7 +228,7 @@ export class EntregaPage {
                       const loading = await this.loadingAlert('Guardando...');
 
                       try {
-
+                        await this.getFechAct();
                         await this.paqService.putPaquete(this.paquete).toPromise();
 
                         let getRastreo = await this.rastreoService.getRastreoByPaquete(this.paquete.idPaquete).toPromise();
