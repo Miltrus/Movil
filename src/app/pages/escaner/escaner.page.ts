@@ -62,25 +62,29 @@ export class EscanerPage implements OnDestroy {
       });
   }
 
-  generateWaypointsFromScannedResults(): WayPointInterface[] {
-    const waypoints: WayPointInterface[] = [];
+  generateWaypointsFromScannedResults(): any {
+    const waypointsWithoutRounding: WayPointInterface[] = [];
 
     for (const i of this.scannedResults) {
       this.packageId = i[0].id;
-      const lat = parseFloat(i[0].lat);
-      const lng = parseFloat(i[0].lng);
-      const roundedLat = Math.round(lat * 1000) / 1000; // redondeo a 3 decimales pa errores de precision de google 🤐
-      const roundedLng = Math.round(lng * 1000) / 1000;
+      const latRound = parseFloat(i[0].lat);
+      const lngRound = parseFloat(i[0].lng);
+      const roundedLat = Math.round(latRound * 100) / 100; // redondeo a 2 decimales pa errores de precision de google 🤐
+      const roundedLng = Math.round(lngRound * 100) / 100;
 
       const latLng = { lat: roundedLat, lng: roundedLng };
-      const waypoint: WayPointInterface = { location: latLng, stopover: true };
+      const waypointsRound: WayPointInterface = { location: latLng, stopover: true };
 
-      waypoints.push(waypoint);
-      this.wayService.associatePackageWithWaypoint(this.packageId, waypoint);
+      this.wayService.associatePackageWithWaypoint(this.packageId, waypointsRound);
+
+      const latLngWithoutRounding = { lat: i[0].lat, lng: i[0].lng };
+      const waypointWithoutRounding: WayPointInterface = { location: latLngWithoutRounding, stopover: true };
+      waypointsWithoutRounding.push(waypointWithoutRounding);
     }
 
-    return waypoints;
+    this.wayService.setWaypoints(waypointsWithoutRounding);
   }
+
 
 
   async startRoute() {
@@ -113,8 +117,7 @@ export class EscanerPage implements OnDestroy {
               }
             }
 
-            const waypoints = this.generateWaypointsFromScannedResults();
-            this.wayService.setWaypoints(waypoints);
+            this.generateWaypointsFromScannedResults();
             this.nav.navigateForward('/tabs/mapa');
             await loading.dismiss();
           } catch (error) {

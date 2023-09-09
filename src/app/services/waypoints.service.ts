@@ -23,12 +23,16 @@ export class WaypointsService {
     this.packageIdToWaypointMap.set(packageId, waypoint);
   }
 
-  getPackageIdFromWaypoint(waypoint: WayPointInterface): string | null {
+  removePackageIdWaypointAssociation(packageId: string) {
+    this.packageIdToWaypointMap.delete(packageId);
+  }
 
+
+  getPackageIdFromWaypoint(waypoint: WayPointInterface): string | null {
     for (const [packageId, associatedWaypoint] of this.packageIdToWaypointMap) {
       if (
-        associatedWaypoint.location.lat === waypoint.location.lat &&
-        associatedWaypoint.location.lng === waypoint.location.lng
+        associatedWaypoint.location.lat == waypoint.location.lat &&
+        associatedWaypoint.location.lng == waypoint.location.lng
       ) {
         return packageId;
       }

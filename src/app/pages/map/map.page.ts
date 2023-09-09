@@ -45,13 +45,13 @@ export class MapPage {
     private loading: LoadingController,
     private alert: AlertController,
     private nav: NavController,
-    private waypointService: WaypointsService,
+    private wayService: WaypointsService,
     private paqService: PaqueteService,
     private rastreoService: RastreoService,
   ) { }
 
   async ionViewDidEnter() {
-    this.waypoints = this.waypointService.getWaypoints();
+    this.waypoints = this.wayService.getWaypoints();
     this.clearCurrentLocationMarker();
     await this.loadMap();
     await this.getPaqsByUser();
@@ -205,7 +205,7 @@ export class MapPage {
 
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 2000; // umbral de proximidad en mts
+    const proximidad = 20; // umbral de proximidad en mts
 
     const remainingDistance = currentLeg.distance.value;
 
@@ -225,10 +225,11 @@ export class MapPage {
 
 
   async deliverPaquete() {
-    const currentWaypoint = this.getCurrentWaypoint();
-    const paqId = this.waypointService.getPackageIdFromWaypoint(currentWaypoint);
 
-    if (await this.isCloseToWaypoint(this.currentLeg)) {
+    if (!await this.isCloseToWaypoint(this.currentLeg)) {
+
+      const currentWaypoint = await this.getCurrentWaypoint();
+      const paqId = this.wayService.getPackageIdFromWaypoint(currentWaypoint);
 
       if (paqId !== null) {
         this.nav.navigateForward('/tabs/entrega', { queryParams: { paqId } });
@@ -246,8 +247,8 @@ export class MapPage {
     const lat = parseFloat(way.lat());
     const lng = parseFloat(way.lng());
 
-    const roundedLat = Math.round(lat * 1000) / 1000;
-    const roundedLng = Math.round(lng * 1000) / 1000;
+    const roundedLat = Math.round(lat * 100) / 100; // redondeo a 2 decimales pa errores de precision de google 🤐
+    const roundedLng = Math.round(lng * 100) / 100;
 
     const convertedWaypoint = {
       location: {
@@ -317,10 +318,11 @@ export class MapPage {
 
                           await this.rastreoService.putRastreo(getRastreo).toPromise();
 
+                          this.wayService.removePackageIdWaypointAssociation(paqueteItem.idPaquete);
                         }
                         await loading.dismiss();
                         await this.presentAlert('Novedad reportada', 'La novedad se ha reportado exitosamente.', 'Aceptar');
-                        this.waypointService.setWaypoints([]);
+                        this.wayService.setWaypoints([]);
                         this.nav.navigateRoot('tabs/escaner');
                       } catch (error) {
                         await loading.dismiss();

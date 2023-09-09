@@ -92,6 +92,8 @@ export class EntregaPage {
 
               await this.api.postEntrega(entregaData).toPromise();
 
+              this.wayService.removePackageIdWaypointAssociation(this.paquete.idPaquete);
+
               const paqsData = await this.paqService.getPaqueteByUser(this.uid).toPromise();
               if (paqsData!.length >= 1) {
                 for (const item of paqsData!) {
@@ -105,27 +107,20 @@ export class EntregaPage {
                 }
               }
 
-              let packageId: any
-
               const generateWaypointsFromScannedResults = () => {
                 const waypoints: WayPointInterface[] = [];
                 for (const i of this.scannedResults) {
-                  packageId = i[0].id;
-                  const lat = parseFloat(i[0].lat);
-                  const lng = parseFloat(i[0].lng);
-                  const roundedLat = Math.round(lat * 1000) / 1000; // redondeo a 3 decimales pa errores de precision de google 🤐
-                  const roundedLng = Math.round(lng * 1000) / 1000;
 
-                  const latLng = { lat: roundedLat, lng: roundedLng };
+
+                  const latLng = { lat: i[0].lat, lng: i[0].lng };
                   const waypoint: WayPointInterface = { location: latLng, stopover: true };
-
                   waypoints.push(waypoint);
-                  this.wayService.associatePackageWithWaypoint(packageId, waypoint);
                 }
-                return waypoints;
+
+                this.wayService.setWaypoints(waypoints);
               }
-              const waypoints = generateWaypointsFromScannedResults();
-              this.wayService.setWaypoints(waypoints);
+
+              generateWaypointsFromScannedResults();
 
               await loading.dismiss();
               await this.presentAlert('Entrega confirmada', 'La entrega se ha confirmado exitosamente.', 'Aceptar');
@@ -238,6 +233,7 @@ export class EntregaPage {
 
                         await this.rastreoService.putRastreo(getRastreo).toPromise();
 
+                        this.wayService.removePackageIdWaypointAssociation(this.paquete.idPaquete);
 
                         const paqsData = await this.paqService.getPaqueteByUser(this.uid).toPromise();
                         if (paqsData!.length >= 1) {
@@ -252,27 +248,21 @@ export class EntregaPage {
                           }
                         }
 
-                        let packageId: any
 
                         const generateWaypointsFromScannedResults = () => {
                           const waypoints: WayPointInterface[] = [];
                           for (const i of this.scannedResults) {
-                            packageId = i[0].id;
-                            const lat = parseFloat(i[0].lat);
-                            const lng = parseFloat(i[0].lng);
-                            const roundedLat = Math.round(lat * 1000) / 1000; // redondeo a 3 decimales pa errores de precision de google 🤐
-                            const roundedLng = Math.round(lng * 1000) / 1000;
 
-                            const latLng = { lat: roundedLat, lng: roundedLng };
+
+                            const latLng = { lat: i[0].lat, lng: i[0].lng };
                             const waypoint: WayPointInterface = { location: latLng, stopover: true };
-
                             waypoints.push(waypoint);
-                            this.wayService.associatePackageWithWaypoint(packageId, waypoint);
                           }
-                          return waypoints;
+
+                          this.wayService.setWaypoints(waypoints);
                         }
-                        const waypoints = generateWaypointsFromScannedResults();
-                        this.wayService.setWaypoints(waypoints);
+
+                        generateWaypointsFromScannedResults();
 
                         await loading.dismiss();
                         await this.presentAlert('Novedad reportada', 'La novedad se ha reportado exitosamente.', 'Aceptar');
