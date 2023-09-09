@@ -28,7 +28,7 @@ export class EscanerPage implements OnDestroy {
     private nav: NavController,
     private api: PaqueteService,
     private rastreo: RastreoService,
-    private waypointService: WaypointsService
+    private wayService: WaypointsService
   ) { }
 
 
@@ -76,7 +76,7 @@ export class EscanerPage implements OnDestroy {
       const waypoint: WayPointInterface = { location: latLng, stopover: true };
 
       waypoints.push(waypoint);
-      this.waypointService.associatePackageWithWaypoint(this.packageId, waypoint);
+      this.wayService.associatePackageWithWaypoint(this.packageId, waypoint);
     }
 
     return waypoints;
@@ -114,7 +114,7 @@ export class EscanerPage implements OnDestroy {
             }
 
             const waypoints = this.generateWaypointsFromScannedResults();
-            await this.waypointService.setWaypoints(waypoints);
+            this.wayService.setWaypoints(waypoints);
             this.nav.navigateForward('/tabs/mapa');
             await loading.dismiss();
           } catch (error) {
@@ -135,7 +135,7 @@ export class EscanerPage implements OnDestroy {
         return true;
       } else if (status.denied) {
         const alert = await this.alert.create({
-          header: 'Error',
+          header: 'Permiso requerido',
           message: 'No se ha otorgado el permiso para acceder a la cámara. Por favor, otorgalo a continuación.',
           buttons: [
             'Cancelar',
@@ -219,12 +219,8 @@ export class EscanerPage implements OnDestroy {
                             data.idEstado = 2;
                             this.api.putPaquete(data).subscribe(
                               async (res: any) => {
-                                if (res.status != 'error') {
-                                  await this.scannedResults.push(qrDataArray);
-                                } else {
-                                  this.presentAlert('Error', res.msj);
-                                }
-                                loading.dismiss();
+                                this.scannedResults.push(qrDataArray);
+                                await loading.dismiss();
                               },
                               async (error) => {
                                 await loading.dismiss();
@@ -240,12 +236,8 @@ export class EscanerPage implements OnDestroy {
                       data.idEstado = 2;
                       this.api.putPaquete(data).subscribe(
                         async (res: any) => {
-                          if (res.status != 'error') {
-                            await this.scannedResults.push(qrDataArray);
-                          } else {
-                            this.presentAlert('Error', res.msj);
-                          }
-                          loading.dismiss();
+                          this.scannedResults.push(qrDataArray);
+                          await loading.dismiss();
                         },
                         async (error) => {
                           await loading.dismiss();
@@ -331,17 +323,13 @@ export class EscanerPage implements OnDestroy {
                               res.idEstado = 2;
                               this.api.putPaquete(res).subscribe(
                                 async (data: any) => {
-                                  if (data.status != 'error') {
-                                    const scannedPackage = {
-                                      id: res.idPaquete,
-                                      cod: res.codigoPaquete,
-                                      lat: res.lat,
-                                      lng: res.lng
-                                    };
-                                    await this.scannedResults.push([scannedPackage]);
-                                  } else {
-                                    this.presentAlert('Error', data.msj);
-                                  }
+                                  const scannedPackage = {
+                                    id: res.idPaquete,
+                                    cod: res.codigoPaquete,
+                                    lat: res.lat,
+                                    lng: res.lng
+                                  };
+                                  this.scannedResults.push([scannedPackage]);
                                   await loading.dismiss();
                                 },
                                 async (error) => {
@@ -358,17 +346,13 @@ export class EscanerPage implements OnDestroy {
                         res.idEstado = 2;
                         this.api.putPaquete(res).subscribe(
                           async (data: any) => {
-                            if (data.status != 'error') {
-                              const scannedPackage = {
-                                id: res.idPaquete,
-                                cod: res.codigoPaquete,
-                                lat: res.lat,
-                                lng: res.lng
-                              };
-                              await this.scannedResults.push([scannedPackage]);
-                            } else {
-                              this.presentAlert('Error', data.msj);
-                            }
+                            const scannedPackage = {
+                              id: res.idPaquete,
+                              cod: res.codigoPaquete,
+                              lat: res.lat,
+                              lng: res.lng
+                            };
+                            this.scannedResults.push([scannedPackage]);
                             await loading.dismiss();
                           },
                           async (error) => {
@@ -413,30 +397,16 @@ export class EscanerPage implements OnDestroy {
             await alert.dismiss();
             const loading = await this.loadingAlert('Cargando...');
 
-            this.api.getOnePaquete(paqueteToRemove[0].id).subscribe(
-              async (data: any) => {
-                if (data.status != 'error') {
-                  data.idUsuario = null;
-                  data.idEstado = 1;
+            const paqToUpdate = {
+              idPaquete: paqueteToRemove[0].id,
+              idUsuario: null,
+              idEstado: 1
+            }
 
-                  this.api.putPaquete(data).subscribe(
-                    async (data: any) => {
-                      if (data.status != 'error') {
-                        this.scannedResults.splice(index, 1);
-                      } else {
-                        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
-                      }
-                      await loading.dismiss();
-                    },
-                    async (error) => {
-                      await loading.dismiss();
-                      this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
-                    }
-                  );
-                } else {
-                  await loading.dismiss();
-                  this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
-                }
+            this.api.putPaquete(paqToUpdate).subscribe(
+              async (data: any) => {
+                this.scannedResults.splice(index, 1);
+                await loading.dismiss();
               },
               async (error) => {
                 await loading.dismiss();
@@ -478,7 +448,6 @@ export class EscanerPage implements OnDestroy {
   openHelp(isOpen: boolean) {
     this.isHelpOpen = isOpen;
   }
-
 
   async presentAlert(title: string, msg: string) {
     const alert = await this.alert.create({

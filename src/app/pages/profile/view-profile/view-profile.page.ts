@@ -160,7 +160,7 @@ export class ViewProfilePage implements OnInit {
             await this.nav.navigateRoot('/login');
             localStorage.removeItem('token');
             localStorage.removeItem('uid');
-            loading.dismiss();
+            await loading.dismiss();
           }
         }
       ]

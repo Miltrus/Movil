@@ -352,11 +352,7 @@ export class MapPage {
 
 
   async getPaqsByUser() {
-    try {
-      this.paquete = await this.paqService.getPaqueteByUser(this.uid).toPromise();
-    } catch (error) {
-      console.error('Error al obtener paquetes:', error);
-    }
+    this.paquete = await this.paqService.getPaqueteByUser(this.uid).toPromise();
   }
 
   // para actualizar la posición del marcador
@@ -378,13 +374,6 @@ export class MapPage {
       this.marker.setMap(null);
       this.marker = null;
     }
-  }
-
-
-  goBack() {
-    // limpiar el marcador de la ubicación actual cuando se navega hacia atrás
-    this.clearCurrentLocationMarker();
-    this.nav.navigateBack('tabs/escaner');
   }
 
   async presentAlert(title: string, msg: string, btn: string) {

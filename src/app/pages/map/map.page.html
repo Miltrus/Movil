@@ -1,9 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
-        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
-      </ion-button>
+      <ion-back-button defaultHref="/tabs/escaner"></ion-back-button>
     </ion-buttons>
     <ion-buttons slot="end">
       <ion-button id="click-trigger-map">
@@ -39,7 +37,7 @@
     <ion-icon name="location-sharp" slot="end"></ion-icon>
   </ion-button>
 
-  <ion-modal mode="ios" [initialBreakpoint]="1" [breakpoints]="[0.30, 0.5, 0.75, 1]" [isOpen]="isMyPaqsOpen">
+  <ion-modal mode="ios" [initialBreakpoint]="0.95" [breakpoints]="[0.30, 0.5, 0.75, 1]" [isOpen]="isMyPaqsOpen">
     <ng-template>
       <ion-header>
         <ion-toolbar>
@@ -72,7 +70,7 @@
     </ng-template>
   </ion-modal>
 
-  <ion-modal mode="ios" [initialBreakpoint]="0.5" [breakpoints]="[0.30, 0.5, 0.75, 1]" [isOpen]="isDetailPaq">
+  <ion-modal mode="ios" [initialBreakpoint]="0.75" [breakpoints]="[0.30, 0.5, 0.75, 1]" [isOpen]="isDetailPaq">
     <ng-template>
       <ion-header>
         <ion-toolbar>
