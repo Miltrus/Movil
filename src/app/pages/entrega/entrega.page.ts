@@ -68,10 +68,7 @@ export class EntregaPage {
       header: 'Confirmar entrega',
       message: '¿Está seguro de que deseas confirmar la entrega?',
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
+        'Cancelar',
         {
           text: 'Confirmar',
           handler: async () => {
@@ -212,10 +209,7 @@ export class EntregaPage {
                 header: 'Confirmar reporte',
                 message: 'Una vez confirmado, no podrá ser modificado o eliminado y este paquete ya no podrá ser entregado en esta ruta y deberá volver a bodega.',
                 buttons: [
-                  {
-                    text: 'Cancelar',
-                    role: 'cancel'
-                  },
+                  'Cancelar',
                   {
                     text: 'Confirmar',
                     handler: async () => {

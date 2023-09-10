@@ -118,10 +118,7 @@ export class EditProfilePage implements OnInit {
       header: 'Confirmar actualización',
       message: '¿Estás seguro de que deseas guardar los cambios?',
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
+        'Cancelar',
         {
           text: 'Aceptar',
           handler: async () => {
@@ -195,10 +192,7 @@ export class EditProfilePage implements OnInit {
       header: 'Cambios sin guardar',
       message: '¿Estás seguro de que deseas salir?',
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
+        'Cancelar',
         {
           text: 'Aceptar',
           handler: async () => {
