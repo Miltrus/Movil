@@ -225,7 +225,7 @@ export class MapPage {
 
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 10000; // umbral de proximidad en mts
+    const proximidad = 100; // umbral de proximidad en mts
 
     const remainingDistance = currentLeg.distance.value;
 
@@ -308,17 +308,17 @@ export class MapPage {
                       try {
                         for (const paqueteItem of this.paquete) {
                           paqueteItem.idEstado = 4;
-                          
+
                           await this.paqService.putPaquete(paqueteItem).toPromise();
-                          
+
                           let getRastreo = await this.rastreoService.getRastreoByPaquete(paqueteItem.idPaquete).toPromise();
-                          
+
                           getRastreo!.idEstado = 2;
                           getRastreo!.motivoNoEntrega = desc.descripcion;
                           getRastreo!.fechaNoEntrega = this.formattedFechAct;
-                          
+
                           await this.rastreoService.putRastreo(getRastreo).toPromise();
-                          
+
                           this.wayService.removePackageIdWaypointAssociation(paqueteItem.idPaquete);
                         }
                         await loading.dismiss();
