@@ -452,6 +452,10 @@ export class EscanerPage implements OnDestroy {
     this.isHelpOpen = isOpen;
   }
 
+  onModalDismiss(event: any) {
+    this.isHelpOpen = false;
+  }
+
   async presentAlert(title: string, msg: string) {
     const alert = await this.alert.create({
       header: title,

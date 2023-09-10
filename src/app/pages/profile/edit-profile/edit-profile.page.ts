@@ -186,7 +186,7 @@ export class EditProfilePage implements OnInit {
     if (!this.hasUnsavedChanges()) {
       this.nav.navigateBack('/tabs/profile');
     } else {
-      this.showUnsavedChangesAlert();
+      await this.showUnsavedChangesAlert();
     }
   }
 

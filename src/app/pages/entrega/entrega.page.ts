@@ -285,10 +285,6 @@ export class EntregaPage {
     await descAlert.present();
   }
 
-  goBack() {
-    this.nav.back();
-  }
-
   async presentAlert(title: string, msg: string, button: string) {
     const alert = await this.alert.create({
       header: title,

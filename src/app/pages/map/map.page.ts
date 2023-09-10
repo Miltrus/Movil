@@ -37,7 +37,7 @@ export class MapPage {
   paquete: any;
   uid = parseInt(localStorage.getItem('uid')!);
   isMyPaqsOpen = false;
-  isDetailPaq = false;
+  isDetailPaqOpen = false;
   paqueteSeleccionado: any;
 
 
@@ -205,7 +205,7 @@ export class MapPage {
 
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 20; // umbral de proximidad en mts
+    const proximidad = 150; // umbral de proximidad en mts
 
     const remainingDistance = currentLeg.distance.value;
 
@@ -225,8 +225,7 @@ export class MapPage {
 
 
   async deliverPaquete() {
-
-    if (!await this.isCloseToWaypoint(this.currentLeg)) {
+    if (await this.isCloseToWaypoint(this.currentLeg)) {
 
       const currentWaypoint = await this.getCurrentWaypoint();
       const paqId = this.wayService.getPackageIdFromWaypoint(currentWaypoint);
@@ -347,9 +346,17 @@ export class MapPage {
     this.isMyPaqsOpen = isOpen;
   }
 
+  onModalMyPaqsDismiss(event: any) {
+    this.isMyPaqsOpen = false;
+  }
+
   detailPaq(isOpen: boolean, paquete: any) {
-    this.isDetailPaq = isOpen;
+    this.isDetailPaqOpen = isOpen;
     this.paqueteSeleccionado = paquete;
+  }
+
+  onModalDetailPaqDismiss(event: any) {
+    this.isDetailPaqOpen = false;
   }
 
 

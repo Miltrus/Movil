@@ -37,7 +37,8 @@
     <ion-icon name="location-sharp" slot="end"></ion-icon>
   </ion-button>
 
-  <ion-modal mode="ios" [initialBreakpoint]="0.95" [breakpoints]="[0.30, 0.5, 0.75, 1]" [isOpen]="isMyPaqsOpen">
+  <ion-modal mode="ios" [initialBreakpoint]="0.95" [breakpoints]="[0, 0.30, 0.5, 0.75, 0.95, 1]" [isOpen]="isMyPaqsOpen"
+    (ionModalDidDismiss)="onModalMyPaqsDismiss($event)">
     <ng-template>
       <ion-header>
         <ion-toolbar>
@@ -70,7 +71,8 @@
     </ng-template>
   </ion-modal>
 
-  <ion-modal mode="ios" [initialBreakpoint]="0.75" [breakpoints]="[0.30, 0.5, 0.75, 1]" [isOpen]="isDetailPaq">
+  <ion-modal mode="ios" [initialBreakpoint]="0.75" [breakpoints]="[0, 0.30, 0.5, 0.75, 1]" [isOpen]="isDetailPaqOpen"
+    (ionModalDidDismiss)="onModalDetailPaqDismiss($event)">
     <ng-template>
       <ion-header>
         <ion-toolbar>
