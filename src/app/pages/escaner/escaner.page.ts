@@ -214,18 +214,31 @@ export class EscanerPage implements OnDestroy {
                           {
                             text: 'Continuar',
                             handler: async () => {
-                              data.idUsuario = this.uid;
-                              data.idEstado = 2;
-                              this.api.putPaquete(data).subscribe(
-                                async (res: any) => {
-                                  this.scannedResults.push(qrDataArray);
-                                  await loading.dismiss();
-                                },
-                                async (error) => {
-                                  await loading.dismiss();
-                                  this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
-                                }
-                              );
+                              const confirmAlert = await this.alert.create({
+                                header: 'Confirmar',
+                                message: `¿Estás seguro de que deseas agregar el paquete '${data.codigoPaquete}' a tu lista?`,
+                                buttons: [
+                                  'Cancelar',
+                                  {
+                                    text: 'Confirmar',
+                                    handler: async () => {
+                                      data.idUsuario = this.uid;
+                                      data.idEstado = 2;
+                                      this.api.putPaquete(data).subscribe(
+                                        async (res: any) => {
+                                          this.scannedResults.push(qrDataArray);
+                                          await loading.dismiss();
+                                        },
+                                        async (error) => {
+                                          await loading.dismiss();
+                                          this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+                                        }
+                                      );
+                                    }
+                                  }
+                                ]
+                              });
+                              await confirmAlert.present();
                             }
                           }]
                       });
@@ -313,24 +326,37 @@ export class EscanerPage implements OnDestroy {
                             {
                               text: 'Continuar',
                               handler: async () => {
-                                res.idUsuario = this.uid;
-                                res.idEstado = 2;
-                                this.api.putPaquete(res).subscribe(
-                                  async (data: any) => {
-                                    const scannedPackage = {
-                                      id: res.idPaquete,
-                                      cod: res.codigoPaquete,
-                                      lat: res.lat,
-                                      lng: res.lng
-                                    };
-                                    this.scannedResults.push([scannedPackage]);
-                                    await loading.dismiss();
-                                  },
-                                  async (error) => {
-                                    await loading.dismiss();
-                                    this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
-                                  }
-                                );
+                                const confirmAlert = await this.alert.create({
+                                  header: 'Confirmar',
+                                  message: `¿Estás seguro de que deseas agregar el paquete '${res.codigoPaquete}' a tu lista?`,
+                                  buttons: [
+                                    'Cancelar',
+                                    {
+                                      text: 'Confirmar',
+                                      handler: async () => {
+                                        res.idUsuario = this.uid;
+                                        res.idEstado = 2;
+                                        this.api.putPaquete(res).subscribe(
+                                          async (data: any) => {
+                                            const scannedPackage = {
+                                              id: res.idPaquete,
+                                              cod: res.codigoPaquete,
+                                              lat: res.lat,
+                                              lng: res.lng
+                                            };
+                                            this.scannedResults.push([scannedPackage]);
+                                            await loading.dismiss();
+                                          },
+                                          async (error) => {
+                                            await loading.dismiss();
+                                            this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+                                          }
+                                        );
+                                      }
+                                    }
+                                  ]
+                                });
+                                await confirmAlert.present();
                               }
                             }]
                         });
