@@ -195,6 +195,7 @@ export class EntregaPage {
           placeholder: '¿Qué ha pasado con este paquete?'
         }
       ],
+      backdropDismiss: false,
       buttons: [
         'Cancelar',
         {
@@ -208,6 +209,7 @@ export class EntregaPage {
               const confirmAlert = await this.alert.create({
                 header: 'Confirmar reporte',
                 message: 'Una vez confirmado, no podrá ser modificado o eliminado y este paquete ya no podrá ser entregado en esta ruta y deberá volver a bodega.',
+                backdropDismiss: false,
                 buttons: [
                   'Cancelar',
                   {

@@ -225,7 +225,7 @@ export class MapPage {
 
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 100; // umbral de proximidad en mts
+    const proximidad = 10000; // umbral de proximidad en mts
 
     const remainingDistance = currentLeg.distance.value;
 
@@ -280,9 +280,10 @@ export class MapPage {
         {
           name: 'descripcion',
           type: 'textarea',
-          placeholder: '¿Qué ha pasado?'
+          placeholder: '¿Qué ha pasado?',
         }
       ],
+      backdropDismiss: false,
       buttons: [
         'Cancelar',
         {
@@ -296,6 +297,7 @@ export class MapPage {
               const confirmAlert = await this.alert.create({
                 header: 'Confirmar reporte',
                 message: 'Una vez confirmado, no podrá ser modificado o eliminado y los paquetes que no hayan sido entregados en esta ruta deberán volver a bodega y la ruta se finalizará',
+                backdropDismiss: false,
                 buttons: [
                   'Cancelar',
                   {
@@ -306,17 +308,17 @@ export class MapPage {
                       try {
                         for (const paqueteItem of this.paquete) {
                           paqueteItem.idEstado = 4;
-
+                          
                           await this.paqService.putPaquete(paqueteItem).toPromise();
-
+                          
                           let getRastreo = await this.rastreoService.getRastreoByPaquete(paqueteItem.idPaquete).toPromise();
-
+                          
                           getRastreo!.idEstado = 2;
                           getRastreo!.motivoNoEntrega = desc.descripcion;
                           getRastreo!.fechaNoEntrega = this.formattedFechAct;
-
+                          
                           await this.rastreoService.putRastreo(getRastreo).toPromise();
-
+                          
                           this.wayService.removePackageIdWaypointAssociation(paqueteItem.idPaquete);
                         }
                         await loading.dismiss();
@@ -337,7 +339,7 @@ export class MapPage {
             }
           }
         }
-      ]
+      ],
     });
     await descAlert.present();
   }

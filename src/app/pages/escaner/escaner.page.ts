@@ -291,6 +291,7 @@ export class EscanerPage implements OnDestroy {
           placeholder: 'Ingresa el código del paquete aquí'
         }
       ],
+      backdropDismiss: false,
       buttons: [
         'Cancelar',
         {
