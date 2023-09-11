@@ -23,7 +23,7 @@ export class MapPage {
   marker: google.maps.Marker | null = null; // para el marcador de la ubicación actual
   locationWatchId: number | null = null; // para almacenar el id de la suscripción de watchPosition
 
-  origin: google.maps.LatLng = new google.maps.LatLng(0, 0);
+  origin: google.maps.LatLng = new google.maps.LatLng(0, 0); /* 6.25534, -75.57484 */ // pa ponerla aca en el sena x si ocurren esos errores chimbos de la ubicacion
   destination: google.maps.LatLng = new google.maps.LatLng(6.29051, -75.57353);
 
   legs: any;
