@@ -214,6 +214,7 @@ export class EscanerPage implements OnDestroy {
                           {
                             text: 'Continuar',
                             handler: async () => {
+                              await alert.dismiss();
                               const confirmAlert = await this.alert.create({
                                 header: 'Confirmar',
                                 message: `¿Estás seguro de que deseas agregar el paquete '${data.codigoPaquete}' a tu lista?`,
@@ -322,14 +323,17 @@ export class EscanerPage implements OnDestroy {
                         const alert = await this.alert.create({
                           header: 'Paquete asignado a otro mensajero',
                           message: 'Este paquete ya ha sido escaneado por otro repartidor. ¿Estás seguro de que deseas continuar?',
+                          backdropDismiss: false,
                           buttons: [
                             'Cancelar',
                             {
                               text: 'Continuar',
                               handler: async () => {
+                                await alert.dismiss();
                                 const confirmAlert = await this.alert.create({
                                   header: 'Confirmar',
                                   message: `¿Estás seguro de que deseas agregar el paquete '${res.codigoPaquete}' a tu lista?`,
+                                  backdropDismiss: false,
                                   buttons: [
                                     'Cancelar',
                                     {
