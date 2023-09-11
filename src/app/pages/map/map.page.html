@@ -4,6 +4,9 @@
       <ion-back-button defaultHref="/tabs/escaner"></ion-back-button>
     </ion-buttons>
     <ion-buttons slot="end">
+      <ion-button (click)="ionViewDidEnter()">
+        <ion-icon name="reload"></ion-icon>
+      </ion-button>
       <ion-button id="click-trigger-map">
         <ion-icon name="ellipsis-vertical"></ion-icon>
       </ion-button>
@@ -27,6 +30,7 @@
 </ion-header>
 
 <ion-content>
+
   <div id="map"></div>
   <ion-button mode="ios" *ngIf="entregaButton" expand="block" class="open-entrega-button"
     (click)="deliverPaquete()">Entregar

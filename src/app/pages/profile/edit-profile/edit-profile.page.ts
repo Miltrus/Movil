@@ -134,7 +134,7 @@ export class EditProfilePage implements OnInit {
               if (data?.status == 'ok') {
                 this.editForm.reset();
                 this.pwdForm.reset();
-                this.nav.navigateRoot('/tabs/profile', { queryParams: { userData: JSON.stringify(updatedData) } });
+                this.nav.navigateBack('tabs/profile', { queryParams: { userData: JSON.stringify(updatedData) } });
                 const toast = await this.toast.create({
                   header: 'Cambios guardados',
                   message: 'Los cambios se han guardado correctamente.',
@@ -181,7 +181,7 @@ export class EditProfilePage implements OnInit {
 
   async goBack() {
     if (!this.hasUnsavedChanges()) {
-      this.nav.navigateBack('/tabs/profile');
+      this.nav.navigateBack('tabs/profile');
     } else {
       await this.showUnsavedChangesAlert();
     }
@@ -197,7 +197,7 @@ export class EditProfilePage implements OnInit {
           text: 'Aceptar',
           handler: async () => {
             await confirmAlert.dismiss();
-            this.nav.navigateBack('/tabs/profile');
+            this.nav.navigateBack('tabs/profile');
           }
         }
       ]

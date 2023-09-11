@@ -116,7 +116,7 @@ export class EscanerPage implements OnDestroy {
               }
 
               this.generateWaypointsFromScannedResults();
-              this.nav.navigateForward('/tabs/mapa');
+              this.nav.navigateForward('tabs/mapa');
               await loading.dismiss();
             } catch (error) {
               await loading.dismiss();

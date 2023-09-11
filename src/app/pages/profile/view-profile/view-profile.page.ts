@@ -135,7 +135,7 @@ export class ViewProfilePage implements OnInit {
 
 
   openEditProfile(): void {
-    this.nav.navigateForward('/tabs/profile/edit-profile', { state: { userData: this.userData } });
+    this.nav.navigateForward('tabs/profile/edit-profile', { state: { userData: this.userData } });
   }
 
   async logout() {

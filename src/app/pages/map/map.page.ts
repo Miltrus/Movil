@@ -4,6 +4,8 @@ import { WayPointInterface } from 'src/app/models/waypoint.interface';
 import { PaqueteService } from 'src/app/services/api/paquete.service';
 import { RastreoService } from 'src/app/services/api/rastreo.service';
 import { WaypointsService } from 'src/app/services/waypoints.service';
+import { Geolocation } from '@capacitor/geolocation';
+import { AndroidSettings, IOSSettings, NativeSettings } from 'capacitor-native-settings';
 
 declare var google: any;
 
@@ -21,7 +23,7 @@ export class MapPage {
   directionsService = new google.maps.DirectionsService();  // pa calcular la ruta
   directionsDisplay = new google.maps.DirectionsRenderer(); // pa mostrar la ruta
   marker: google.maps.Marker | null = null; // para el marcador de la ubicación actual
-  locationWatchId: number | null = null; // para almacenar el id de la suscripción de watchPosition
+  /* locationWatchId: number | null = null; // para almacenar el id de la suscripción de watchPosition */
 
   origin: google.maps.LatLng = new google.maps.LatLng(0, 0);
   destination: google.maps.LatLng = new google.maps.LatLng(6.29051, -75.57353);
@@ -57,12 +59,12 @@ export class MapPage {
     await this.getPaqsByUser();
   }
 
-  ionViewWillLeave() {
+  /* ionViewWillLeave() {
     // cancelar la suscripción de watchPosition al salir de la página
     if (this.locationWatchId !== null) {
       navigator.geolocation.clearWatch(this.locationWatchId);
     }
-  }
+  } */
 
   async loadMap() {
     this.mapEle = document.getElementById('map')!;
@@ -83,6 +85,75 @@ export class MapPage {
   }
 
   async getCurrentLocation() {
+    const loading = await this.loadingAlert('Obteniendo tu ubicación...');
+    try {
+      const permissionStatus = await Geolocation.checkPermissions();
+
+      if (permissionStatus?.location != 'granted') {
+        await loading.dismiss();
+        const requestStatus = await Geolocation.requestPermissions();
+
+        if (requestStatus?.location != 'granted') {
+          await loading.dismiss();
+          this.nav.navigateRoot('tabs/escaner');
+          const alert = await this.alert.create({
+            header: 'Acceso a la ubicación requerido',
+            message: 'Para continuar, por favor otorga permiso para acceder a tu ubicación.',
+            buttons: [{
+              text: 'Activar',
+              handler: async () => {
+                await this.openSettings(true);
+              }
+            }]
+          })
+          await alert.present();
+          return;
+        }
+
+      }
+
+      let geoOptions: PositionOptions = {
+        maximumAge: 5000,
+        timeout: 30000,
+        enableHighAccuracy: true
+      };
+
+      const position = await Geolocation.getCurrentPosition(geoOptions)
+      this.origin = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+      await loading.dismiss();
+      this.updateMarkerPosition(this.origin);
+      await this.calculateRoute();
+
+    } catch (error: any) {
+      await loading.dismiss();
+      if (error?.message == 'Location services are not enabled') {
+        await this.nav.navigateRoot('tabs/escaner');
+        const alert = await this.alert.create({
+          header: 'Acceso a la ubicación requerido',
+          message: 'Para continuar, por favor activa la ubicación.',
+          buttons: [
+            {
+              text: 'Activar',
+              handler: async () => {
+                await this.openSettings();
+              }
+            }
+          ]
+        });
+        await alert.present();
+      }
+      this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
+    }
+  }
+
+  openSettings(app = false) {
+    return NativeSettings.open({
+      optionAndroid: app ? AndroidSettings.ApplicationDetails : AndroidSettings.Location,
+      optionIOS: app ? IOSSettings.App : IOSSettings.LocationServices
+    });
+  }
+
+  /* async getCurrentLocation() {
     const loading = await this.loadingAlert('Obteniendo tu ubicación...');
     if (navigator.geolocation) {
       const geolocationOptions = {
@@ -106,29 +177,29 @@ export class MapPage {
             await this.calculateRoute();
           },
           async (error) => {
-            if (error.code == 1) {
-              await loading.dismiss();
-              this.presentAlert('Acceso a la ubicación requerido', 'Para continuar, por favor otorga permiso para acceder a tu ubicación.', 'OK');
-              this.nav.navigateRoot('tabs/escaner');
-              return;
-            } else if (error.code == 2 || error.code == 3) {
-              await loading.dismiss();
-              this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
-              this.nav.navigateRoot('tabs/escaner');
-              return;
-            }
-            if (attempts <= maxAttempts) {
-              attempts++;
-              setTimeout(() => {
-                tryGetLocation();
-              }, 1000);
-            } else {
-              await loading.dismiss();
-              this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
-              this.nav.navigateRoot('tabs/escaner');
-              return;
-            }
-          },
+              if (error.code == 1) {
+                await loading.dismiss();
+                this.presentAlert('Acceso a la ubicación requerido', 'Para continuar, por favor otorga permiso para acceder a tu ubicación.', 'OK');
+                this.nav.navigateRoot('tabs/escaner');
+                return;
+              } else if (error.code == 2 || error.code == 3) {
+                await loading.dismiss();
+                this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
+                this.nav.navigateRoot('tabs/escaner');
+                return;
+              }
+              if (attempts <= maxAttempts) {
+                attempts++;
+                setTimeout(() => {
+                  tryGetLocation();
+                }, 1000);
+              } else {
+                await loading.dismiss();
+                this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
+                this.nav.navigateRoot('tabs/escaner');
+                return;
+              }
+            },
           geolocationOptions
         );
       };
@@ -137,7 +208,7 @@ export class MapPage {
     } else {
       this.presentAlert('Error al obtener la ubicación', 'Parece que tu dispositivo no soporta la geolocalización. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
     }
-  }
+  } */
 
   async calculateRoute() {
     const loading = await this.loadingAlert('Calculando la ruta...');
@@ -214,7 +285,7 @@ export class MapPage {
       const paqId = this.wayService.getPackageIdFromWaypoint(currentWaypoint);
 
       if (paqId !== null) {
-        this.nav.navigateForward('/tabs/entrega', { queryParams: { paqId } });
+        this.nav.navigateForward('tabs/entrega', { queryParams: { paqId } });
       } else {
         this.presentAlert('Ups...', 'No se ha encontrado el paquete a entregar. No te preocupes, simplemente inicia nuevamente la ruta ;)', 'OK');
       }
@@ -367,7 +438,7 @@ export class MapPage {
   }
 
   // para actualizar la posición del marcador
-  updateMarkerPosition(position: { lat: number, lng: number }) {
+  updateMarkerPosition(position: google.maps.LatLng) {
     if (this.marker) {
       this.marker.setPosition(position);
     } else {
