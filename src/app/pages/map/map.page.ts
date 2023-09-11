@@ -143,6 +143,7 @@ export class MapPage {
         await alert.present();
       }
       this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
+      this.nav.navigateRoot('tabs/escaner');
     }
   }
 
