@@ -61,6 +61,10 @@ export class EntregaPage {
     });
   }
 
+  ionViewWillLeave() {
+    this.signaturePad.clear();
+  }
+
 
   async save(): Promise<void> {
     this.saveSignature();
@@ -81,6 +85,7 @@ export class EntregaPage {
             try {
               await this.paqService.putPaquete(this.paquete).toPromise();
 
+              this.signaturePad.clear();
               let getRastreo = await this.rastreoService.getRastreoByPaquete(this.paquete.idPaquete).toPromise();
               getRastreo!.idEstado = 1;
 
