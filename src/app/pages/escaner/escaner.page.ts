@@ -40,8 +40,8 @@ export class EscanerPage implements OnDestroy {
       if (data.length >= 1) {
         for (const item of data) {
           const scannedPackage = {
-            id: item.idPaquete,
-            cod: item.codigoPaquete,
+            idPaquete: item.idPaquete,
+            codigoPaquete: item.codigoPaquete,
             lat: item.lat,
             lng: item.lng
           };
@@ -66,7 +66,7 @@ export class EscanerPage implements OnDestroy {
     const waypointsWithoutRounding: WayPointInterface[] = [];
 
     for (const i of this.scannedResults) {
-      this.packageId = i[0].id;
+      this.packageId = i[0].idPaquete;
       const roundedLat = Math.round(i[0].lat * 100000) / 100000; // redondeo a 5 decimales pa errores de precision de google 🤐
       const roundedLng = Math.round(i[0].lng * 100000) / 100000;
 
@@ -173,104 +173,33 @@ export class EscanerPage implements OnDestroy {
       document.querySelector('body')!.classList.remove('scanner-active');
 
       if (result.hasContent) {
+        const loading = await this.loadingAlert('Validando...');
         try {
-          const qrDataArray: any[] = JSON.parse(result.content);
-          if (qrDataArray.every((item) =>
-            Object.keys(item).length == 4 &&
-            item.hasOwnProperty("id") &&
-            item.hasOwnProperty("cod") &&
-            item.hasOwnProperty("lat") &&
-            item.hasOwnProperty("lng")
+          const qrData: any[] = JSON.parse(result.content);
+          if (qrData.every((item) =>
+            Object.keys(item).length == 2 &&
+            item.hasOwnProperty("idPaquete") &&
+            item.hasOwnProperty("codigoPaquete")
           )) {
-            const qrData = qrDataArray[0].cod;
+            const qrCod = qrData[0].codigoPaquete;
 
             const codExists = this.scannedResults.find((i: any) =>
-              i.some((item: any) => item.cod == qrData)
+              i.some((item: any) => item.codigoPaquete == qrCod)
             );
 
             if (codExists) {
+              await loading.dismiss();
               this.presentAlert('Paquete duplicado', 'Ya has ingresado este paquete a tu lista.');
             } else {
-              const loading = await this.loadingAlert('Cargando...');
-
-              this.api.getPaqueteByCodigo(qrDataArray[0].cod).subscribe(
-                async (data: any) => {
-                  if (data.status != 'error') {
-
-                    if (data.idEstado == 3) {
-                      await loading.dismiss();
-                      this.presentAlert('Paquete ya entregado', 'Este paquete ya ha sido entregado.');
-                      return;
-                    }
-                    if (data.idUsuario != this.uid && data.idEstado == 2) {
-                      await loading.dismiss();
-                      const alert = await this.alert.create({
-                        header: 'Paquete asignado a otro mensajero',
-                        message: 'Este paquete ya ha sido escaneado por otro repartidor. ¿Estás seguro de que deseas continuar?',
-                        buttons: [
-                          'Cancelar',
-                          {
-                            text: 'Continuar',
-                            handler: async () => {
-                              await alert.dismiss();
-                              const confirmAlert = await this.alert.create({
-                                header: 'Confirmar',
-                                message: `¿Estás seguro de que deseas agregar el paquete '${data.codigoPaquete}' a tu lista?`,
-                                buttons: [
-                                  'Cancelar',
-                                  {
-                                    text: 'Confirmar',
-                                    handler: async () => {
-                                      data.idUsuario = this.uid;
-                                      data.idEstado = 2;
-                                      this.api.putPaquete(data).subscribe(
-                                        async (res: any) => {
-                                          this.scannedResults.push(qrDataArray);
-                                          await loading.dismiss();
-                                        },
-                                        async (error) => {
-                                          await loading.dismiss();
-                                          this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
-                                        }
-                                      );
-                                    }
-                                  }
-                                ]
-                              });
-                              await confirmAlert.present();
-                            }
-                          }]
-                      });
-                      await alert.present();
-                    } else {
-                      data.idUsuario = this.uid;
-                      data.idEstado = 2;
-                      this.api.putPaquete(data).subscribe(
-                        async (res: any) => {
-                          this.scannedResults.push(qrDataArray);
-                          await loading.dismiss();
-                        },
-                        async (error) => {
-                          await loading.dismiss();
-                          this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
-                        }
-                      );
-                    }
-                  } else {
-                    await loading.dismiss();
-                    this.presentAlert('Error', 'El QR escaneado no es válido. Por favor, escanea un QR válido o ingresa el código manualmente.');
-                  }
-                },
-                async (error) => {
-                  await loading.dismiss();
-                  this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
-                }
-              );
+              await loading.dismiss();
+              this.assingPaq(qrCod);
             }
           } else {
+            await loading.dismiss();
             this.presentAlert('Error', 'El QR escaneado no es válido. Por favor, escanea un QR válido o introduzca el código manualmente.');
           }
         } catch (error) {
+          await loading.dismiss();
           this.presentAlert('Error', 'El QR escaneado no es válido. Por favor, escanea un QR válido o introduzca el código manualmente.');
         }
       }
@@ -297,100 +226,15 @@ export class EscanerPage implements OnDestroy {
           text: 'Confirmar',
           handler: async (data) => {
             if (data.manualCode) {
+              await alertInput.dismiss();
               const loading = await this.loadingAlert('Validando...');
               if (this.scannedResults.find((i: any) =>
-                i.some((item: any) => item.cod === data.manualCode.toUpperCase()))) {
-                await alertInput.dismiss();
+                i.some((item: any) => item.codigoPaquete === data.manualCode.toUpperCase()))) {
                 await loading.dismiss();
                 this.presentAlert('Paquete duplicado', 'Ya has ingresado este paquete a tu lista.');
               } else {
-                this.api.getPaqueteByCodigo(data.manualCode).subscribe(
-                  async (res: any) => {
-                    if (res.status == 'error') {
-                      await loading.dismiss();
-                      this.presentAlert('Error', 'El código ingresado no es válido. Por favor, ingresa un código válido o escanea el QR.');
-                    } else {
-
-                      if (res.idEstado == 3) {
-                        await loading.dismiss();
-                        this.presentAlert('Paquete ya entregado', 'Este paquete ya ha sido entregado.');
-                        return;
-                      }
-                      if (res.idUsuario != this.uid && res.idEstado == 2) {
-                        await loading.dismiss();
-                        const alert = await this.alert.create({
-                          header: 'Paquete asignado a otro mensajero',
-                          message: 'Este paquete ya ha sido escaneado por otro repartidor. ¿Estás seguro de que deseas continuar?',
-                          backdropDismiss: false,
-                          buttons: [
-                            'Cancelar',
-                            {
-                              text: 'Continuar',
-                              handler: async () => {
-                                await alert.dismiss();
-                                const confirmAlert = await this.alert.create({
-                                  header: 'Confirmar',
-                                  message: `¿Estás seguro de que deseas agregar el paquete '${res.codigoPaquete}' a tu lista?`,
-                                  backdropDismiss: false,
-                                  buttons: [
-                                    'Cancelar',
-                                    {
-                                      text: 'Confirmar',
-                                      handler: async () => {
-                                        res.idUsuario = this.uid;
-                                        res.idEstado = 2;
-                                        this.api.putPaquete(res).subscribe(
-                                          async (data: any) => {
-                                            const scannedPackage = {
-                                              id: res.idPaquete,
-                                              cod: res.codigoPaquete,
-                                              lat: res.lat,
-                                              lng: res.lng
-                                            };
-                                            this.scannedResults.push([scannedPackage]);
-                                            await loading.dismiss();
-                                          },
-                                          async (error) => {
-                                            await loading.dismiss();
-                                            this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
-                                          }
-                                        );
-                                      }
-                                    }
-                                  ]
-                                });
-                                await confirmAlert.present();
-                              }
-                            }]
-                        });
-                        await alert.present();
-                      } else {
-                        res.idUsuario = this.uid;
-                        res.idEstado = 2;
-                        this.api.putPaquete(res).subscribe(
-                          async (data: any) => {
-                            const scannedPackage = {
-                              id: res.idPaquete,
-                              cod: res.codigoPaquete,
-                              lat: res.lat,
-                              lng: res.lng
-                            };
-                            this.scannedResults.push([scannedPackage]);
-                            await loading.dismiss();
-                          },
-                          async (error) => {
-                            await loading.dismiss();
-                            this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
-                          }
-                        );
-                      }
-                    }
-                  },
-                  async (error) => {
-                    await loading.dismiss();
-                    this.presentAlert('Error en el servidor', 'Ha ocurrido un error al validar el código. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
-                  }
-                );
+                await loading.dismiss();
+                await this.assingPaq(data.manualCode);
               }
             } else {
               await alertInput.dismiss();
@@ -403,12 +247,89 @@ export class EscanerPage implements OnDestroy {
     await alertInput.present();
   }
 
+  async assingPaq(paq: any) {
+    const loading = await this.loadingAlert('Cargando...');
+
+    this.api.getPaqueteByCodigo(paq).subscribe(
+      async (data: any) => {
+        if (data.status != 'error') {
+
+          if (data.idEstado == 3) {
+            await loading.dismiss();
+            this.presentAlert('Paquete ya entregado', 'Este paquete ya ha sido entregado.');
+            return;
+          }
+          if (data.idUsuario != this.uid && data.idEstado == 2) {
+            await loading.dismiss();
+            const alert = await this.alert.create({
+              header: 'Paquete asignado a otro mensajero',
+              message: 'Este paquete ya ha sido escaneado por otro repartidor. ¿Estás seguro de que deseas continuar?',
+              buttons: [
+                'Cancelar',
+                {
+                  text: 'Continuar',
+                  handler: async () => {
+                    await alert.dismiss();
+                    const confirmAlert = await this.alert.create({
+                      header: 'Confirmar',
+                      message: `¿Estás seguro de que deseas agregar el paquete '${data.codigoPaquete}' a tu lista?`,
+                      buttons: [
+                        'Cancelar',
+                        {
+                          text: 'Confirmar',
+                          handler: async () => {
+                            await confirmAlert.dismiss();
+                            this.paqEnRuta(data);
+                          }
+                        }
+                      ]
+                    });
+                    await confirmAlert.present();
+                  }
+                }]
+            });
+            await alert.present();
+          } else {
+            await this.paqEnRuta(data);
+            loading.dismiss();
+          }
+        } else {
+          await loading.dismiss();
+          this.presentAlert('Error', 'El código ingresado no es válido. Por favor, ingresa un código válido o escanea el QR.');
+        }
+      },
+      async (error) => {
+        await loading.dismiss();
+        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+      }
+    );
+  }
+
+  async paqEnRuta(data: any) {
+    data.idUsuario = this.uid;
+    data.idEstado = 2;
+    this.api.putPaquete(data).subscribe(
+      async (res: any) => {
+        const scannedPackage = {
+          idPaquete: data.idPaquete,
+          codigoPaquete: data.codigoPaquete,
+          lat: data.lat,
+          lng: data.lng
+        };
+        this.scannedResults.push([scannedPackage]);
+      },
+      async (error) => {
+        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+      }
+    );
+  }
+
 
   async removePaquete(index: number) {
     const paqueteToRemove = this.scannedResults[index];
     const alert = await this.alert.create({
       header: 'Confirmar',
-      message: `¿Estás seguro de que deseas eliminar el paquete '${paqueteToRemove[0].cod}' de tu lista?`,
+      message: `¿Estás seguro de que deseas eliminar el paquete '${paqueteToRemove[0].codigoPaquete}' de tu lista?`,
       buttons: [
         'Cancelar',
         {
@@ -418,7 +339,7 @@ export class EscanerPage implements OnDestroy {
             const loading = await this.loadingAlert('Cargando...');
 
             const paqToUpdate = {
-              idPaquete: paqueteToRemove[0].id,
+              idPaquete: paqueteToRemove[0].idPaquete,
               idUsuario: null,
               idEstado: 1
             }

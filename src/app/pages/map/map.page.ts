@@ -25,7 +25,8 @@ export class MapPage {
   marker: google.maps.Marker | null = null; // para el marcador de la ubicación actual
   /* locationWatchId: number | null = null; // para almacenar el id de la suscripción de watchPosition */
 
-  origin: google.maps.LatLng = new google.maps.LatLng(0, 0); /* 6.25534, -75.57484 */ // pa ponerla aca en el sena x si ocurren esos errores chimbos de la ubicacion
+  //origin: google.maps.LatLng = new google.maps.LatLng(6.25534, -75.57484);
+  origin: google.maps.LatLng = new google.maps.LatLng(0, 0);
   destination: google.maps.LatLng = new google.maps.LatLng(6.29051, -75.57353);
 
   legs: any;
@@ -113,7 +114,7 @@ export class MapPage {
       }
 
       let geoOptions: PositionOptions = {
-        maximumAge: 5000,
+        maximumAge: 0,
         timeout: 30000,
         enableHighAccuracy: true
       };
@@ -297,7 +298,7 @@ export class MapPage {
 
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 150000; // umbral de proximidad en mts
+    const proximidad = 600; // umbral de proximidad en mts
 
     const remainingDistance = currentLeg.distance.value;
 
@@ -392,7 +393,7 @@ export class MapPage {
                           this.wayService.removePackageIdWaypointAssociation(paqueteItem.idPaquete);
                         }
                         await loading.dismiss();
-                        await this.presentAlert('Novedad reportada', 'La novedad se ha reportado exitosamente.', 'Aceptar');
+                        this.presentAlert('Novedad reportada', 'La novedad se ha reportado exitosamente.', 'Aceptar');
                         this.wayService.setWaypoints([]);
                         this.nav.navigateRoot('tabs/escaner');
                       } catch (error) {
