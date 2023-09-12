@@ -97,6 +97,7 @@ export class EntregaPage {
               this.wayService.removePackageIdWaypointAssociation(this.paquete.idPaquete);
 
               const paqsData = await this.paqService.getPaqueteByUser(this.uid).toPromise();
+              this.scannedResults = [];
               if (paqsData!.length >= 1) {
                 for (const item of paqsData!) {
                   const scannedPackage = {
@@ -109,20 +110,15 @@ export class EntregaPage {
                 }
               }
 
-              const generateWaypointsFromScannedResults = () => {
-                const waypoints: WayPointInterface[] = [];
-                for (const i of this.scannedResults) {
+              const waypoints: WayPointInterface[] = [];
+              for (const i of this.scannedResults) {
 
-
-                  const latLng = { lat: i[0].lat, lng: i[0].lng };
-                  const waypoint: WayPointInterface = { location: latLng, stopover: true };
-                  waypoints.push(waypoint);
-                }
-
-                this.wayService.setWaypoints(waypoints);
+                const latLng = { lat: i[0].lat, lng: i[0].lng };
+                const waypoint: WayPointInterface = { location: latLng, stopover: true };
+                waypoints.push(waypoint);
               }
 
-              generateWaypointsFromScannedResults();
+              this.wayService.setWaypoints(waypoints);
 
               await loading.dismiss();
               await this.presentAlert('Entrega confirmada', 'La entrega se ha confirmado exitosamente.', 'Aceptar');
@@ -237,6 +233,7 @@ export class EntregaPage {
                         this.wayService.removePackageIdWaypointAssociation(this.paquete.idPaquete);
 
                         const paqsData = await this.paqService.getPaqueteByUser(this.uid).toPromise();
+                        this.scannedResults = [];
                         if (paqsData!.length >= 1) {
                           for (const item of paqsData!) {
                             const scannedPackage = {
@@ -249,21 +246,15 @@ export class EntregaPage {
                           }
                         }
 
+                        const waypoints: WayPointInterface[] = [];
+                        for (const i of this.scannedResults) {
 
-                        const generateWaypointsFromScannedResults = () => {
-                          const waypoints: WayPointInterface[] = [];
-                          for (const i of this.scannedResults) {
-
-
-                            const latLng = { lat: i[0].lat, lng: i[0].lng };
-                            const waypoint: WayPointInterface = { location: latLng, stopover: true };
-                            waypoints.push(waypoint);
-                          }
-
-                          this.wayService.setWaypoints(waypoints);
+                          const latLng = { lat: i[0].lat, lng: i[0].lng };
+                          const waypoint: WayPointInterface = { location: latLng, stopover: true };
+                          waypoints.push(waypoint);
                         }
 
-                        generateWaypointsFromScannedResults();
+                        this.wayService.setWaypoints(waypoints);
 
                         await loading.dismiss();
                         await this.presentAlert('Novedad reportada', 'La novedad se ha reportado exitosamente.', 'Aceptar');

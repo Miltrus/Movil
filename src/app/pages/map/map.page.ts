@@ -224,7 +224,7 @@ export class MapPage {
         waypoints: this.waypoints,
         optimizeWaypoints: true,
         travelMode: google.maps.TravelMode.DRIVING,
-        unitSystem: google.maps.UnitSystem.METRIC
+        unitSystem: google.maps.UnitSystem.METRIC,
       }, async (response: any, status: any) => {
         if (status === google.maps.DirectionsStatus.OK) {
           this.directionsDisplay.setDirections(response);
@@ -297,7 +297,7 @@ export class MapPage {
 
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 100; // umbral de proximidad en mts
+    const proximidad = 150000; // umbral de proximidad en mts
 
     const remainingDistance = currentLeg.distance.value;
 
@@ -308,11 +308,9 @@ export class MapPage {
 
   getCurrentWaypoint(): any {
     const way = this.currentLeg.end_location;
-    const lat = parseFloat(way.lat());
-    const lng = parseFloat(way.lng());
 
-    const roundedLat = Math.round(lat * 100) / 100; // redondeo a 2 decimales pa errores de precision de google 🤐
-    const roundedLng = Math.round(lng * 100) / 100;
+    const roundedLat = Math.round(way.lat() * 100000) / 100000; // redondeo a 5 decimales pa errores de precision de google 🤐
+    const roundedLng = Math.round(way.lng() * 100000) / 100000;
 
     const convertedWaypoint = {
       location: {
