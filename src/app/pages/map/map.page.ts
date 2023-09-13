@@ -27,6 +27,7 @@ export class MapPage {
 
   //origin: google.maps.LatLng = new google.maps.LatLng(6.25534, -75.57484);
   origin: google.maps.LatLng = new google.maps.LatLng(0, 0);
+
   destination: google.maps.LatLng = new google.maps.LatLng(6.29051, -75.57353);
 
   legs: any;
@@ -59,13 +60,6 @@ export class MapPage {
     this.waypoints = this.wayService.getWaypoints();
     await this.getPaqsByUser();
   }
-
-  /* ionViewWillLeave() {
-    // cancelar la suscripción de watchPosition al salir de la página
-    if (this.locationWatchId !== null) {
-      navigator.geolocation.clearWatch(this.locationWatchId);
-    }
-  } */
 
   async loadMap() {
     this.mapEle = document.getElementById('map')!;
@@ -154,63 +148,6 @@ export class MapPage {
       optionIOS: app ? IOSSettings.App : IOSSettings.LocationServices
     });
   }
-
-  /* async getCurrentLocation() {
-    const loading = await this.loadingAlert('Obteniendo tu ubicación...');
-    if (navigator.geolocation) {
-      const geolocationOptions = {
-        enableHighAccuracy: true,
-        timeout: 30000,
-        maximumAge: 0
-      };
-
-      let attempts = 0;
-      const maxAttempts = 30;
-
-      const tryGetLocation = () => {
-        this.locationWatchId = navigator.geolocation.watchPosition(
-          async (position) => {
-            const currentPositionLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-
-            this.origin = currentPositionLatLng;
-            this.updateMarkerPosition(currentPositionLatLng);
-
-            await loading.dismiss();
-            await this.calculateRoute();
-          },
-          async (error) => {
-              if (error.code == 1) {
-                await loading.dismiss();
-                this.presentAlert('Acceso a la ubicación requerido', 'Para continuar, por favor otorga permiso para acceder a tu ubicación.', 'OK');
-                this.nav.navigateRoot('tabs/escaner');
-                return;
-              } else if (error.code == 2 || error.code == 3) {
-                await loading.dismiss();
-                this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
-                this.nav.navigateRoot('tabs/escaner');
-                return;
-              }
-              if (attempts <= maxAttempts) {
-                attempts++;
-                setTimeout(() => {
-                  tryGetLocation();
-                }, 1000);
-              } else {
-                await loading.dismiss();
-                this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
-                this.nav.navigateRoot('tabs/escaner');
-                return;
-              }
-            },
-          geolocationOptions
-        );
-      };
-      // llamamos la funcion recursiva pa obtener la ubi
-      tryGetLocation();
-    } else {
-      this.presentAlert('Error al obtener la ubicación', 'Parece que tu dispositivo no soporta la geolocalización. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
-    }
-  } */
 
   async calculateRoute() {
     const loading = await this.loadingAlert('Calculando la ruta...');

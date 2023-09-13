@@ -100,7 +100,7 @@ export class EscanerPage implements OnDestroy {
               for (const i of this.scannedResults) {
                 for (const j of i) {
                   const rastreo = {
-                    idPaquete: j.id,
+                    idPaquete: j.idPaquete,
                     idUsuario: this.uid,
                   };
 
