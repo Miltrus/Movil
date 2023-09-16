@@ -67,8 +67,8 @@ export class EscanerPage implements OnDestroy {
 
     for (const i of this.scannedResults) {
       this.packageId = i[0].idPaquete;
-      const roundedLat = Math.round(i[0].lat * 100000) / 100000; // redondeo a 5 decimales pa errores de precision de google 🤐
-      const roundedLng = Math.round(i[0].lng * 100000) / 100000;
+      const roundedLat = Math.round(i[0].lat * 10000) / 10000; // redondeo a 4 decimales pa errores de precision de google 🤐
+      const roundedLng = Math.round(i[0].lng * 10000) / 10000;
 
       const latLng = { lat: roundedLat, lng: roundedLng };
       const waypointsRound: WayPointInterface = { location: latLng, stopover: true };

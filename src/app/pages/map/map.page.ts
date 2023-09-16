@@ -23,11 +23,8 @@ export class MapPage {
   directionsService = new google.maps.DirectionsService();  // pa calcular la ruta
   directionsDisplay = new google.maps.DirectionsRenderer(); // pa mostrar la ruta
   marker: google.maps.Marker | null = null; // para el marcador de la ubicación actual
-  /* locationWatchId: number | null = null; // para almacenar el id de la suscripción de watchPosition */
 
-  //origin: google.maps.LatLng = new google.maps.LatLng(6.25534, -75.57484);
   origin: google.maps.LatLng = new google.maps.LatLng(0, 0);
-
   destination: google.maps.LatLng = new google.maps.LatLng(6.29051, -75.57353);
 
   legs: any;
@@ -235,7 +232,7 @@ export class MapPage {
 
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 600; // umbral de proximidad en mts
+    const proximidad = 100; // umbral de proximidad en mts
 
     const remainingDistance = currentLeg.distance.value;
 
@@ -247,8 +244,8 @@ export class MapPage {
   getCurrentWaypoint(): any {
     const way = this.currentLeg.end_location;
 
-    const roundedLat = Math.round(way.lat() * 100000) / 100000; // redondeo a 5 decimales pa errores de precision de google 🤐
-    const roundedLng = Math.round(way.lng() * 100000) / 100000;
+    const roundedLat = Math.round(way.lat() * 10000) / 10000; // redondeo a 4 decimales pa errores de precision de google 🤐
+    const roundedLng = Math.round(way.lng() * 10000) / 10000;
 
     const convertedWaypoint = {
       location: {
