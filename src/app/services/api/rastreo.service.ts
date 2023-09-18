@@ -9,7 +9,7 @@ import { ResponseInterface } from 'src/app/models/response.interface';
 })
 export class RastreoService {
 
-  url: string = 'http://127.0.0.1:3030/';
+  url: string = 'https://api-star-routing.onrender.com/';
 
   constructor(private http: HttpClient) { }
 

@@ -232,7 +232,7 @@ export class MapPage {
 
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 100; // umbral de proximidad en mts
+    const proximidad = 100000; // umbral de proximidad en mts
 
     const remainingDistance = currentLeg.distance.value;
 
