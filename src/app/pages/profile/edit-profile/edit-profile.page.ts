@@ -30,15 +30,15 @@ export class EditProfilePage implements OnInit {
     private toast: ToastController
   ) {
     this.editForm = this.formBuilder.group({
-      idUsuario: [''],
+      idUsuario: [],
       documentoUsuario: ['', [Validators.required, Validators.pattern('^[0-9]{7,10}$')]],
       idTipoDocumento: ['', Validators.required],
       nombreUsuario: ['', Validators.required],
       apellidoUsuario: ['', Validators.required],
       telefonoUsuario: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       correoUsuario: ['', [Validators.required, Validators.pattern('^[\\w.%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$')]],
-      idRol: [''],
-      idEstado: ['']
+      idRol: [],
+      idEstado: []
     });
     this.pwdForm = this.formBuilder.group({
       contrasenaUsuario: ['', [Validators.required, Validators.pattern(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d.*\d.*\d)(?=.*[!@#$%^&+=?.:,"°~;_¿¡*/{}|<>()]).{8,}$/)]]

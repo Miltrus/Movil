@@ -13,8 +13,9 @@ import { SharedModule } from './shared/shared.module';
   imports: [
     BrowserModule,
     IonicModule.forRoot(),
-    SharedModule,
-    AppRoutingModule],
+    AppRoutingModule,
+    SharedModule
+  ],
   providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],
   bootstrap: [AppComponent],
 })

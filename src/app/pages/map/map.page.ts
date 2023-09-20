@@ -25,7 +25,7 @@ export class MapPage {
   marker: google.maps.Marker | null = null; // para el marcador de la ubicación actual
 
   origin: google.maps.LatLng = new google.maps.LatLng(0, 0);
-  destination: google.maps.LatLng = new google.maps.LatLng(6.29051, -75.57353);
+  destination: google.maps.LatLng = new google.maps.LatLng(6.283584, -75.574004);
 
   legs: any;
   currentLeg: any
@@ -87,21 +87,21 @@ export class MapPage {
 
         if (requestStatus?.location != 'granted') {
           await loading.dismiss();
-          this.nav.navigateRoot('tabs/escaner');
           const alert = await this.alert.create({
             header: 'Acceso a la ubicación requerido',
-            message: 'Para continuar, por favor otorga permiso para acceder a tu ubicación.',
+            message: 'No se ha otorgado el permiso para acceder a la ubicación. Por favor, otorgalo a continuación.',
             buttons: [{
-              text: 'Activar',
+              text: 'Configuración',
               handler: async () => {
                 await this.openSettings(true);
               }
             }]
           })
+          this.nav.navigateRoot('tabs/escaner');
           await alert.present();
           return;
         }
-
+        return;
       }
 
       let geoOptions: PositionOptions = {
@@ -119,9 +119,8 @@ export class MapPage {
     } catch (error: any) {
       await loading.dismiss();
       if (error?.message == 'Location services are not enabled') {
-        await this.nav.navigateRoot('tabs/escaner');
         const alert = await this.alert.create({
-          header: 'Acceso a la ubicación requerido',
+          header: 'Ubicación desactivada',
           message: 'Para continuar, por favor activa la ubicación.',
           buttons: [
             {
@@ -132,9 +131,11 @@ export class MapPage {
             }
           ]
         });
+        this.nav.navigateRoot('tabs/escaner');
         await alert.present();
+        return;
       }
-      this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
+      this.presentAlert('Error al obtener la ubicación', 'No se pudo obtener la ubicación actual. Por favor, inténtalo nuevamente ;)', 'OK');
       this.nav.navigateRoot('tabs/escaner');
     }
   }
@@ -203,7 +204,7 @@ export class MapPage {
             }, 1500);
           } else {
             await loading.dismiss();
-            this.presentAlert('Error al calcular la ruta', 'No se pudo calcular la ruta correctamente. Por favor, intenta nuevamente iniciar la ruta ;)', 'OK');
+            this.presentAlert('Error al calcular la ruta', 'No se pudo calcular la ruta correctamente. Por favor, intenta iniciarla nuevamente ;)', 'OK');
             this.nav.navigateRoot('tabs/escaner');
             return;
           }
@@ -220,7 +221,7 @@ export class MapPage {
       const currentWaypoint = await this.getCurrentWaypoint();
       const paqId = this.wayService.getPackageIdFromWaypoint(currentWaypoint);
 
-      if (paqId !== null) {
+      if (paqId != null) {
         this.nav.navigateForward('tabs/entrega', { queryParams: { paqId } });
       } else {
         this.presentAlert('Ups...', 'No se ha encontrado el paquete a entregar. No te preocupes, simplemente inicia nuevamente la ruta ;)', 'OK');
@@ -232,7 +233,7 @@ export class MapPage {
 
 
   async isCloseToWaypoint(currentLeg: google.maps.DirectionsLeg): Promise<boolean> {
-    const proximidad = 100000; // umbral de proximidad en mts
+    const proximidad = 100; // umbral de proximidad en mts
 
     const remainingDistance = currentLeg.distance.value;
 
@@ -301,7 +302,7 @@ export class MapPage {
               await descAlert.dismiss();
               const confirmAlert = await this.alert.create({
                 header: 'Confirmar reporte',
-                message: 'Una vez confirmado, no podrá ser modificado o eliminado y los paquetes que no hayan sido entregados en esta ruta deberán volver a bodega y la ruta se finalizará',
+                message: 'Una vez confirmado, no podrá ser modificado o eliminado, y los paquetes que no hayan sido entregados en esta ruta deberán volver a bodega y la ruta se finalizará',
                 backdropDismiss: false,
                 buttons: [
                   'Cancelar',
@@ -328,8 +329,8 @@ export class MapPage {
                         }
                         await loading.dismiss();
                         this.presentAlert('Novedad reportada', 'La novedad se ha reportado exitosamente.', 'Aceptar');
-                        this.wayService.setWaypoints([]);
                         this.nav.navigateRoot('tabs/escaner');
+                        this.wayService.setWaypoints([]);
                       } catch (error) {
                         await loading.dismiss();
                         this.presentAlert('Error en el servidor', 'Ha ocurrido un error al reportar la novedad. Por favor, revisa tu conexión a internet o inténtalo nuevamente.', 'OK');

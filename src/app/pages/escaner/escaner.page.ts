@@ -134,17 +134,14 @@ export class EscanerPage implements OnDestroy {
         return true;
       } else if (status.denied) {
         const alert = await this.alert.create({
-          header: 'Permiso requerido',
+          header: 'Acceso a la cámara requerido',
           message: 'No se ha otorgado el permiso para acceder a la cámara. Por favor, otorgalo a continuación.',
-          buttons: [
-            'Cancelar',
-            {
-              text: 'Configuración',
-              handler: () => {
-                BarcodeScanner.openAppSettings();
-              }
+          buttons: [{
+            text: 'Configuración',
+            handler: () => {
+              BarcodeScanner.openAppSettings();
             }
-          ]
+          }]
         });
         await alert.present();
       }
@@ -196,11 +193,11 @@ export class EscanerPage implements OnDestroy {
             }
           } else {
             await loading.dismiss();
-            this.presentAlert('Error', 'El QR escaneado no es válido. Por favor, escanea un QR válido o introduzca el código manualmente.');
+            this.presentAlert('QR inválido', 'El QR escaneado no es válido. Por favor, inténtalo nuevamente o introduzca el código manualmente.');
           }
         } catch (error) {
           await loading.dismiss();
-          this.presentAlert('Error', 'El QR escaneado no es válido. Por favor, escanea un QR válido o introduzca el código manualmente.');
+          this.presentAlert('QR inválido', 'El QR escaneado no es válido. Por favor, inténtalo nuevamente o introduzca el código manualmente.');
         }
       }
     } catch (error) {
@@ -264,6 +261,7 @@ export class EscanerPage implements OnDestroy {
             const alert = await this.alert.create({
               header: 'Paquete asignado a otro mensajero',
               message: 'Este paquete ya ha sido escaneado por otro repartidor. ¿Estás seguro de que deseas continuar?',
+              backdropDismiss: false,
               buttons: [
                 'Cancelar',
                 {
@@ -273,6 +271,7 @@ export class EscanerPage implements OnDestroy {
                     const confirmAlert = await this.alert.create({
                       header: 'Confirmar',
                       message: `¿Estás seguro de que deseas agregar el paquete '${data.codigoPaquete}' a tu lista?`,
+                      backdropDismiss: false,
                       buttons: [
                         'Cancelar',
                         {
@@ -295,7 +294,7 @@ export class EscanerPage implements OnDestroy {
           }
         } else {
           await loading.dismiss();
-          this.presentAlert('Error', 'El código ingresado no es válido. Por favor, ingresa un código válido o escanea el QR.');
+          this.presentAlert('Código inválido', 'El código ingresado no es válido. Por favor, inténtalo nuevamente o escanea el QR.');
         }
       },
       async (error) => {

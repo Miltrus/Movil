@@ -85,7 +85,6 @@ export class EntregaPage {
             try {
               await this.paqService.putPaquete(this.paquete).toPromise();
 
-              this.signaturePad.clear();
               let getRastreo = await this.rastreoService.getRastreoByPaquete(this.paquete.idPaquete).toPromise();
               getRastreo!.idEstado = 1;
 
@@ -119,6 +118,8 @@ export class EntregaPage {
               }
 
               this.wayService.setWaypoints(waypoints);
+
+              this.signaturePad.clear();
 
               await loading.dismiss();
               await this.presentAlert('Entrega confirmada', 'La entrega se ha confirmado exitosamente.', 'Aceptar');
@@ -209,7 +210,7 @@ export class EntregaPage {
               this.paquete.idEstado = 4
               const confirmAlert = await this.alert.create({
                 header: 'Confirmar reporte',
-                message: 'Una vez confirmado, no podrá ser modificado o eliminado y este paquete ya no podrá ser entregado en esta ruta y deberá volver a bodega.',
+                message: 'Una vez confirmado, no podrá ser modificado o eliminado, y este paquete ya no podrá ser entregado en esta ruta y deberá volver a bodega.',
                 backdropDismiss: false,
                 buttons: [
                   'Cancelar',
