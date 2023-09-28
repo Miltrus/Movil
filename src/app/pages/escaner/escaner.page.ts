@@ -55,7 +55,7 @@ export class EscanerPage implements OnDestroy {
     },
       async (error) => {
         await loading.dismiss();
-        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente.');
         if (refresher) {
           refresher.complete();
         }
@@ -108,7 +108,7 @@ export class EscanerPage implements OnDestroy {
                     await this.rastreo.deleteRastreo(rastreo).toPromise();
                     await this.rastreo.postRastreo(rastreo).toPromise();
                   } catch (error) {
-                    this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+                    this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente.');
                   }
                 }
               }
@@ -118,7 +118,7 @@ export class EscanerPage implements OnDestroy {
               await loading.dismiss();
             } catch (error) {
               await loading.dismiss();
-              this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+              this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente.');
             }
           }
         }]
@@ -299,7 +299,7 @@ export class EscanerPage implements OnDestroy {
       },
       async (error) => {
         await loading.dismiss();
-        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente.');
       }
     );
   }
@@ -318,7 +318,7 @@ export class EscanerPage implements OnDestroy {
         this.scannedResults.push([scannedPackage]);
       },
       async (error) => {
-        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+        this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente.');
       }
     );
   }
@@ -350,7 +350,7 @@ export class EscanerPage implements OnDestroy {
               },
               async (error) => {
                 await loading.dismiss();
-                this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente');
+                this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente.');
               }
             );
           }

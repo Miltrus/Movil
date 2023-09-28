@@ -101,7 +101,6 @@ export class MapPage {
           await alert.present();
           return;
         }
-        return;
       }
 
       let geoOptions: PositionOptions = {

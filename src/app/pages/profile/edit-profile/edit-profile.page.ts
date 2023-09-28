@@ -132,8 +132,6 @@ export class EditProfilePage implements OnInit {
             try {
               const data = await this.api.putUsuario(updatedData).toPromise();
               if (data?.status == 'ok') {
-                this.editForm.reset();
-                this.pwdForm.reset();
                 this.nav.navigateBack('tabs/profile', { queryParams: { userData: JSON.stringify(updatedData) } });
                 const toast = await this.toast.create({
                   header: 'Cambios guardados',
