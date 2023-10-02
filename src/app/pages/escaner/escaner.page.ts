@@ -193,11 +193,11 @@ export class EscanerPage implements OnDestroy {
             }
           } else {
             await loading.dismiss();
-            this.presentAlert('QR inválido', 'El QR escaneado no es válido. Por favor, inténtalo nuevamente o introduzca el código manualmente.');
+            this.presentAlert('QR inválido', 'El QR escaneado no es válido. Por favor, inténtalo nuevamente o introduce el código del paquete manualmente.');
           }
         } catch (error) {
           await loading.dismiss();
-          this.presentAlert('QR inválido', 'El QR escaneado no es válido. Por favor, inténtalo nuevamente o introduzca el código manualmente.');
+          this.presentAlert('QR inválido', 'El QR escaneado no es válido. Por favor, inténtalo nuevamente o introduce el código del paquete manualmente.');
         }
       }
     } catch (error) {
@@ -289,8 +289,8 @@ export class EscanerPage implements OnDestroy {
             });
             await alert.present();
           } else {
+            await loading.dismiss();
             await this.paqEnRuta(data);
-            loading.dismiss();
           }
         } else {
           await loading.dismiss();
@@ -305,6 +305,8 @@ export class EscanerPage implements OnDestroy {
   }
 
   async paqEnRuta(data: any) {
+    const loading = await this.loadingAlert('Agregando...');
+    await loading.present();
     data.idUsuario = this.uid;
     data.idEstado = 2;
     this.api.putPaquete(data).subscribe(
@@ -316,8 +318,10 @@ export class EscanerPage implements OnDestroy {
           lng: data.lng
         };
         this.scannedResults.push([scannedPackage]);
+        loading.dismiss()
       },
       async (error) => {
+        await loading.dismiss();
         this.presentAlert('Error en el servidor', 'Ha ocurrido un error al comunicarse con el servidor. Por favor, revisa tu conexión a internet o inténtalo nuevamente.');
       }
     );
