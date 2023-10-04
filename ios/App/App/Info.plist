@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+  <key>NSCameraUsageDescription</key>
+  <string>Por favor, ortorga acceso a la cámara para escanear el código QR</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Por favor, ortorga acceso a la ubicación para calcular la ruta</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Por favor, otorga acceso a la ubicación para calcular la ruta</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
